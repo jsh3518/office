@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="pelDem"
+  id="myeclipse.1397018896418"
+  context-root="/pelDem"
+  j2ee-spec="5.0"
+  archive="pelDem.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
