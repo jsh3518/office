@@ -13,9 +13,9 @@ public class User {
 	private String contact;//联系人
 	private String phone;//联系方式
 	private String email;//邮箱
-	private String province;//地址--省
-	private String city;//地址--市
-	private String county;//地址--县/区
+	private String provincialId;//地址--省(ID)
+	private String cityId;//地址--市(ID)
+	private String countyId;//地址--县/区(ID)
 	private String address;//地址--详细地址
 	private String post;//邮政编码
 	private String tax;//税号
@@ -27,6 +27,9 @@ public class User {
 	private Date lastLoginStart;
 	private Date lastLoginEnd;
 	
+	private Organ province;//地址--省
+	private Organ city;//地址--市
+	private Organ county;//地址--县/区
 	public Integer getUserId() {
 		return userId;
 	}
@@ -120,22 +123,22 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getProvince() {
+	public Organ getProvince() {
 		return province;
 	}
-	public void setProvince(String province) {
+	public void setProvince(Organ province) {
 		this.province = province;
 	}
-	public String getCity() {
+	public Organ getCity() {
 		return city;
 	}
-	public void setCity(String city) {
+	public void setCity(Organ city) {
 		this.city = city;
 	}
-	public String getCounty() {
+	public Organ getCounty() {
 		return county;
 	}
-	public void setCounty(String county) {
+	public void setCounty(Organ county) {
 		this.county = county;
 	}
 	public String getAddress() {
@@ -167,6 +170,24 @@ public class User {
 	}
 	public void setType(Integer type) {
 		this.type = type;
+	}
+	public String getProvincialId() {
+		return provincialId;
+	}
+	public void setProvincialId(String provincialId) {
+		this.provincialId = provincialId;
+	}
+	public String getCityId() {
+		return cityId;
+	}
+	public void setCityId(String cityId) {
+		this.cityId = cityId;
+	}
+	public String getCountyId() {
+		return countyId;
+	}
+	public void setCountyId(String countyId) {
+		this.countyId = countyId;
 	}
 	
 }

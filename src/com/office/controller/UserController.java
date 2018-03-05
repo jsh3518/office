@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 
 import net.sf.json.JSONArray;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -61,6 +62,7 @@ public class UserController {
 	@Autowired
 	private OrganService organService;
 	
+	private static Logger logger = Logger.getLogger(FileUploadUtil.class);//输出Log日志
 	/**
 	 * 显示用户列表
 	 * @param user
@@ -121,7 +123,8 @@ public class UserController {
             MultipartHttpServletRequest mRequest = (MultipartHttpServletRequest) request;  
 			MultipartFile mfile = (MultipartFile)mRequest.getFile("buslic");
 			String filePath = request.getSession().getServletContext().getRealPath("/") + "files"+File.separator;
-			String fileName = user.getTax() +"_" + mfile.getOriginalFilename();
+			logger.info("文件上传路径："+filePath);
+			String fileName = user.getTax() +"@_@" + mfile.getOriginalFilename();
 			user.setFile(fileName);//附件名称
 			File file = new File(filePath);
 			if (!file.exists()) {
@@ -152,9 +155,9 @@ public class UserController {
 		mv.addObject("result",result);
 		List<Organ> provinList = organService.listOrganByLevel(1);
 		mv.addObject("provinList", provinList);
-		List<Organ> cityList = organService.listOrganByParent(2, user.getProvince());
+		List<Organ> cityList = organService.listOrganByParent(2, user.getProvincialId());
 		mv.addObject("cityList", cityList);
-		List<Organ> countyList = organService.listOrganByParent(3,user.getCity());
+		List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
 		mv.addObject("countyList", countyList);
 		mv.setViewName("regist");
 		return mv;
@@ -253,7 +256,7 @@ public class UserController {
 	public void saveAuth(@RequestParam int userId,@RequestParam String menuIds,PrintWriter out){
 		BigInteger rights = RightsHelper.sumRights(Tools.str2StrArray(menuIds));
 		User user = userService.getUserById(userId);
-		user.setRights(rights.toString());
+		user.setRights(rights==null?"":rights.toString());
 		userService.updateUserRights(user);
 		out.write("success");
 		out.close();
@@ -331,4 +334,59 @@ public class UserController {
 			e.printStackTrace();
 		}
     }
+	
+	/**
+	 * 显示待审核用户（代理商）列表
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value="/toAudit")
+	public ModelAndView getUserList(User user){
+		user.setStatus(0);
+		user.setType(1);//用户类型：0,管理员;1,代理商
+		List<User> userList = userService.getUsers(user);
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("useraudits");
+		mv.addObject("userList", userList);
+		mv.addObject("user", user);
+		return mv;
+	}
+	
+	/**
+	 * 请求编辑用户页面
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/forAudit")
+	public ModelAndView forAudit(@RequestParam int userId){
+		ModelAndView mv = new ModelAndView();
+		User user = userService.getUserById(userId);
+		mv.addObject("user", user);
+
+		List<Organ> provinList = organService.listOrganByLevel(1);
+		mv.addObject("provinList", provinList);
+		List<Organ> cityList = organService.listOrganByParent(2, user.getProvincialId());
+		mv.addObject("cityList", cityList);
+		List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
+		mv.addObject("countyList", countyList);
+		mv.setViewName("user_audit");
+		return mv;
+	}
+	
+	/**
+	 * 请求编辑用户页面
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/userAudit")
+	public void userAudit(PrintWriter out,@RequestParam int userId){
+		User user = new User();
+		user.setRoleId(4);//代理商用户
+		user.setStatus(1);//已审核
+		user.setUserId(userId);
+		userService.updateUserStatus(user);
+		out.write("success");
+		out.flush();
+		out.close();
+	}
 }

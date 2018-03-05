@@ -81,22 +81,22 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</div>
 				<div class="regist_info">
 					<label class="regist_label">公司地址：</label>
-					<select name="province" id="province" class="organ_select" style="margin-left: 20px" onChange="changeOrg('city',this.value)">
-						<option value="${user.province}">请选择</option>
+					<select name="provincialId" id="provincialId" class="organ_select" style="margin-left: 20px" onChange="changeOrg('cityId',this.value)">
+						<option value="">请选择</option>
 						<c:forEach items="${provinList}" var="organ">
-							<option value="${organ.orgId }">${organ.orgName }</option>
+							<option <c:if test="${user.provincialId == organ.orgId}"> selected="selected"</c:if> value="${organ.orgId }">${organ.orgName }</option>
 						</c:forEach>
 					</select>
-					<select name="city" id="city" class="organ_select" onChange="changeOrg('county',this.value)">
-						<option value="${user.city}">请选择</option>
+					<select name="cityId" id="cityId" class="organ_select" onChange="changeOrg('countyId',this.value)">
+						<option value="">请选择</option>
 						<c:forEach items="${cityList}" var="organ">
-							<option value="${organ.orgId }">${organ.orgName }</option>
+							<option <c:if test="${user.cityId == organ.orgId}"> selected="selected"</c:if> value="${organ.orgId }">${organ.orgName }</option>
 						</c:forEach>
 					</select>
-					<select name="county" id="county" class="organ_select">
-						<option value="${user.county}">请选择</option>
+					<select name="countyId" id="countyId" class="organ_select">
+						<option value="">请选择</option>
 						<c:forEach items="${countyList}" var="organ">
-							<option value="${organ.orgId }">${organ.orgName}</option>
+							<option <c:if test="${user.countyId == organ.orgId}"> selected="selected"</c:if> value="${organ.orgId }">${organ.orgName}</option>
 						</c:forEach>
 					</select>
 				</div>
@@ -129,6 +129,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<input type="submit" name="registBtn" value="注册" class="btn"/>
 					<input type="reset" name="cancelBtn" value="取消" class="btn" onclick="resetErr()"/>
 				</div>
+				<input type="text" name="type" id="type" value="1" style="display: none"/>
 			</form>
 			</div>
 		</div>
@@ -183,8 +184,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$("#codeerr").html("");
 		}
 		
-		var con = 1;
+		var con;
 		function check(){
+			con=1;
 			//resetErr();
 			valName();
 			valPassword();
@@ -361,11 +363,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			var url = "organ/getOrgans.html";
 			var select = $("#"+type);
 			var level;
-			if(type=="city"){
-				$("#county").html("");
-				$("#county").append("<option value=''>请选择</option>");
+			if(type=="cityId"){
+				$("#countyId").html("");
+				$("#countyId").append("<option value=''>请选择</option>");
 				level = 2;
-			}else if(type=="county"){
+			}else if(type=="countyId"){
 				level = 3;
 			}
 			select.html("");

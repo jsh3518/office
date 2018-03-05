@@ -92,4 +92,12 @@ public class UserServiceImpl implements UserService {
 		return userMapper.listAllUser();
 	}
 	
+	public List<User> getUsers(User user) {
+		// TODO Auto-generated method stub
+		return userMapper.getUsers(user);
+	}
+	
+	public void updateUserStatus(User user){
+		userMapper.updateUserStatus(user);
+	}
 }

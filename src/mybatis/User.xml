@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.UserMapper">
-	<sql id="userColumns">loginname,username,password,rights,status,role_id,contact,phone,email,province,city,county,address,post,tax,file,type</sql>
+	<sql id="userColumns">loginname,username,password,rights,status,role_id,contact,phone,email,provincialid,cityid,countyid,address,post,tax,file,type</sql>
 
 	<resultMap type="User" id="userAndRoleResultMap">
 		<id column="user_id" property="userId"/>
@@ -11,11 +11,31 @@
 		<result column="password" property="password"/>
 		<result column="user_rights" property="rights"/>
 		<result column="status" property="status"/>
+		<result column="contact" property="contact"/>
+		<result column="phone" property="phone"/>
+		<result column="email" property="email"/>
+		<result column="address" property="address"/>
+		<result column="post" property="post"/>
+		<result column="tax" property="tax"/>
+		<result column="file" property="file"/>
+		<result column="type" property="type"/>
 		<result column="last_login" property="lastLogin"/>
 		<association property="role" column="role_id" javaType="Role">
 			<id column="role_id" property="roleId"/>
 			<result column="role_name" property="roleName"/>
 			<result column="role_rights" property="rights"/>
+		</association>
+				<association property="province" column="provincialId" javaType="Organ">
+			<id column="proId" property="orgId"/>
+			<result column="proName" property="orgName"/>
+		</association>
+		<association property="city" column="cityId" javaType="Organ">
+			<id column="cityId" property="orgId"/>
+			<result column="cityName" property="orgName"/>
+		</association>
+		<association property="county" column="countyId" javaType="Organ">
+			<id column="countyId" property="orgId"/>
+			<result column="countyName" property="orgName"/>
 		</association>
 	</resultMap>
 	<resultMap type="User" id="userResultMap">
@@ -25,21 +45,32 @@
 		<result column="password" property="password"/>
 		<result column="rights" property="rights"/>
 		<result column="status" property="status"/>
+		<result column="contact" property="contact"/>
+		<result column="phone" property="phone"/>
+		<result column="email" property="email"/>
+		<result column="provincialId" property="provincialId"/>
+		<result column="cityId" property="cityId"/>
+		<result column="countyId" property="countyId"/>
+		<result column="address" property="address"/>
+		<result column="post" property="post"/>
+		<result column="tax" property="tax"/>
+		<result column="file" property="file"/>
+		<result column="type" property="type"/>
 		<result column="role_id" property="roleId"/>
 	</resultMap>
 	
 	<select id="listAllUser" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login
+		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.city,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u 
-		left join tb_role r on u.role_id=r.role_id 
-		where u.status=0 
+		left join tb_role r on u.role_id=r.role_id
+		where 1=1
 	</select>
 	
 	<select id="listPageUser" parameterType="User" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login
+		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
-		where u.status=0 
+		where 1=1
 		<if test="loginname!=null and loginname!=''">
 			and u.loginname like "%"#{loginname}"%" 
 		</if>
@@ -54,28 +85,57 @@
 		</if>
 	</select>
 	
-	<select id="getUserInfo" parameterType="User" resultMap="userResultMap">
-		select * from tb_user where 1=1
-		<if test="loginname!=null">
-		and loginname = #{loginname}
+	<select id="getUsers" parameterType="User" resultMap="userAndRoleResultMap">
+		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
+			p.orgid proid,p.orgname proname,c.orgid cityid,c.orgname cityname,d.orgid countyid,d.orgname countyname 
+		from tb_user u
+		left join organ p on u.provincialid = p.orgid and p.level = 1 and p.valid = 1
+		left join organ c on u.cityid = c.orgid and c.level = 2 and c.valid = 1
+		left join organ d on u.countyid = d.orgid and d.level = 3 and d.valid = 1
+		where u.status = 0
+		<if test="loginname!=null and loginname!=''">
+			and loginname like "%"#{loginname}"%" 
+		</if>
+		<if test="username!=null and username!=''">
+			and username like "%"#{username}"%" 
 		</if>
 		<if test="password!=null">
-		and password = #{password}
+			and password = #{password}
 		</if>
 		<if test="userId!=null and userId>0">
-		and user_id = #{userId}
+			and user_id = #{userId}
+		</if>
+		<if test="type!=null and type>0">
+			and type = #{type}
+		</if>
+	</select>
+	
+	<select id="getUserInfo" parameterType="User" resultMap="userResultMap">
+		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		from tb_user u
+		where 1=1
+		<if test="loginname!=null">
+			and loginname = #{loginname}
+		</if>
+		<if test="password!=null">
+			and password = #{password}
+		</if>
+		<if test="userId!=null and userId>0">
+			and user_id = #{userId}
 		</if>
 	</select>
 	
 	<select id="getUserById" parameterType="int" resultMap="userResultMap">
-		select * from tb_user u where u.user_id = #{userId}
+		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		from tb_user u 
+		where u.user_id = #{userId}
 	</select>
 	
 	<select id="getUserAndRoleById" parameterType="int" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights 
+		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights ,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
-		where u.status=0 and u.user_id=#{userId}
+		where u.user_id=#{userId}
 	</select>
 	
 	<select id="getCountByName" parameterType="User" resultType="int">
@@ -85,7 +145,7 @@
 	<select id="getCount" parameterType="User" resultType="int">
 		select count(user_id) from tb_user where status=0 
 		<if test="loginname!=null and loginname!=''">
-			and loginname like "%"#{loginname}"%" 
+			and loginname = #{loginname}
 		</if>
 		<if test="roleId!=null and roleId!=0">
 			and role_id=#{roleId} 
@@ -106,13 +166,14 @@
 	</select>
 	
 	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="userId">
-		insert tb_user (<include refid="userColumns"/>) values (#{loginname},#{username},#{password},#{rights},0,#{roleId},#{contact},#{phone},#{email},#{province},#{city},#{county},#{address},#{post},#{tax},#{file},#{type})
+		insert tb_user (<include refid="userColumns"/>) values (#{loginname},#{username},#{password},#{rights},0,#{roleId},#{contact},#{phone},#{email},#{provincialId},#{cityId},#{countyId},#{address},#{post},#{tax},#{file},#{type})
 	</insert>
 	
 	<update id="updateUser" parameterType="User">
 		update tb_user set 
 		loginname=#{loginname},
-		username=#{username},password=#{password},
+		username=#{username},
+		password=#{password},
 		rights=#{rights},
 		status=#{status},
 		role_id=#{roleId},
@@ -141,4 +202,7 @@
 		delete from tb_user where user_id=#{userId}
 	</delete>
 	
+	<update id="updateUserStatus" parameterType="User">
+		update tb_user set status=#{status},role_id=#{roleId} where user_id=#{userId}
+	</update>
 </mapper>

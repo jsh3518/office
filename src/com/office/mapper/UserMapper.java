@@ -32,4 +32,8 @@ public interface UserMapper  {
 	void updateLastLogin(User user);
 	
 	List<User> getUserByName(String loginname);
+	
+	List<User> getUsers(User user);
+	
+	void updateUserStatus(User user);
 }

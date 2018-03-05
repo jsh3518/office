@@ -30,4 +30,8 @@ public interface UserService {
 	List<User> getUserByName(String loginname);
 	
 	int getCount(User user);
+	
+	List<User> getUsers(User user);
+	
+	void updateUserStatus(User user);
 }
