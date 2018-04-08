@@ -30,6 +30,7 @@ public class User {
 	private Organ province;//地址--省
 	private Organ city;//地址--市
 	private Organ county;//地址--县/区
+	
 	public Integer getUserId() {
 		return userId;
 	}

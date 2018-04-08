@@ -88,4 +88,25 @@ public class Tools {
 			return "";
 		}
 	}
+	
+	
+	/**
+	 * 获取字符串的unicode编码 
+	 * @param string
+	 * @return
+	 */
+    public static String stringToUnicode(final String s) {
+        
+    	char[] utfBytes = s.toCharArray();
+        String unicodeBytes = "";
+        for (int byteIndex = 0; byteIndex < utfBytes.length; byteIndex++) {
+            String hexB = Integer.toHexString(utfBytes[byteIndex]);//转换为16进制整型字符串  
+              if (hexB.length() <= 2) {
+                  hexB = "00" + hexB;
+             }
+             unicodeBytes = unicodeBytes + "\\u" + hexB;
+        }  
+        System.out.println("unicodeBytes is: " + unicodeBytes);
+        return unicodeBytes;
+    }
 }

@@ -2,22 +2,44 @@ package com.office.service.impl;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.office.entity.Role;
+import com.office.entity.User;
 import com.office.mapper.RoleMapper;
+import com.office.mapper.UserMapper;
 import com.office.service.RoleService;
 
+@Service("RoleService")
 public class RoleServiceImpl implements RoleService{
-
+	@Resource(name="roleMapper")
+	@Autowired
 	private RoleMapper roleMapper;
+	@Resource(name="userMapper")
+	@Autowired
+	private UserMapper userMapper;
 	
 	public List<Role> listAllRoles() {
-		// TODO Auto-generated method stub
 		return roleMapper.listAllRoles();
 	}
 
-	public void deleteRoleById(int roleId) {
-		// TODO Auto-generated method stub
-		roleMapper.deleteRoleById(roleId);
+	public String deleteRoleById(int roleId) {
+		User user = new User();
+		user.setRoleId(roleId);
+		try{
+			if(userMapper.getCount(user)>0)
+				return "该角色正在使用，请对用户解除角色后再进行删除操作！";
+			else{
+				roleMapper.deleteRoleById(roleId);
+				return "删除成功！";
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return "删除失败！";
+		}
 	}
 
 	public Role getRoleById(int roleId) {
@@ -48,14 +70,6 @@ public class RoleServiceImpl implements RoleService{
 	public void updateRoleRights(Role role) {
 		// TODO Auto-generated method stub
 		roleMapper.updateRoleRights(role);
-	}
-
-	public RoleMapper getRoleMapper() {
-		return roleMapper;
-	}
-
-	public void setRoleMapper(RoleMapper roleMapper) {
-		this.roleMapper = roleMapper;
 	}
 
 }

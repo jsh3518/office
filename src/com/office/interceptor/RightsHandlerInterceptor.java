@@ -37,6 +37,13 @@ public class RightsHandlerInterceptor extends HandlerInterceptorAdapter{
 					menuId = m.getMenuId();
 					break;
 				}else{
+					String regex = "";
+					if(menuUrl.contains(".html")){
+						regex = "/?"+menuUrl;
+					}else{
+						regex = "/?"+menuUrl+"(/.*)?.html";
+					}
+					/**20180403 jiashouhui 修改Url验证
 					String[] arr = menuUrl.split("\\.");
 					String regex = "";
 					if(arr.length==2){
@@ -45,6 +52,7 @@ public class RightsHandlerInterceptor extends HandlerInterceptorAdapter{
 					}else{
 						regex = "/?"+menuUrl+"(/.*)?.html";
 					}
+					**/
 					if(path.matches(regex)){
 						menuId = m.getMenuId();
 						break;

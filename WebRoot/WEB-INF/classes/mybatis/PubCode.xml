@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.PubCodeMapper">
+	<sql id="pubCodeColumns">id,classid,code,name,sort,valid,level,detail</sql>
+
+	
+	<resultMap type="PubCode" id="pubCodeResultMap">
+		<id column="id" property="id"/>
+		<result column="classid" property="classId"/>
+		<result column="code" property="code"/>
+		<result column="name" property="name"/>
+		<result column="sort" property="sort"/>
+		<result column="valid" property="valid"/>
+		<result column="level" property="level"/>
+		<result column="detail" property="detail"/>
+	</resultMap>
+	
+	<select id="listPubCodeByClass" resultMap="pubCodeResultMap">
+		select * from pub_code where classid=#{classId} and valid='1' order by sort
+	</select>
+	
+	<select id="listPagePubCode" resultMap="pubCodeResultMap">
+		select * from pub_code where 1=1 
+		<if test="id!=null and id!=''">
+			and id = #{id}
+		</if>
+		<if test="classId!=null and classId!=''">
+			and classid = #{classId}
+		</if>
+		<if test="code!=null and code!=''">
+			and code = #{code}
+		</if>
+		<if test="name!=null and name!=''">
+			and name = #{name}
+		</if>
+		<if test="valid!=null and valid!=''">
+			and valid = #{valid}
+		</if>
+		<if test="level!=null and level!=''">
+			and level = #{level}
+		</if>
+		<if test="detail!=null and detail!=''">
+			and detail = #{detail}
+		</if>
+		order by sort
+	</select>
+	
+	<insert id="insertPubCode" parameterType="PubCode">
+		insert pub_code (<include refid="pubCodeColumns"/>) values (#{id},#{classId},#{code},#{name},#{sort},#{valid},#{level},#{detail})
+	</insert>
+
+</mapper>

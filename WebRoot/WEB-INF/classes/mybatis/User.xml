@@ -25,7 +25,7 @@
 			<result column="role_name" property="roleName"/>
 			<result column="role_rights" property="rights"/>
 		</association>
-				<association property="province" column="provincialId" javaType="Organ">
+		<association property="province" column="provincialId" javaType="Organ">
 			<id column="proId" property="orgId"/>
 			<result column="proName" property="orgName"/>
 		</association>
@@ -60,14 +60,14 @@
 	</resultMap>
 	
 	<select id="listAllUser" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.city,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.city,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id
 		where 1=1
 	</select>
 	
 	<select id="listPageUser" parameterType="User" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
 		where 1=1
@@ -86,7 +86,7 @@
 	</select>
 	
 	<select id="getUsers" parameterType="User" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
+		select u.user_id,u.username,u.loginname,u.rights as user_rights,u.role_id,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
 			p.orgid proid,p.orgname proname,c.orgid cityid,c.orgname cityname,d.orgid countyid,d.orgname countyname 
 		from tb_user u
 		left join organ p on u.provincialid = p.orgid and p.level = 1 and p.valid = 1
@@ -111,7 +111,7 @@
 	</select>
 	
 	<select id="getUserInfo" parameterType="User" resultMap="userResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.loginname,u.password,u.rights,u.role_id,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
 		from tb_user u
 		where 1=1
 		<if test="loginname!=null">
@@ -125,9 +125,13 @@
 		</if>
 	</select>
 	
-	<select id="getUserById" parameterType="int" resultMap="userResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+	<select id="getUserById" parameterType="int" resultMap="userAndRoleResultMap">
+		select u.user_id,u.username,u.loginname,u.password,u.rights,u.role_id,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
+			p.orgid proid,p.orgname proname,c.orgid cityid,c.orgname cityname,d.orgid countyid,d.orgname countyname
 		from tb_user u 
+		left join organ p on u.provincialid = p.orgid and p.level = 1 and p.valid = 1
+		left join organ c on u.cityid = c.orgid and c.level = 2 and c.valid = 1
+		left join organ d on u.countyid = d.orgid and d.level = 3 and d.valid = 1
 		where u.user_id = #{userId}
 	</select>
 	
@@ -143,7 +147,7 @@
 	</select>
 	
 	<select id="getCount" parameterType="User" resultType="int">
-		select count(user_id) from tb_user where status=0 
+		select count(user_id) from tb_user where 1=1 
 		<if test="loginname!=null and loginname!=''">
 			and loginname = #{loginname}
 		</if>

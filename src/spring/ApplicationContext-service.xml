@@ -6,9 +6,6 @@
 	<bean id="userService" class="com.office.service.impl.UserServiceImpl">
 		<property name="userMapper" ref="userMapper"/>
 	</bean>
-	<bean id="roleService" class="com.office.service.impl.RoleServiceImpl">
-		<property name="roleMapper" ref="roleMapper"/>
-	</bean>
 	<bean id="menuService" class="com.office.service.impl.MenuServiceImpl">
 		<property name="menuMapper" ref="menuMapper"/>
 	</bean>
@@ -17,5 +14,11 @@
 	</bean>
 	<bean id="organService" class="com.office.service.impl.OrganServiceImpl">
 		<property name="organMapper" ref="organMapper"/>
+	</bean>
+	<bean id="customerService" class="com.office.service.impl.CustomerServiceImpl">
+		<property name="customerMapper" ref="customerMapper"/>
+	</bean>
+	<bean id="OfferService" class="com.office.service.impl.OfferServiceImpl">
+		<property name="OfferMapper" ref="offerMapper"/>
 	</bean>
 </beans>

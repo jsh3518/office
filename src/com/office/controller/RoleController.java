@@ -1,9 +1,12 @@
 package com.office.controller;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONArray;
 
@@ -107,5 +110,26 @@ public class RoleController {
 		roleService.updateRoleRights(role);
 		out.write("success");
 		out.close();
+	}
+	
+	/**
+	 * 删除某个用户
+	 * @param userId
+	 * @param out
+	 */
+	@RequestMapping(value="/delete")
+	public void deleteRole(@RequestParam int roleId,HttpServletResponse response){
+		String message = roleService.deleteRoleById(roleId);
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("text/html; charset=utf-8");
+		PrintWriter out;
+		try {
+			out = response.getWriter();
+		    out.print(message);
+		    out.flush();
+		    out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.CustomerMapper">
+	<sql id="customerColumns">companyname,country,province,city,region,address,postalcode,email,firstname,lastname,phonenumber,domain,domain1,domain2,status,tenantid,createtime,createuser</sql>
+
+	<resultMap type="Customer" id="customerResultMap">
+		<id column="id" property="id"/>
+		<result column="companyname" property="companyName"/>
+		<result column="country" property="country"/>
+		<result column="province" property="province"/>
+		<result column="city" property="city"/>
+		<result column="region" property="region"/>
+		<result column="provincialname" property="provincialName"/>
+		<result column="cityname" property="cityName"/>
+		<result column="regionname" property="regionName"/>
+		<result column="abbr" property="abbr"/>
+		<result column="address" property="address"/>
+		<result column="postalcode" property="postalCode"/>
+		<result column="email" property="email"/>
+		<result column="firstname" property="firstName"/>
+		<result column="lastname" property="lastName"/>
+		<result column="phonenumber" property="phoneNumber"/>
+		<result column="domain" property="domain"/>
+		<result column="domain1" property="domain1"/>
+		<result column="domain2" property="domain2"/>
+		<result column="status" property="status"/>
+		<result column="tenantid" property="tenantId"/>
+		<result column="createtime" property="createTime"/>
+		<result column="createuser" property="createUser"/>
+	</resultMap>
+	
+	<select id="listPageCustomer" resultMap="customerResultMap">
+		select u.*,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName
+		 	from customer u
+			left join organ p on u.province = p.orgid and p.level = 1 and p.valid = 1
+			left join organ c on u.city = c.orgid and c.level = 2 and c.valid = 1
+			left join organ d on u.region = d.orgid and d.level = 3 and d.valid = 1
+		 where 1=1
+		<if test="companyName!=null and companyName!=''">
+			and u.companyname like "%"#{companyName}"%"
+		</if>
+		<if test="domain!=null and domain!=0">
+			and u.domain like "%"#{domain}"%"
+		</if>
+	</select>
+
+	<select id="selectCustomerById" resultMap="customerResultMap">
+		select u.id,u.companyname,u.country,u.province,u.city,u.region,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName, u.address,u.postalcode,u.email,u.firstname,u.lastname,u.phonenumber,u.domain,u.createtime,u.createuser
+			from customer u
+			left join organ p on u.province = p.orgid and p.level = 1 and p.valid = 1
+			left join organ c on u.city = c.orgid and c.level = 2 and c.valid = 1
+			left join organ d on u.region = d.orgid and d.level = 3 and d.valid = 1
+		where u.id=#{id}
+	</select>
+	
+	<insert id="insertCustomer" parameterType="Customer" useGeneratedKeys="true" keyProperty="id">
+		insert customer (<include refid="customerColumns"/>) values (#{companyName},#{country},#{province},#{city},#{region},#{address},#{postalCode},#{email},#{firstName},#{lastName},#{phoneNumber},#{domain},#{domain1},#{domain2},#{status},#{tenantId},#{createTime},#{createUser})
+	</insert>
+	
+	<update id="updateTenantId" parameterType="int">
+		update customer set tenantid=#{tenantId} where id=#{id}
+	</update>
+</mapper>

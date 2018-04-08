@@ -46,8 +46,9 @@ public class FileUploadUtil {
 		}
 		return result;
 	}
+	
 	/**
-	 * 上传单个文件，并返回其在服务器中的存储路径     *
+	 * 上传单个文件，并返回其在服务器中的存储路径
 	 * @param aFile
 	 * @return
 	 * @throws FileNotFoundException
@@ -135,17 +136,18 @@ public class FileUploadUtil {
 	}
 	
 	/**
-	 * 上传单个文件，并返回其在服务器中的存储路径     *
+	 * 上传单个文件，并返回其在服务器中的存储路径
 	 * @param mFile
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static String uploadFile(MultipartFile mFile,String filePath) throws IOException {
+	public static String uploadFile(MultipartFile mFile,String filePath){
 
 		try {
 			write(mFile.getInputStream(), new FileOutputStream(filePath));
-		} catch (FileNotFoundException e) {
+			
+		} catch (IOException e) {
 			logger.error("上传的文件: " + mFile.getName() + " 不存在！！");
 			e.printStackTrace();
 		}

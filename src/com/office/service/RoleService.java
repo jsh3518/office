@@ -9,6 +9,6 @@ public interface RoleService {
 	Role getRoleById(int roleId);
 	boolean insertRole(Role role);
 	boolean updateRoleBaseInfo(Role role);
-	void deleteRoleById(int roleId);
+	String deleteRoleById(int roleId);
 	void updateRoleRights(Role role);
 }

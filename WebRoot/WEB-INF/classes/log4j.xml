@@ -12,7 +12,7 @@
 	
 	<!-- Application Loggers -->
 	<logger name="com.office">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<!-- 3rdparty Loggers -->
@@ -33,19 +33,21 @@
 	</logger>
 
 	<logger name="org.springframework.jdbc">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 
 	<logger name="org.mybatis.spring">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	<logger name="java.sql">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	<!-- Root Logger -->
 	<root>
-		<priority value="info" />
+		<priority value="debug" />
 		<appender-ref ref="console" />
+		<appender-ref ref="info" />
+		<appender-ref ref="error" />
 	</root>
 	
 </log4j:configuration>

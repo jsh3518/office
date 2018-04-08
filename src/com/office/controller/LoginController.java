@@ -22,8 +22,11 @@ import com.office.service.MenuService;
 import com.office.service.UserService;
 import com.office.util.Const;
 import com.office.util.MD5Util;
+import com.office.util.RestfulUtil;
 import com.office.util.RightsHelper;
 import com.office.util.Tools;
+
+import net.sf.json.JSONObject;
 
 @Controller
 public class LoginController {
@@ -74,6 +77,7 @@ public class LoginController {
 						user.setLastLogin(new Date());
 						userService.updateLastLogin(user);
 						session.setAttribute(Const.SESSION_USER, user);
+						session.setAttribute(Const.SESSION_USER_ID, loginname);
 						session.removeAttribute(Const.SESSION_SECURITY_CODE);
 					}else{
 						errInfo = "用户名或密码错误！";
@@ -112,6 +116,9 @@ public class LoginController {
 		//避免每次拦截用户操作时查询数据库，以下将用户所属角色权限、用户权限限都存入session
 		session.setAttribute(Const.SESSION_ROLE_RIGHTS, roleRights); //将角色权限存入session
 		session.setAttribute(Const.SESSION_USER_RIGHTS, userRights); //将用户权限存入session
+		JSONObject resultJson = RestfulUtil.getToken();
+		String access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
+		session.setAttribute(Const.ACCESS_TOKEN, access_token);
 		
 		List<Menu> menuList = menuService.listAllMenu();
 		if(Tools.notEmpty(userRights) || Tools.notEmpty(roleRights)){

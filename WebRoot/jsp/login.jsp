@@ -12,9 +12,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <style type="text/css">
 	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background-color: #1B3142;}
 	.header{width:100%;height:41px;background: url(images/login-top-bg.gif) repeat-x;}
-	.center{width:100%;height:532px;background: url(images/login_bg.jpg) repeat-x;}
+	.center{width:100%;height:542px;background: url(images/login_bg.jpg) repeat-x;}
 	.login_right{float:right;width:50%;height:100%;background: url(images/login-wel.gif) bottom no-repeat;}
-	.login_left{float:right;width:295px;height:100%;background: url(images/login-content-bg.gif) no-repeat;}
+	.login_left{float:right;width:350px;height:100%;background: url(images/login-content-bg.gif) no-repeat;background-size:350px}
 	.login_title{margin-left:35px;font-family: Arial, Helvetica, sans-serif;font-size: 14px;height:36px;line-height: 36px;color: #666666;font-weight: bold;}
 	.login_info{margin-left:35px;font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:36px;line-height: 36px;color: #333333;}
 	.login_input{width:150px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
@@ -24,15 +24,15 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	
 	.errInfo{display:none;color:red;}
 	
-	.logo{width:100%;height:68px;background: url(images/logo2.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/logo2.png';)}
-	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 25px;color: #666666;}
+	.logo{width:100%;height:40px;background: url(images/office_logo.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/office_logo.png';)}
+	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 32px;font-weight:bold ; line-height: 10px;color: #4ae;}
 	
-	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
+	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 13px;color: #ABCAD3;text-decoration: none;line-height: 30px;vertical-align: middle;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
 <body>
-<div style="width:100%;height:645px;position: absolute;top:50%;left:50%;margin-top:-320px;margin-left:-50%;">
+<div style="width:100%;height:600px;position: absolute;top:50%;left:50%;margin-top:-320px;margin-left:-50%;">
 	<div class="header"></div>
 	<div class="center">
 		<div class="login_right">
@@ -66,7 +66,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<div style="width:100%;height:auto;margin-top:150px;">
 				<div class="logo"></div>
 				<div class="left_txt">
-				
+				Office订单管理系统
 				</div>
 			</div>
 		</div>

@@ -2,23 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.OrganMapper">
-	<sql id="OrganColumns">orgid,orgname,parentid,order,level,remark,valid,start,end</sql>
+	<sql id="OrganColumns">orgid,orgname,parentid,sort,level,remark,valid,phonetic,abbr,start,end</sql>
 
 	<resultMap type="Organ" id="organParentResultMap">
 		<id column="orgid" property="orgId"/>
 		<result column="orgname" property="orgName"/>
 		<result column="parentid" property="parentId"/>
-		<result column="order" property="order"/>
+		<result column="sort" property="sort"/>
 		<result column="level" property="level"/>
 		<result column="remark" property="remark"/>
 		<result column="valid" property="valid"/>
+		<result column="phonetic" property="phonetic"/>
+		<result column="abbr" property="abbr"/>
 		<result column="start" property="start"/>
 		<result column="end" property="end"/>
 		<association property="subOrgan" column="orgid" javaType="Organ">
 			<id column="orgid" property="orgId"/>
 			<result column="orgname" property="orgName"/>
 			<result column="parentid" property="parentId"/>
-			<result column="order" property="order"/>
+			<result column="sort" property="sort"/>
 			<result column="level" property="level"/>
 		</association>
 	</resultMap>
@@ -26,22 +28,24 @@
 		<id column="orgid" property="orgId"/>
 		<result column="orgname" property="orgName"/>
 		<result column="parentid" property="parentId"/>
-		<result column="order" property="order"/>
+		<result column="sort" property="sort"/>
 		<result column="level" property="level"/>
 		<result column="remark" property="remark"/>
 		<result column="valid" property="valid"/>
+		<result column="phonetic" property="phonetic"/>
+		<result column="abbr" property="abbr"/>
 		<result column="start" property="start"/>
 		<result column="end" property="end"/>
 	</resultMap>
 	
 	<select id="listOrganByLevel" resultMap="organResultMap">
-		select o.orgid,o.orgname,o.parentid,o.order,o.level,o.valid ,o.start,o.end
+		select <include refid="OrganColumns"/>
 		from organ o 
 		where o.level = #{level}  
 	</select>
 	
 	<select id="listOrganByParent" resultMap="organResultMap">
-		select o.orgid,o.orgname,o.parentid,o.order,o.level,o.valid ,o.start,o.end
+		select <include refid="OrganColumns"/>
 		from organ o 
 		where o.level = #{level} and o.parentid = #{parentId}
 	</select>

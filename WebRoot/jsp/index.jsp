@@ -14,6 +14,7 @@
 		<div class="header_right">
 			<span id="sysTime"></span>
 			<span>${user.username }，您好！</span>
+			<a href="index.html" style="padding-left: 5px;padding-right: 5px;color: #FFFFFF">首页</a>
 			<a href="javascript:logout();"><img src="images/out.gif" border="0"/></a>
 		</div>
 	</div>
@@ -62,7 +63,7 @@
 					<td style="height:17px;background: url('images/buttom_right2.gif') no-repeat;"></td>
 				</tr>
 			</table>
-			<div class="sys_bottom"> Copyright &copy; 2011 XXX管理系统</div>
+			<div class="sys_bottom"> Copyright &copy;2018 Office订单管理系统</div>
 		</div>
 	</div>
 	

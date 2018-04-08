@@ -92,7 +92,7 @@ public class MD5Util {
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String getEncryptedPwd(String password)  throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	public static String getEncryptedPwd(String password){
 
 		//声明加密后的口令数组变量
 		byte[] pwd = null;
@@ -104,12 +104,16 @@ public class MD5Util {
 		random.nextBytes(salt);
 		//声明消息摘要对象
 		MessageDigest md = null;
-		//创建消息摘要
-		md = MessageDigest.getInstance("MD5");
-		//将盐数据传入消息摘要对象
-		md.update(salt);
-		//将口令的数据传给消息摘要对象
-		md.update(password.getBytes("UTF-8"));
+		try {
+			//创建消息摘要
+			md = MessageDigest.getInstance("MD5");
+			//将盐数据传入消息摘要对象
+			md.update(salt);
+			//将口令的数据传给消息摘要对象
+			md.update(password.getBytes("UTF-8"));
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		//获得消息摘要的字节数组
 		byte[] digest = md.digest();
 		//因为要在口令的字节数组中存放盐，所以加上盐的字节长度
@@ -121,4 +125,30 @@ public class MD5Util {
 		//将字节数组格式加密后的口令转化为16进制字符串格式的口令
 		return byteToHexString(pwd);
 	}
+	
+	/**
+	 * 字符串进行MD5转码
+	 * @param str
+	 * @return
+	 */
+	public static String toMD5(String str){ 
+
+        byte[] byteArray = null;
+        MessageDigest md5 = null;
+        try{
+            md5 = MessageDigest.getInstance("MD5");
+            md5.update(str.getBytes("UTF-8"));
+        }catch (Exception e){
+            e.printStackTrace();
+            return "";  
+        }
+		//获得消息摘要的字节数组
+		byte[] digest = md5.digest();
+		//因为要在口令的字节数组中存放盐，所以加上盐的字节长度
+		byteArray = new byte[digest.length];
+		//将消息摘要拷贝到加密口令字节数组从第13个字节开始的字节
+		System.arraycopy(digest, 0, byteArray, 0, digest.length);
+		//将字节数组格式加密后的口令转化为16进制字符串格式的口令
+		return byteToHexString(byteArray);
+    }
 } 

@@ -20,7 +20,7 @@
 				<tr class="main_info">
 				<td>${vs.index+1}</td>
 				<td id="roleNameTd${role.roleId }">${role.roleName }</td>
-				<td><a href="javascript:editRole(${role.roleId });">修改</a> | <a href="javascript:delUser(${role.roleId });">删除</a> | <a href="javascript:editRights(${role.roleId });">权限</a></td>
+				<td><a href="javascript:editRole(${role.roleId });">修改</a> |<c:if test="${role.system!=1}"> <a href="javascript:delRole(${role.roleId });">删除</a> |</c:if> <a href="javascript:editRights(${role.roleId });">权限</a></td>
 				</tr>
 				</c:forEach>
 			</c:when>
@@ -73,6 +73,16 @@
     				}
     			});
     		});
+		}
+		
+		function delRole(roleId){
+			if(confirm("确定要删除该记录？")){
+				var url = "role/delete.html?roleId="+roleId;
+				$.get(url,function(data){
+					alert(data);
+					document.location.reload();
+				});
+			}
 		}
 		
 		function editRole(roleId){

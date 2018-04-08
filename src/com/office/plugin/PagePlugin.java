@@ -5,7 +5,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.xml.bind.PropertyException;
@@ -42,7 +45,6 @@ public class PagePlugin implements Interceptor {
 	private static String pageSqlId = ""; //mapper.xml中需要拦截的ID(正则匹配)
 	
 	public Object intercept(Invocation ivk) throws Throwable {
-		// TODO Auto-generated method stub
 		if(ivk.getTarget() instanceof RoutingStatementHandler){
 			RoutingStatementHandler statementHandler = (RoutingStatementHandler)ivk.getTarget();
 			BaseStatementHandler delegate = (BaseStatementHandler) ReflectHelper.getValueByFieldName(statementHandler, "delegate");
@@ -72,7 +74,17 @@ public class PagePlugin implements Interceptor {
 					if(parameterObject instanceof Page){	//参数就是Page实体
 						 page = (Page) parameterObject;
 						 page.setEntityOrField(true);	 //见com.office.entity.Page.entityOrField 注释
-						page.setTotalResult(count);
+						 page.setTotalResult(count);
+					}else if(parameterObject instanceof HashMap){//参数为HashMap，判断是否其中包含Page对象
+						Iterator<?> iter =  ((HashMap<?, ?>)parameterObject).entrySet().iterator();
+						while (iter.hasNext()) {
+							Entry<?, ?> entry = (Entry<?, ?>) iter.next();
+							if(entry.getValue() instanceof Page){//如果是Page实体
+								 page = (Page) entry.getValue();
+								 page.setEntityOrField(true);	 //见com.office.entity.Page.entityOrField 注释
+								 page.setTotalResult(count);
+							}
+						}
 					}else{	//参数为某个实体，该实体拥有Page属性
 						Field pageField = ReflectHelper.getFieldByFieldName(parameterObject,"page");
 						if(pageField!=null){
@@ -167,7 +179,6 @@ public class PagePlugin implements Interceptor {
 	}
 	
 	public Object plugin(Object arg0) {
-		// TODO Auto-generated method stub
 		return Plugin.wrap(arg0, this);
 	}
 
@@ -177,7 +188,6 @@ public class PagePlugin implements Interceptor {
 			try {
 				throw new PropertyException("dialect property is not found!");
 			} catch (PropertyException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -186,7 +196,6 @@ public class PagePlugin implements Interceptor {
 			try {
 				throw new PropertyException("pageSqlId property is not found!");
 			} catch (PropertyException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

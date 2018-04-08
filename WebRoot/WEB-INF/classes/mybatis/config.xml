@@ -9,6 +9,12 @@
 		<typeAlias type="com.office.entity.Menu" alias="Menu"/>
 		<typeAlias type="com.office.entity.Info" alias="Info"/>
 		<typeAlias type="com.office.entity.Organ" alias="Organ"/>
+		<typeAlias type="com.office.entity.Customer" alias="Customer"/>
+		<typeAlias type="com.office.entity.Offer" alias="Offer"/>
+		<typeAlias type="com.office.entity.Orders" alias="Orders"/>
+		<typeAlias type="com.office.entity.PubCode" alias="PubCode"/>
+		<typeAlias type="com.office.entity.Subscription" alias="Subscription"/>
+		<typeAlias type="com.office.entity.Credit" alias="Credit"/>
 	</typeAliases>
 	
 	<plugins>
@@ -24,6 +30,10 @@
 		<mapper resource="mybatis/Menu.xml"/>
 		<mapper resource="mybatis/Info.xml"/>
 		<mapper resource="mybatis/Organ.xml"/>
+		<mapper resource="mybatis/Customer.xml"/>
+		<mapper resource="mybatis/Offer.xml"/>
+		<mapper resource="mybatis/Orders.xml"/>
+		<mapper resource="mybatis/PubCode.xml"/>
+		<mapper resource="mybatis/Credit.xml"/>
 	</mappers>
-	
 </configuration>

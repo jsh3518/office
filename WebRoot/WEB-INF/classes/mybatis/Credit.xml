@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.CreditMapper">
+	<sql id="creditColumns">agentid,agentname,creditrating,creditline,account,unit,valid</sql>
+
+	<resultMap type="Credit" id="creditResultMap">
+		<id column="id" property="id"/>
+		<result column="agentid" property="agentId"/>
+		<result column="agentname" property="agentName"/>
+		<result column="creditrating" property="creditRating"/>
+		<result column="creditline" property="creditLine"/>
+		<result column="account" property="account"/>
+		<result column="unit" property="unit"/>
+		<result column="valid" property="valid"/>
+	</resultMap>
+	
+	<select id="listPageCredit" resultMap="creditResultMap">
+		select c.id,a.user_id agentid,a.username agentname, p.name creditrating,creditline,account,p1.name unit,c.valid
+		 from tb_user a left join credit c on c.agentid = a.user_id and c.valid = 1
+		 left join pub_code p on p.code = c.creditrating and p.classid = 'CREDITRATING' and p.valid = '1'
+		 left join pub_code p1 on p1.code = c.unit and p1.classid = 'TIMEUNIT' and p1.valid = '1'
+		 where a.type = '1' and a.status = '1' and a.role_id = 3
+		<if test="agentName!=null and agentName!=''">
+			and a.username like "%"#{agentName}"%"
+		</if>
+	</select>
+	
+	<select id="queryCredit" parameterType="int" resultMap="creditResultMap">
+		select id,<include refid="creditColumns"/> from  credit where agentid = #{agentId}
+	</select>
+	
+	<insert id="insertCredit" parameterType="Credit" useGeneratedKeys="true" keyProperty="id">
+		insert credit (<include refid="creditColumns"/>) values (#{agentId},#{agentName},#{creditRating},#{creditLine},#{account},#{unit},#{valid})
+	</insert>
+	
+	<update id="updateCredit" parameterType="Credit">
+		update credit set id = #{id}
+		<if test="agentId!=null and agentId !=''">
+			, agentid = #{agentId}
+		</if>
+		<if test="agentName!=null and agentName!=''">
+			, agentname = #{agentName}
+		</if>
+		<if test="creditRating!=null and creditRating!=''">
+			, creditrating = #{creditRating}
+		</if>
+		<if test="account!=null and account!=''">
+			, account = #{account}
+		</if>
+		<if test="unit!=null and unit!=''">
+			, unit = #{unit}
+		</if>
+		<if test="valid!=null and valid!=''">
+			, valid = #{valid}
+		</if>
+		where id=#{id}
+	</update>
+</mapper>

@@ -7,6 +7,7 @@
 		<id column="role_id" property="roleId"/>
 		<result column="role_name" property="roleName"/>
 		<result column="rights" property="rights"/>
+		<result column="system" property="system"/>
 	</resultMap>
 	
 	<select id="listAllRoles" resultMap="roleResultMap">

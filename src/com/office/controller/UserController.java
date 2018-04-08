@@ -62,7 +62,7 @@ public class UserController {
 	@Autowired
 	private OrganService organService;
 	
-	private static Logger logger = Logger.getLogger(FileUploadUtil.class);//输出Log日志
+	private static Logger logger = Logger.getLogger(UserController.class);//输出Log日志
 	/**
 	 * 显示用户列表
 	 * @param user
@@ -114,7 +114,7 @@ public class UserController {
 	 * @throws NoSuchAlgorithmException 
 	 */
 	@RequestMapping(value="/regedit",method=RequestMethod.POST)
-	public ModelAndView regedit(HttpServletRequest request,HttpSession session,User user,@RequestParam(value="code",required=false)  String code) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+	public ModelAndView regedit(HttpServletRequest request,HttpSession session,User user) {
 		user.setPassword(MD5Util.getEncryptedPwd(user.getPassword()));
 		ModelAndView mv = new ModelAndView();
 		boolean result = true;
@@ -132,11 +132,9 @@ public class UserController {
 			}
 			FileUploadUtil.uploadFile(mfile,filePath+fileName);
 
-        } catch (Exception e) {  
-            //e.printStackTrace();
+        } catch (Exception e) {
 			mv.addObject("msg","附件上传失败！");
 			result = false;
-			session.removeAttribute(Const.SESSION_SECURITY_CODE);
         }  
 		
 
@@ -144,7 +142,6 @@ public class UserController {
 			if(!userService.insertUser(user)){
 				mv.addObject("msg","用户名已存在！");
 				result = false;
-				session.removeAttribute(Const.SESSION_SECURITY_CODE);
 			}
 		}else{
 			userService.updateUserBaseInfo(user);
@@ -173,8 +170,11 @@ public class UserController {
 	@RequestMapping(value="/save",method=RequestMethod.POST)
 	public ModelAndView saveUser(User user) throws NoSuchAlgorithmException, UnsupportedEncodingException{
 		ModelAndView mv = new ModelAndView();
+		String password = user.getPassword() ;
+		if(password!=null&&!"".equals(password)){
 		//用户密码加密
-		user.setPassword(MD5Util.getEncryptedPwd(user.getPassword()));
+			user.setPassword(MD5Util.getEncryptedPwd(password));
+		}
 		if(user.getUserId()==null || user.getUserId().intValue()==0){
 			if(userService.insertUser(user)==false){
 				mv.addObject("msg","failed");
@@ -379,9 +379,10 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value="/userAudit")
-	public void userAudit(PrintWriter out,@RequestParam int userId){
+	public void userAudit(PrintWriter out,@RequestParam int userId,@RequestParam int roleId){
 		User user = new User();
-		user.setRoleId(4);//代理商用户
+		
+		user.setRoleId(roleId);//代理商角色
 		user.setStatus(1);//已审核
 		user.setUserId(userId);
 		userService.updateUserStatus(user);

@@ -24,10 +24,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.regist_code{width:70px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:10px;cursor: pointer;}
 	.regist_info img{vertical-align: middle;cursor: pointer;}
-	
 	.errInfo{color:red;width:180px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block; }
-	
-	.logo{width:100%;height:68px;background: url(images/logo2.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/logo2.png';)}
 	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 25px;color: #666666;}
 	
 	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
@@ -100,16 +97,21 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="regist_info">
 					<label class="regist_label">税号：</label>
 					<input type="text" name="tax" id="tax" class="regist_input" value="${user.tax }"/>
-					&nbsp;<span id="taxerr" class="errInfo"></span>
 				</div>
 			</div>
 			<div class="audit_left">
 				<div class="regist_info">
+					<label class="regist_label">代理商角色：</label>
+					<select name="roleId" id="roleId" class="role_select">
+						<option value="2">总代理商</option>
+						<option value="3" selected="selected">代理商</option>
+					</select>
+				</div>
+				<div class="regist_info">
 					<label class="regist_label">营业执照扫描件：</label><br>
-					<img height="280px" width="auto" src="<%=basePath%>files/${user.file}">
-					<!-- 
-					<input type="text" id="file" name="file" class="file" value="${user.file}">
-					 -->
+					<div style="height:280px;width: 450px;overflow:auto;margin-left: 20px">
+						<img height="auto" width="430px" src="<%=basePath%>files/${user.file}">
+					</div>
 				</div>
 			</div>
 
@@ -119,13 +121,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 </div>
 	<script type="text/javascript">
 	$("input:text").attr("disabled",true);
-	$("select").attr("disabled",true);
+	$(".organ_select").attr("disabled",true);
 		var msg = "${msg}";
-
 		//代理商审核
 		function userAudit(){
 				  var url = "user/userAudit.html";
-					var postData = {"userId":$("#userId").val()};
+					var postData = {"userId":$("#userId").val(),"roleId":$("#roleId").val()};
 					$.post(url,postData,function(data){
 						alert("审核成功！");
 						window.location="<%=basePath%>user/toAudit.html";

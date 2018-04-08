@@ -22,12 +22,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.file{width:250px;height:20px;margin-left:20px;vertical-align: middle;}
 	.organ_select{width:82px;height:20px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.regist_code{width:70px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
-	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:30px;cursor: pointer;}
+	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:15px;cursor: pointer;}
 	.regist_info img{vertical-align: middle;cursor: pointer;}
-	
 	.errInfo{color:red;width:180px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block; }
-	
-	.logo{width:100%;height:68px;background: url(images/logo2.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/logo2.png';)}
 	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 25px;color: #666666;}
 	
 	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
@@ -128,6 +125,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="regist_info" style="text-align:center">
 					<input type="submit" name="registBtn" value="注册" class="btn"/>
 					<input type="reset" name="cancelBtn" value="取消" class="btn" onclick="resetErr()"/>
+					<input type="button" name="backBtn" value="返回" class="btn" onclick="forBack()"/>
 				</div>
 				<input type="text" name="type" id="type" value="1" style="display: none"/>
 			</form>
@@ -153,11 +151,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				$("#codeImg").bind("click",changeCode);
 				if(msg!=""){
 					if(msg.indexOf("验证码")>-1){
-						$("#codeerr").show();
 						$("#codeerr").html(msg);
 						$("#code").focus();
 					}else{
-						$("#nameerr").show();
 						$("#nameerr").html(msg);
 						$("#loginname").focus();
 					}
@@ -176,18 +172,27 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		}
 		
 		function resetErr(){
-			$("#nameerr").hide();
 			$("#nameerr").html("");
-			$("#pwderr").hide();
 			$("#pwderr").html("");
-			$("#codeerr").hide();
+			$("#pwderr1").html("");
+			$("#usererr").html("");
+			$("#contacterr").html("");
+			$("#phoneerr").html("");
+			$("#emailerr").html("");
+			$("#posterr").html("");
+			$("#taxerr").html("");
+			$("#fileerr").html("");
 			$("#codeerr").html("");
+		}
+		
+		function forBack(){
+			window.location="<%=basePath%>login.html";
 		}
 		
 		var con;
 		function check(){
 			con=1;
-			//resetErr();
+			resetErr();
 			valName();
 			valPassword();
 			valPassword1();

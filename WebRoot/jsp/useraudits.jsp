@@ -18,8 +18,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<div class="search_div">
 		用户名：<input type="text" name="loginname" value="${user.loginname }"/>
 		公司名称：<input type="text" name="username" value="${user.username }"/>
-		登录日期：<input type="text" name="lastLoginStart" value="<fmt:formatDate value="${user.lastLoginStart}" pattern="yyyy-MM-dd"/>" onclick="WdatePicker()" readonly="readonly" style="width:70px;"/> -
-		<input type="text" name="lastLoginEnd" value="<fmt:formatDate value="${user.lastLoginEnd}" pattern="yyyy-MM-dd"/>" onclick="WdatePicker()" readonly="readonly" style="width:70px;"/>
 		<a href="javascript:search();" class="myBtn"><em>查询</em></a>
 	</div>
 	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="main_table">
@@ -62,10 +60,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		</c:choose>
 	</table>
 	<div class="page_and_btn">
-		<div>
-			<a href="javascript:addUser();" class="myBtn"><em>新增</em></a>
-			<a href="javascript:exportUser();" class="myBtn"><em>导出</em></a>
-		</div>
 		${user.page.pageStr }
 	</div>
 	</form>
@@ -83,64 +77,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}else{
 				$("input[name='userIds']").attr("checked",false);
 			}
-		}
-		
-		function addUser(){
-			//$(".shadow").show();
-			var dg = new $.dialog({
-				title:'新增用户',
-				id:'user_new',
-				width:330,
-				height:300,
-				iconTitle:false,
-				cover:true,
-				maxBtn:false,
-				xButton:true,
-				resize:false,
-				page:'user/add.html'
-				});
-    		dg.ShowDialog();
-		}
-		
-		function editUser(userId){
-			var dg = new $.dialog({
-				title:'修改用户',
-				id:'user_edit',
-				width:330,
-				height:300,
-				iconTitle:false,
-				cover:true,
-				maxBtn:false,
-				resize:false,
-				page:'user/edit.html?userId='+userId
-				});
-    		dg.ShowDialog();
-		}
-		
-		function delUser(userId){
-			if(confirm("确定要删除该记录？")){
-				var url = "user/delete.html?userId="+userId;
-				$.get(url,function(data){
-					if(data=="success"){
-						document.location.reload();
-					}
-				});
-			}
-		}
-		
-		function editRights(userId){
-			var dg = new $.dialog({
-				title:'用户授权',
-				id:'auth',
-				width:280,
-				height:370,
-				iconTitle:false,
-				cover:true,
-				maxBtn:false,
-				resize:false,
-				page:'user/auth.html?userId='+userId
-				});
-    		dg.ShowDialog();
 		}
 		
 		function search(){

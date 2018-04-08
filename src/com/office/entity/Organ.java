@@ -7,10 +7,12 @@ public class Organ {
 	private String orgId;//组织ID
 	private String orgName;//组织名称
 	private String parentId;//父级
-	private String order;//排序
+	private String sort;//排序
 	private Integer level;//级别
 	private String remark;//备注
 	private Integer valid;//是否有效
+	public String phonetic;//英文对照
+	public String abbr;//英文简称
 	private Date start;//开始时间
 	private Date end;//结束时间
 	private List<Organ> subOrgan;//子集
@@ -32,11 +34,11 @@ public class Organ {
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
 	}
-	public String getOrder() {
-		return order;
+	public String getSort() {
+		return sort;
 	}
-	public void setOrder(String order) {
-		this.order = order;
+	public void setSort(String sort) {
+		this.sort = sort;
 	}
 	public Integer getLevel() {
 		return level;
@@ -55,6 +57,18 @@ public class Organ {
 	}
 	public void setValid(Integer valid) {
 		this.valid = valid;
+	}
+	public String getPhonetic() {
+		return phonetic;
+	}
+	public void setPhonetic(String phonetic) {
+		this.phonetic = phonetic;
+	}
+	public String getAbbr() {
+		return abbr;
+	}
+	public void setAbbr(String abbr) {
+		this.abbr = abbr;
 	}
 	public Date getStart() {
 		return start;
