@@ -2,8 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.OrdersMapper">
-	<sql id="ordersColumns">ordersno,billingcycle,customerid,createtime,effecttime,sum,status,mpnid,reseller,createuser,payment,file,orderid</sql>
-	<sql id="subscriptionColumns">ordersid,offerid,offername,quantity,billingcycle,subscriptionid,amount,createuser</sql>
+	<sql id="ordersColumns">ordersno,billingcycle,customerid,createtime,effecttime,sum,actualsum,status,mpnid,reseller,createuser,payment,file,orderid,type</sql>
+	<sql id="detailColumns">ordersid,offerid,offername,quantity,billingcycle,subscriptionid,amount,actualamount,createuser,originalid</sql>
+	<sql id="subscriptionColumns">customerid,detailid,offerid,offername,quantity,billingcycle,subscriptionid,effecttime,renew,mpnid,reseller,createuser</sql>
 
 	<resultMap type="Orders" id="ordersResultMap">
 		<id column="id" property="id"/>
@@ -13,6 +14,7 @@
 		<result column="createtime" property="createTime"/>
 		<result column="effecttime" property="effectTime"/>
 		<result column="sum" property="sum"/>
+		<result column="actualsum" property="actualSum"/>
 		<result column="status" property="status"/>
 		<result column="mpnid" property="mpnId"/>
 		<result column="reseller" property="reseller"/>
@@ -20,12 +22,13 @@
 		<result column="payment" property="payment"/>
 		<result column="file" property="file"/>
 		<result column="orderid" property="orderId"/>
+		<result column="type" property="type"/>
 		<association property="customer" column="customerid" javaType="Customer" 
 			select="com.office.mapper.CustomerMapper.selectCustomerById">
 		</association>
 	</resultMap>
 	
-	<resultMap type="Subscription" id="subscriptionResultMap">
+		<resultMap type="OrdersDetail" id="detailResultMap">
 		<id column="id" property="id"/>
 		<result column="ordersid" property="ordersId"/>
 		<result column="offerid" property="offerId"/>
@@ -36,8 +39,30 @@
 		<result column="billingcycle" property="billingCycle"/>
 		<result column="subscriptionid" property="subscriptionId"/>
 		<result column="amount" property="amount"/>
+		<result column="actualamount" property="actualAmount"/>
+		<result column="createuser" property="createUser"/>
+		<result column="originalid" property="originalId"/>
+		
+	</resultMap>
+	
+	<resultMap type="Subscription" id="subscriptionResultMap">
+		<id column="id" property="id"/>
+		<result column="customerid" property="customerId"/>
+		<result column="detailid" property="detailId"/>
+		<result column="offerid" property="offerId"/>
+		<result column="offername" property="offerName"/>
+		<result column="parent" property="parent"/>
+		<result column="parentname" property="parentName"/>
+		<result column="quantity" property="quantity"/>
+		<result column="billingcycle" property="billingCycle"/>
+		<result column="subscriptionid" property="subscriptionId"/>
+		<result column="effecttime" property="effectTime"/>
+		<result column="renew" property="renew"/>
+		<result column="mpnid" property="mpnId"/>
+		<result column="reseller" property="reseller"/>
 		<result column="createuser" property="createUser"/>
 	</resultMap>
+	
 	<select id="listPageOrders" resultMap="ordersResultMap">
 		select o.id,<include refid="ordersColumns"/>
 		from orders o
@@ -61,7 +86,7 @@
 		<if test="status!=null and status!=''">
 			and o.status = #{status}
 		</if>
-		<if test="id!=null and id!=''">
+		<if test="id!=null and id!=0">
 			and id = #{id}
 		</if>
 		order by CASE WHEN STATUS = 3 THEN	0 ELSE STATUS END,createtime
@@ -78,23 +103,35 @@
 		select max(ordersno) from orders where to_days(createtime)=to_days(#{date})
 	</select>
 	
-	<select id="getSubscription" resultMap="subscriptionResultMap">
-		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.createuser
-		FROM subscription s
+	<select id="getOrdersDetail" resultMap="detailResultMap">
+		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser
+		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
 		WHERE s.ordersid = #{ordersId}
 	</select>
 	
+	<select id="selectOrdersDetail" resultMap="detailResultMap">
+		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser
+		FROM orders_detail s
+		LEFT JOIN offer c ON c.offerid = s.offerid
+		LEFT JOIN offer o ON c.parent = o.offerid
+		WHERE s.id = #{detailId}
+	</select>
+	
 	<insert id="insertOrders" parameterType="Orders" useGeneratedKeys="true" keyProperty="id">
-		insert orders (<include refid="ordersColumns"/>) values (#{ordersNo},#{billingCycle},#{customerId},#{createTime},#{effectTime},#{sum},#{status},#{mpnId},#{reseller},#{createUser},#{payment},#{file},#{orderId})
+		insert orders (<include refid="ordersColumns"/>) values (#{ordersNo},#{billingCycle},#{customerId},#{createTime},#{effectTime},#{sum},#{actualSum},#{status},#{mpnId},#{reseller},#{createUser},#{payment},#{file},#{orderId},#{type})
 	</insert>
 	
-	<insert id="insertSubscription" parameterType="List" useGeneratedKeys="true" keyProperty="id">
-		insert subscription (<include refid="subscriptionColumns"/>) values
-		<foreach collection="list" item="subscription" index="index" open="(" close=")" separator="),(">
-			#{subscription.ordersId}, #{subscription.offerId},(select o.offername from offer o where o.offerid=#{subscription.offerId}),#{subscription.quantity},#{subscription.billingCycle},#{subscription.subscriptionId},#{subscription.amount},#{subscription.createUser}
+	<insert id="insertOrdersDetail" parameterType="List" useGeneratedKeys="true" keyProperty="id">
+		insert orders_detail (<include refid="detailColumns"/>) values
+		<foreach collection="list" item="ordersDetail" index="index" open="(" close=")" separator="),(">
+			#{ordersDetail.ordersId}, #{ordersDetail.offerId},(select o.offername from offer o where o.offerid=#{ordersDetail.offerId}),#{ordersDetail.quantity},#{ordersDetail.billingCycle},#{ordersDetail.subscriptionId},#{ordersDetail.amount},#{ordersDetail.actualAmount},#{ordersDetail.createUser},#{ordersDetail.originalId}
 		</foreach>
+	</insert>
+	
+	<insert id="insertSubscription" parameterType="Subscription" useGeneratedKeys="true" keyProperty="id">
+		insert orders (<include refid="subscriptionColumns"/>) values (#{customerId},#{detailId},#{offerId},#{offerName},#{quantity},#{billingCycle},#{subscriptionId},#{effectTime},#{renew},#{mpnId},#{reseller},#{createUser})
 	</insert>
 	
 	<update id="updateOrders" parameterType="Orders">
@@ -103,10 +140,10 @@
 			,payment = #{payment}
 		</if>
 		<if test="mpnId!=null and mpnId!=''">
-		 and mpnid=#{mpnId}
+		 ,mpnid=#{mpnId}
 		</if>
 		<if test="reseller!=null and reseller!=''">
-		 and reseller=#{reseller}
+		 ,reseller=#{reseller}
 		</if>
 		<if test="file!=null and file!=''">
 			,file=#{file}
@@ -114,11 +151,14 @@
 		<if test="orderId!=null and orderId!=''">
 			,orderid=#{orderId}
 		</if>
+		<if test="effectTime!=null and effectTime!=''">
+			,effecttime=#{effectTime}
+		</if>
 		where id=#{id}
 	</update>
 	
-	<update id="updateSubscription" parameterType="Subscription">
-		update subscription set subscriptionid=#{subscriptionId}
+	<update id="updateOrdersDetail" parameterType="OrdersDetail">
+		update orders_detail set subscriptionid=#{subscriptionId}
 		<if test="amount!=null and amount!=''">
 			,amount = #{amount}
 		</if>
@@ -133,4 +173,21 @@
 		  and id = #{id}
 		</if>
 	</update>
+	
+	<delete id="deleteOrdersDetail" parameterType="String">
+		delete from orders_detail where ordersid=#{ordersId}
+	</delete>
+	
+	<select id="listPageSubscription" resultType="Map">
+	SELECT s.id,<include refid="subscriptionColumns"/>,date_add(date_add(s.effecttime, interval 12+s.renew month), interval -1 day) duetime
+		FROM	subscription s
+		WHERE	1 = 1
+	<if test="createUser!=null and createUser!=''">
+		AND s.createuser = #{createUser}
+	</if>
+	<if test="customerId!=null and customerId!=0">
+		AND s.customerid =#{customerId}
+	</if>
+		order by s.offerid,s.effecttime
+	</select>
 </mapper>

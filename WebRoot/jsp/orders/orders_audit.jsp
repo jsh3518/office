@@ -79,17 +79,17 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						<th width="33%">数量</th>
 						<th width="33%">记帐频率</th>
 					</tr>
-					<c:forEach items="${subscriptionMap}" var="subscriptionMap" >
+					<c:forEach items="${ordersDetailMap}" var="ordersDetailMap" >
 					<tr>
-						<td class="title">${subscriptionMap.key}</td>
+						<td class="title">${ordersDetailMap.key}</td>
 						<td>&nbsp;</td>
 						<td>&nbsp;</td>
 					</tr>
-						<c:forEach items="${subscriptionMap.value}" var="subscription">
+						<c:forEach items="${ordersDetailMap.value}" var="ordersDetail">
 							<tr>
-								<td>${subscription.offerName}</td>
-								<td>${subscription.quantity}许可证</td>
-								<td>${billingCycleMap[subscription.billingCycle]}</td>
+								<td>${ordersDetail.offerName}</td>
+								<td>${ordersDetail.quantity}许可证</td>
+								<td>${billingCycleMap[ordersDetail.billingCycle]}</td>
 							</tr>
 						</c:forEach>
 					</c:forEach>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.OfferPriceMapper">
+	<sql id="offerPriceColumns">offerid,offername,price_month,price_year,unit,valid</sql>
+
+	<resultMap type="OfferPrice" id="offerPriceResultMap">
+		<id column="id" property="id"/>
+		<result column="offerid" property="offerId"/>
+		<result column="offername" property="offerName"/>
+		<result column="price_month" property="priceMonth"/>
+		<result column="price_year" property="priceYear"/>
+		<result column="unit" property="unit"/>
+		<result column="unitname" property="unitName"/>
+		<result column="valid" property="valid"/>
+	</resultMap>
+	
+	<select id="listPageOfferPrice" resultMap="offerPriceResultMap">
+		SELECT o.offerid,	o.offername,	p.id,	p.price_month,	p.price_year,	p.unit,c.name unitname,	p.valid
+			FROM	offer o 
+			LEFT JOIN offer_price p ON o.offerid = p.offerid
+		<if test="valid!=null and valid!=''">
+			AND p.valid = #{valid}
+		</if>
+			LEFT JOIN pub_code c ON p.unit = c.code AND c.classid='AMOUNTUNIT' AND c.valid = '1'
+		WHERE	(CASE	WHEN o.istrial IS NULL THEN	0	ELSE	o.istrial END) = 0 AND o. LEVEL = 2
+		<if test="offerId!=null and offerId!=''">
+			AND o.offerid = #{offerId}
+		</if>
+		<if test="offerName!=null and offerName!=''">
+			and o.offername like "%"#{offerName}"%"
+		</if>
+		ORDER BY	o.parent DESC,	o.sort
+	</select>
+	
+	<select id="getOfferPriceById" parameterType="String" resultMap="offerPriceResultMap">
+		select id,<include refid="offerPriceColumns"/> from offer_price where id = #{id}
+	</select>
+	
+	<insert id="insertOfferPrice" parameterType="OfferPrice" useGeneratedKeys="true" keyProperty="id">
+		insert offer_price (<include refid="offerPriceColumns"/>) values (#{offerId},#{offerName},#{priceMonth},#{priceYear},#{unit},#{valid})
+	</insert>
+
+	<update id="updateOfferPrice" parameterType="OfferPrice">
+		update offer_price set id=#{id}
+		<if test="priceMonth!=null and priceMonth!=''">
+			,price_month = #{priceMonth}
+		</if>
+		<if test="priceYear!=null and priceYear!=''">
+			, price_year=#{priceYear}
+		</if>
+		<if test="unit!=null and unit!=''">
+			, unit=#{unit}
+		</if>
+		<if test="valid!=null and valid!=''">
+			, valid=#{valid}
+		</if>
+		  where id = #{id}
+	</update>
+</mapper>

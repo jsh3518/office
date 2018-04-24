@@ -18,7 +18,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.select{width:150px;height:25px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-left:15px;cursor: pointer;text-align: center}
 	.left{margin-left:20px;vertical-align:middle;text-align: left;float:left;}
-	.input{width:10px;height:25px;align:center;vertical-align:middle;font-size:12px;color:#222;background-color:#fff;border:1px solid #ccc;border-radius:4px;}
 	.checkbox{width:15px;height:15px;vertical-align:middle;font-size:12px;color:#222;border:1px solid #ccc;border-radius:4px;}
 	.error{float: left;color: #ea644a;}
 	.tab-div {width: 400px;position: relative;}  
@@ -26,7 +25,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   .tab {overflow: hidden;padding:0;position: relative;margin-left:20px;}
   .tab li{float: left;width: 150px;border:1px solid #def;height: 25px;line-height: 25px;text-align: center;cursor: pointer;border-radius:4px;}
   .color{background-color:#def}
-  .content{width: 120px;float: left;display: none;}
+  .content{width: 120px;float: left;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -37,7 +36,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<div class="title">
 				新订阅
 			</div>
-			<div class="info">
+			<div id="billingDiv" class="info" style="display: none">
 				<label class="left">计费频率</label>
 				<div class="left" id="billings">
       		<c:forEach var="billing" varStatus="status" items="${billingList}">
@@ -60,23 +59,27 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<c:forEach items="${offer.subOffer}" var="offerChild">
 						<div style="width: 650px;float: left;margin-left: 20px">
 							<div style="width: 500px;float: left">
-								<input name="checkbox" type="checkbox" onclick="myCheck(this,'${offer.offerId}')" value="${offerChild.offerId}" class="checkbox"/>${offerChild.offerName}
+								<input name="checkbox" type="checkbox" onclick="myCheck(this,'${offer.offerId}',${offerChild.mininum})" value="${offerChild.offerId}" class="checkbox"  <c:if test="${!empty ordersDetailMap&&ordersDetailMap.containsKey(offerChild.offerId)}">checked="checked"</c:if>/>${offerChild.offerName}
 							</div>
-							<div class="content" id="div_${offerChild.offerId}"><input name="quantity_${offerChild.offerId}" id="quantity_${offerChild.offerId}" type="text" style="width: 70px;" />许可证</div>
+							<div class="content" id="div_${offerChild.offerId}" <c:if test="${empty ordersDetailMap||!ordersDetailMap.containsKey(offerChild.offerId)}">style="display:none"</c:if>><input name="quantity_${offerChild.offerId}" id="quantity_${offerChild.offerId}" type="text" style="width: 70px;" onblur="checkValue(this,${offerChild.maxinum},'${offerChild.offerId}')" value="${ordersDetailMap==null?'':ordersDetailMap.get(offerChild.offerId)}"/>许可证</div>
 						</div>
 					</c:forEach>
 				</div>
 			</c:forEach>
-			<div class="info" style="margin-top: 5px;margin-bottom: 5px">
+			<div class="info" id="resellerDiv" style="margin-top: 5px;margin-bottom: 5px;display: none" >
 				<label class="left"><font style="font-weight: bold;">间接经销商</font></label>
 				<div class="left" id="mpnIdDiv">
       		<input type="text" name="mpnId" id="mpnId" onblur="valMpnId()"/>
       		<input type="hidden" id="reseller" name ="reseller"/>
      		</div>
 			</div>
-			<div class="info" >
+			<div class="info" style="margin-top: 5px;">
 				<input type="submit" name="registBtn" id="registBtn" value="订阅" class="btn"/>
 				<input type="button" name="backBtn" id="backBtn" value="返回" class="btn" onclick="forBack()"/>
+			</div>
+			<div style="display: none">
+				<input type="text" name="customerId" id="customerId" value="${customerId}"/>
+				<input type="text" name="id" id="id" value="${ordersId}"/>
 			</div>
 		</form>
 	</div>
@@ -87,20 +90,52 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		});
 		
 		$(document).ready(function(){
+
 			var id = $("#billingCycle:checked").val();
 			setDisabled(id);
+			
+			if("${roleId}"==2){
+				$("#billingDiv").show();
+				$("#resellerDiv").show();
+			}
+			setName();
 		});
 		
-		function genTimestamp(){
-			var time = new Date();
-			return time.getTime();
+		//修改ul li的名称
+		function setName(){
+			var ulNode = $("ul.tab");
+			var childrens = ulNode.children();
+			var len = childrens.length;
+			//循环遍历所有孩子结点，并根据子节点中checkbox选中的值修改名称
+			for(var i=0;i<len;i++){
+				var id = childrens[i].id.substring(4);//截取出id
+				var count = $("#content_"+id+" input.checkbox:checked").length;
+				if(count==0){
+					$("#tab_"+id+" span").hide();
+				}else{
+					$("#tab_"+id+" span").show();
+					$("#tab_"+id+" span").text("("+count+")");
+				}
+			}
 		}
 		
 		function forBack(){
-			window.location="<%=basePath%>default.html";
+			//history.back(-1);
+			var message = "未创建新订阅，是否确定返回？";
+			var url = "<%=basePath%>customer.html";
+			if("${flag}"=="edit"){
+				message = "订阅信息未修改，是否确定返回？";
+				url = "<%=basePath%>orders/getOrders.html?id=${orders.id}";
+			}else{
+				
+			}
+			if(confirm(message)){
+				window.location=url;
+			}
 		}
 		
 		var con;
+		var numFlag = 1;//判断输入的订阅数量是否符合要求
 		function check(){
 			con=1;
 			$("#registBtn").attr("disabled",true);
@@ -108,7 +143,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			valBilling();
 			valOffer();
 			valMpnId();
-			if(con==1){
+			if(con==1&&numFlag==1){
 				return true;
 			}else{
 				$("#registBtn").attr("disabled",false);
@@ -144,7 +179,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				  var url = "orders/checkMpnId.html";
 					var postData = {"mpnId":mpnId};
 					$.post(url,postData,function(data){
-						var mpn = JSON.parse(data)
+						var mpn = JSON.parse(data);
 						if(mpn.responseCode==200){
 							var result = JSON.parse(mpn.result.substr(mpn.result.indexOf("{")));
 							$("#mpnIdDiv").after('<div class="message">'+result.partnerName+'</div>');
@@ -183,20 +218,28 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				$("#content_Trial input.checkbox").attr("disabled",true);
 			}
 		}
-		function myCheck(obj,id){
+		function myCheck(obj,id,mininum){
 			if(obj.checked){
+				
+				if(id=="Trial"){//如果是使用产品，则数量不允许修改
+					$("#quantity_"+obj.value).attr("readonly","readonly");
+				}
 				$("#div_"+obj.value).show();
-				$("#quantity_"+obj.value).val(1);
+				$("#quantity_"+obj.value).val(mininum);
 			}else{
 				$("#div_"+obj.value).hide();
 				$("#quantity_"+obj.value).val();
 			}
-			var count = $("#content_"+id+" input.checkbox:checked").length;
-			if(count==0){
-				$("#tab_"+id+" span").hide();
-			}else{
-				$("#tab_"+id+" span").show();
-				$("#tab_"+id+" span").text("("+count+")");
+			setName();
+		}
+		
+		//判断输入的数量是否超过最大允许值
+		function checkValue(obj,maxinum,id){
+			numFlag = 1;
+			$("#div_"+id).siblings('.error').remove();
+			if(obj.value>maxinum){
+				$("#div_"+id).after('<div class="error" style="float:right">最大'+maxinum+'许可证</div>');
+				numFlag = 0;
 			}
 		}
 	</script>

@@ -30,6 +30,8 @@ import com.office.entity.Orders;
 import com.office.entity.Page;
 import com.office.entity.PubCode;
 import com.office.entity.Subscription;
+import com.office.entity.OrdersDetail;
+import com.office.entity.User;
 import com.office.service.CustomerService;
 import com.office.service.OfferService;
 import com.office.service.OrdersService;
@@ -91,8 +93,19 @@ public class OrdersController {
 	@RequestMapping(value="/forNew")
 	public String forNew(Model model,Customer customer,HttpSession session){
 
+		User user= (User)session.getAttribute(Const.SESSION_USER);
+		customer.setCountry("CN");
+		customer.setCreateTime(new Date());
+		customer.setCreateUser(user==null?null:user.getLoginname());
+		customer.setStatus("0");//客户新增
+		customerService.insertCustomer(customer);
 		List<PubCode> billingList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
-		List<Offer> listParentOffer = offerService.listOfferByLevel(1);
+		String isTrial = null;
+		
+		if(user!=null&&user.getRoleId()!=2){
+			isTrial = "0";
+		}
+		List<Offer> listParentOffer = offerService.listOfferByLevel(1,isTrial);
 		List<Offer> offerList = new ArrayList<Offer>();
 		for(Offer offer:listParentOffer){
 			String id = offer.getOfferId();
@@ -101,7 +114,9 @@ public class OrdersController {
 		}
 		model.addAttribute("billingList", billingList);
 		model.addAttribute("offerList", offerList);
-		session.setAttribute("tempCustomer", customer);
+		model.addAttribute("customerId", customer.getId());
+		model.addAttribute("roleId", user==null?null:user.getRoleId());
+		//session.setAttribute("tempCustomer", customer);
 		return "orders/orders_add";
 	}
 
@@ -113,59 +128,57 @@ public class OrdersController {
 	 */
 	@RequestMapping(value="/addOrders",method=RequestMethod.POST)
 	public ModelAndView addOrders(Orders orders,HttpSession session,HttpServletRequest req){
-		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
-		Date day=new Date();
-		Customer customer = (Customer)session.getAttribute("tempCustomer");
-		if(customer!=null&&customer.getId()==null){
-			customer.setCountry("CN");
-			customer.setCreateTime(day);
-			customer.setCreateUser(userId);
-			//插入之后customer主键值被更新
-			customerService.insertCustomer(customer);
-		}
 		
-		String maxNo = ordersService.getMaxOrdersNo(day);
-		String ordersNo;
-		if(maxNo==null||"".equals(maxNo)){
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			ordersNo = "ORDER-VSTECS-"+ sdf.format(day)+"00001";
-		}else{
-			Long num = Long.valueOf(maxNo.substring(maxNo.length()-13))+1;
-			ordersNo = "ORDER-VSTECS-"+num;
+		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
+		Customer customer = customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
+		if(orders.getId()==null||"".equals(orders.getId())){
+			
+			Date day=new Date();
+			String maxNo = ordersService.getMaxOrdersNo(day);
+			String ordersNo;
+			if(maxNo==null||"".equals(maxNo)){
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+				ordersNo = "ORDER-VSTECS-"+ sdf.format(day)+"00001";
+			}else{
+				Long num = Long.valueOf(maxNo.substring(maxNo.length()-13))+1;
+				ordersNo = "ORDER-VSTECS-"+num;
+			}
+	
+			orders.setOrdersNo(ordersNo);
+			orders.setCustomerId(customer.getId());
+			orders.setStatus("0");//0:新增;1:已提交;2:已审核。
+			orders.setCreateTime(day);
+			orders.setCreateUser(userId);
+			ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
+		}else{//如果订单id存在，说明是订单更新操作，需要将订单明细表数据删除后重新添加
+			orders = ordersService.getOrdersById(orders.getId().toString());
+			ordersService.deleteOrdersDetail(orders.getId().toString());
 		}
-
-		orders.setOrdersNo(ordersNo);
-		orders.setCustomerId(customer.getId());
-		orders.setStatus("0");//0:新增;1:已提交;2:已审核。
-		orders.setCreateTime(day);
-		orders.setCreateUser(userId);
-		ordersService.insertOrders(orders);
 		String[] checkbox = req.getParameterValues("checkbox");
 		String quantity;
-		List<Subscription> subscriptionList = new ArrayList<Subscription>();
+		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
 
 		for(String str:checkbox){
 			quantity = req.getParameter("quantity_"+str);
-			Subscription subscription = new Subscription();
-			subscription.setQuantity(quantity);
-			subscription.setOfferId(str);
-			subscription.setOrdersId(orders.getId());
-			subscription.setBillingCycle(orders.getBillingCycle());
-			subscription.setCreateUser(userId);
-			subscriptionList.add(subscription);
+			OrdersDetail ordersDetail = new OrdersDetail();
+			ordersDetail.setQuantity(quantity);
+			ordersDetail.setOfferId(str);
+			ordersDetail.setOrdersId(orders.getId());
+			ordersDetail.setBillingCycle(orders.getBillingCycle());
+			ordersDetail.setCreateUser(userId);
+			ordersDetailList.add(ordersDetail);
 		}
-		ordersService.insertSubscription(subscriptionList);
+		ordersService.insertOrdersDetail(ordersDetailList);
 		
 		//跳转至付款信息界面
 		ModelAndView mv = new ModelAndView();
-		String ordersId = Integer.toString(orders.getId());
 		orders.setCustomer(customer);
-		Map<String, List<Subscription>> subscriptionMap = getSubscriptionMap(ordersId);
+		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(orders.getId().toString());
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
 		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
 		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
 		mv.addObject("orders", orders);
-		mv.addObject("subscriptionMap", subscriptionMap);
+		mv.addObject("ordersDetailMap", ordersDetailMap);
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("statusMap", statusMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
@@ -187,12 +200,12 @@ public class OrdersController {
 		String id = req.getParameter("id")==null?"":req.getParameter("id");
 		String flag = req.getParameter("flag")==null?"":req.getParameter("flag");
 		Orders orders = ordersService.getOrdersById(id);
-		Map<String, List<Subscription>> subscriptionMap = getSubscriptionMap(id);
+		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(id);
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
 		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
 		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
 		model.addAttribute("orders", orders);
-		model.addAttribute("subscriptionMap", subscriptionMap);
+		model.addAttribute("ordersDetailMap", ordersDetailMap);
 		model.addAttribute("paymentList", paymentList);
 		model.addAttribute("statusMap", statusMap);
 		model.addAttribute("billingCycleMap", billingCycleMap);
@@ -316,34 +329,36 @@ public class OrdersController {
 					if(result.indexOf("{")>=0){
 						JSONObject reCustomerJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
 						tenantId = reCustomerJson.get("id")==null?"":reCustomerJson.get("id").toString();
-						customerService.updateTenantId(customer.getId(), tenantId);
+						JSONObject json = (JSONObject)reCustomerJson.get("userCredentials");
+						String password = json.get("password")==null?"":json.get("password").toString();
+						customerService.updateTenantId(customer.getId(), tenantId,password);
 					}
 				}
 			}
 			
-			List<Subscription> subscriptionList = ordersService.getSubscription(id);
+			List<OrdersDetail> ordersDetailList = ordersService.getOrdersDetail(id);
 			JSONObject orderJson = new JSONObject();
 			orderJson.put("referenceCustomerId", tenantId);
 			orderJson.put("billingCycle", orders.getBillingCycle());
 			orderJson.put("creationDate", null);
 			orderJson.put("attributes", "'objectType': 'order'");
 			JSONArray jsonArr = new JSONArray();  
-			for(int i=0;i<subscriptionList.size();i++){
-				Subscription subscription = subscriptionList.get(i);
-				JSONObject subscriptionJson = new JSONObject();
-				subscriptionJson.put("lineItemNumber", i);
-				subscriptionJson.put("offerId", subscription.getOfferId());
-				subscriptionJson.put("friendlyName", subscription.getOfferName());
-				subscriptionJson.put("quantity", subscription.getQuantity());
+			for(int i=0;i<ordersDetailList.size();i++){
+				OrdersDetail ordersDetail = ordersDetailList.get(i);
+				JSONObject ordersDetailJson = new JSONObject();
+				ordersDetailJson.put("lineItemNumber", i);
+				ordersDetailJson.put("offerId", ordersDetail.getOfferId());
+				ordersDetailJson.put("friendlyName", ordersDetail.getOfferName());
+				ordersDetailJson.put("quantity", ordersDetail.getQuantity());
 				//此处需要验证MPNID是否有效
 				if(orders.getMpnId()!=null){
-					JSONObject json = getMpnId(access_token,orders.getMpnId());
+					JSONObject json = RestfulUtil.getMpnId(access_token,orders.getMpnId());
 					if(json.get("responseCode").toString().startsWith("2")){
-						subscriptionJson.put("partnerIdOnRecord",orders.getMpnId());
+						ordersDetailJson.put("partnerIdOnRecord",orders.getMpnId());
 					}
 				}
-				subscriptionJson.put("attributes", "'objectType': 'orderLineItems'");
-				jsonArr.add(subscriptionJson);
+				ordersDetailJson.put("attributes", "'objectType': 'orderLineItems'");
+				jsonArr.add(ordersDetailJson);
 			}
 			orderJson.put("lineItems", jsonArr);
 			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/orders";
@@ -368,45 +383,69 @@ public class OrdersController {
 
 				for (Object obj : orderArr){
 					JSONObject o = (JSONObject) obj;
-					Subscription newSubscription = new Subscription();
-					newSubscription.setSubscriptionId(o.getString("subscriptionId"));
-					newSubscription.setOfferId(o.getString("offerId"));
-					newSubscription.setOrdersId(Integer.valueOf(id));
-					ordersService.updateSubscription(newSubscription);
+					OrdersDetail newOrdersDetail = new OrdersDetail();
+					newOrdersDetail.setSubscriptionId(o.getString("subscriptionId"));
+					newOrdersDetail.setOfferId(o.getString("offerId"));
+					newOrdersDetail.setOrdersId(Integer.valueOf(id));
+					ordersService.updateOrdersDetail(newOrdersDetail);
+					
+					if("1".equals(orders.getType())){//如果是续订
+						
+					}else{
+						//将数据写入订阅信息表
+						for(int i=0;i<ordersDetailList.size();i++){
+							OrdersDetail ordersDetail = ordersDetailList.get(i);
+							if(id.equals(ordersDetail.getOrdersId())&&o.getString("offerId").equals(ordersDetail.getOfferId())){
+								Subscription subscription = new Subscription();
+								subscription.setDetailId(ordersDetail.getId());
+								subscription.setOfferId(ordersDetail.getOfferId());
+								subscription.setOfferName(ordersDetail.getOfferName());
+								subscription.setQuantity(ordersDetail.getQuantity());
+								subscription.setEffectTime(new Date());
+								subscription.setRenew(0);
+								subscription.setBillingCycle(ordersDetail.getBillingCycle());
+								subscription.setSubscriptionId(o.getString("subscriptionId"));
+								subscription.setMpnId(orders.getMpnId());
+								subscription.setReseller(orders.getReseller());
+								subscription.setCreateUser(ordersDetail.getCreateUser());
+								ordersService.insertSubscription(subscription);
+							}
+						}
+					}
 				}
 			}
-		}else if("0".equals(opinion)){
+			tmpOrders.setEffectTime(new Date());
+		}else if("0".equals(opinion)){//审核不通过，退回。
 			tmpOrders.setStatus("3");
 		}
-		
+
 		ordersService.updateOrders(tmpOrders);
         return "redirect:listOrders.html?flag=audit";
 	}
 
 	/**
 	 * 根据订单Id查询订阅信息，并对订阅数据进行重新组装。
-	 * 组装格式HashMap(key:parentName,value:List<Subscription>)
+	 * 组装格式HashMap(key:parentName,value:List<OrdersDetail>)
 	 * @param id
 	 * @return
 	 */
-	private Map<String, List<Subscription>> getSubscriptionMap( String id){
-		List<Subscription> subscriptionList = ordersService.getSubscription(id);
-		Map<String, List<Subscription>> subscriptionMap = new HashMap<>();
-		for (Subscription subscription : subscriptionList) {
-			List<Subscription> tempList = subscriptionMap.get(subscription.getParentName());
+	private Map<String, List<OrdersDetail>> getOrdersDetailMap( String id){
+		List<OrdersDetail> ordersDetailList = ordersService.getOrdersDetail(id);
+		Map<String, List<OrdersDetail>> ordersDetailMap = new HashMap<>();
+		for (OrdersDetail ordersDetail : ordersDetailList) {
+			List<OrdersDetail> tempList = ordersDetailMap.get(ordersDetail.getParentName());
 			//如果取不到数据,那么直接new一个空的ArrayList
 			if (tempList == null) {
 				tempList = new ArrayList<>();
-				tempList.add(subscription);
-				subscriptionMap.put(subscription.getParentName(), tempList);
+				tempList.add(ordersDetail);
+				ordersDetailMap.put(ordersDetail.getParentName(), tempList);
 			}else {
-				//某个subscriptionMap之前已经存放过了,则直接追加数据到原来的List里
-				tempList.add(subscription);
+				//某个ordersDetailMap之前已经存放过了,则直接追加数据到原来的List里
+				tempList.add(ordersDetail);
 			}
 		}
-		return subscriptionMap;
+		return ordersDetailMap;
 	}
-	
 	
 	/**
 	 * 判断域名是否可用
@@ -422,7 +461,7 @@ public class OrdersController {
 			access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
 			session.setAttribute(Const.ACCESS_TOKEN, access_token);		
 		}
-		JSONObject object = getMpnId(access_token,mpnId);
+		JSONObject object = RestfulUtil.getMpnId(access_token,mpnId);
 		
 		PrintWriter out;
 		try {
@@ -435,13 +474,161 @@ public class OrdersController {
 			e.printStackTrace();
 		}
     }
+
+	/**
+	 * 
+	 * @param request
+	 * @param model
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping(value="/querySubscription")
+	public String querySubscription(HttpServletRequest request,Model model,Page page) {
+		HttpSession session = request.getSession();
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		
+		HashMap<String, Object> paraMap = new HashMap<String, Object>();
+		String customerId = request.getParameter("customerId")==null?"":request.getParameter("customerId");
+		
+		paraMap.put("page", page);
+		paraMap.put("customerId", customerId);
+		if(user!=null&&user.getRoleId()!=2){
+			paraMap.put("createUser", user.getLoginname());
+		}
+		List<Object> subscriptionList = ordersService.listSubscription(paraMap);
+		
+		model.addAttribute("subscriptionList", subscriptionList);
+		model.addAttribute("page", page);
+		return "orders/subscription_list";
+	}
 	
-	public JSONObject getMpnId(String access_token,String mpnId){
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/profiles/mpn?mpnId="+mpnId; 
-		String method = "GET";
-		Map<String, String> paramHeader = new HashMap<String, String>();
-		paramHeader.put("Accept", "application/json");
-		paramHeader.put("Authorization",  "Bearer "+access_token);
-		return  RestfulUtil.getRestfulData(targetURL,method,paramHeader,null);
+	/**
+	 * 初始化添加订阅
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/forAdd")
+	public String forAdd(Model model,String customerId,HttpSession session){
+
+		List<PubCode> billingList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
+		String isTrial = null;
+		User user= (User)session.getAttribute(Const.SESSION_USER);
+		if(user!=null&&user.getRoleId()!=2){
+			isTrial = "0";
+		}
+		List<Offer> listParentOffer = offerService.listOfferByLevel(1,isTrial);
+		List<Offer> offerList = new ArrayList<Offer>();
+		for(Offer offer:listParentOffer){
+			String id = offer.getOfferId();
+			offer.setSubOffer(offerService.listOfferByParent(id));
+			offerList.add(offer);
+		}
+
+		model.addAttribute("billingList", billingList);
+		model.addAttribute("offerList", offerList);
+		model.addAttribute("flag", "new");
+		model.addAttribute("roleId", user==null?null:user.getRoleId());
+		model.addAttribute("customerId", customerId);
+		return "orders/orders_add";
+	}
+	
+	
+	/**
+	 * 修改订单信息
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/forEdit")
+	public String forEdit(Model model,String ordersId,HttpSession session){
+		
+		Orders orders = ordersService.getOrdersById(ordersId);
+		List<OrdersDetail> ordersDetailList = ordersService.getOrdersDetail(ordersId);
+		Map<String, String> ordersDetailMap = new HashMap<>();
+		for (OrdersDetail ordersDetail : ordersDetailList) {
+			ordersDetailMap.put(ordersDetail.getOfferId(), ordersDetail.getQuantity());
+		}
+		List<PubCode> billingList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
+		String isTrial = null;
+		User user= (User)session.getAttribute(Const.SESSION_USER);
+		if(user!=null&&user.getRoleId()!=2){
+			isTrial = "0";
+		}
+		List<Offer> listParentOffer = offerService.listOfferByLevel(1,isTrial);
+		List<Offer> offerList = new ArrayList<Offer>();
+		for(Offer offer:listParentOffer){
+			String id = offer.getOfferId();
+			offer.setSubOffer(offerService.listOfferByParent(id));
+			offerList.add(offer);
+		}
+
+		model.addAttribute("billingList", billingList);
+		model.addAttribute("offerList", offerList);
+		model.addAttribute("ordersDetailMap", ordersDetailMap);
+		model.addAttribute("flag", "edit");
+		model.addAttribute("customerId", orders.getCustomerId());
+		model.addAttribute("ordersId", orders.getId());
+		model.addAttribute("roleId", user==null?null:user.getRoleId());
+		return "orders/orders_add";
+	}
+	
+	/**
+	 * 保存订单信息（如果用户不存在，则先保存用户信息）
+	 * @param orders
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value="/renewOrders")
+	public ModelAndView renewOrders(String detailId,HttpSession session,HttpServletRequest req){
+		
+		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
+		OrdersDetail ordersDetail = ordersService.selectOrdersDetail(detailId);
+		Orders orders = ordersService.getOrdersById(ordersDetail.getOrdersId().toString());
+		Customer customer = customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
+		
+		//新建orders
+		orders.setId(null);
+		Date day=new Date();
+		String maxNo = ordersService.getMaxOrdersNo(day);
+		String ordersNo;
+		if(maxNo==null||"".equals(maxNo)){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			ordersNo = "ORDER-VSTECS-"+ sdf.format(day)+"00001";
+		}else{
+			Long num = Long.valueOf(maxNo.substring(maxNo.length()-13))+1;
+			ordersNo = "ORDER-VSTECS-"+num;
+		}
+		
+		orders.setOrdersNo(ordersNo);
+		orders.setStatus("0");//0:新增;1:已提交;2:已审核。
+		orders.setCreateTime(day);
+		orders.setCreateUser(userId);
+		orders.setType("1");//续订
+		ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
+
+		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
+		//新建订单明细
+		ordersDetail.setOriginalId(detailId);
+		ordersDetail.setId(null);
+		ordersDetail.setOrdersId(orders.getId());
+		ordersDetail.setBillingCycle(orders.getBillingCycle());
+		ordersDetail.setCreateUser(userId);
+		ordersDetailList.add(ordersDetail);
+		ordersService.insertOrdersDetail(ordersDetailList);
+		
+		//跳转至付款信息界面
+		ModelAndView mv = new ModelAndView();
+		orders.setCustomer(customer);
+		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(orders.getId().toString());
+		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
+		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
+		mv.addObject("orders", orders);
+		mv.addObject("ordersDetailMap", ordersDetailMap);
+		mv.addObject("paymentList", paymentList);
+		mv.addObject("statusMap", statusMap);
+		mv.addObject("billingCycleMap", billingCycleMap);
+		//返回订单信息
+		mv.setViewName("orders/orders_detail");
+		return mv;
 	}
 }

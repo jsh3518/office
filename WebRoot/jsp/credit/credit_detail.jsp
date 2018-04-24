@@ -13,16 +13,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <title>Office订单管理系统</title>
 <style type="text/css">
 	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
-	.center{width:100%;margin-top:10px; height:415px;background: url(images/login_bg.jpg);}
+	.center{width:100%;margin-top:10px; height:405px;background: url(images/login_bg.jpg);}
 	.title{text-align:left;font-family:Arial,Helvetica,sans-serif;font-size:14px;height:30px;line-height:30px;color:#666666;font-weight:bold;}
-	.info{font-family:Arial,Helvetica,sans-serif;font-size:13px;height:30px;line-height:20px;color:#333333;float: left;}
-	.select{width:100px;height:25px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
+	.info{font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom: 20px}
+	.select{width:200px;height:25px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-left:15px;cursor: pointer;text-align: center}
 	.left{width:100px;vertical-align:middle;text-align:right; color:#262626;float:left;height:20px;}
-	.right{width:200px;height:30px;vertical-align:middle;text-align: left;float:left;}
+	.right{width:200px;height:20px;vertical-align:middle;text-align: left;float:left;}
 	.input{width:200px;height:20px;align:center;vertical-align:middle;font-size:13px;border:1px solid #ccc;border-radius:4px;}
 	.readonly{color:#222;background-color:#D4E8E3;}
-	.error{float: left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
+	.error{float: left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:8px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -30,7 +30,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <div style="width:850px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
 		<form action="credit/editCredit.html" method="post" name="creditForm" onsubmit="return check();">
-			<fieldset style="margin-top: 10px">
+			<fieldset style="margin-top: 20px">
 				<legend>代理商信息</legend>
 				<div class="info">
 					<input style="display: none" id="agentId" name="agentId" value="${agent.userId }"/>
@@ -77,23 +77,31 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="left">信用额度(元)<font color="red">*</font>：</label>
 					<div class="right">
-						<div id="creditLineDiv" style="float: left;"><input type="text" id="creditLine" name="creditLine" class="input" style="width: 100px" value="${credit.creditLine }"></div>
+						<input type="text" id="creditLine" name="creditLine" class="input" value="${credit.creditLine }">
 					</div>
 				</div>
 				<div class="info">
 					<label class="left">账期<font color="red">*</font>：</label>
-					<div class="right" id="unitDiv">
-						<input type="text" id="account" name="account" class="input" style="width: 50px" value="${credit.account }">
-						<select name="unit" id="unit" class="select">
-							<option value="">请选择</option>
-							<c:forEach items="${unitList}" var="timeUnit">
-								<option <c:if test="${timeUnit.code == credit.unit}"> selected="selected"</c:if> value="${timeUnit.code }">${timeUnit.name}</option>
-							</c:forEach>
-						</select>
+					<div class="right">
+						<div  id="unitDiv">
+							<input type="text" id="account" name="account" class="input" style="width: 73px" value="${credit.account }">
+							<select name="unit" id="unit" class="select" style="width: 120px">
+								<option value="">请选择</option>
+								<c:forEach items="${unitList}" var="timeUnit">
+									<option <c:if test="${timeUnit.code == credit.unit}"> selected="selected"</c:if> value="${timeUnit.code }">${timeUnit.name}</option>
+								</c:forEach>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="info">
+					<label class="left">折扣：</label>
+					<div class="right">
+						<input type="text" id="discount" name="discount" class="input" style="width: 100px" value="${credit.discount }">&nbsp;折
 					</div>
 				</div>
 			</fieldset>
-			<div class="info" style="margin-top: 5px">
+			<div class="info" style="margin-top: 10px">
 				<input type="submit" name="submitBtn" id="submitBtn" value="确认" class="btn"/>
 				<input type="button" name="returnBtn" id="returnBtn" value="返回" class="btn" onclick="forReturn()"/>
 			</div>
@@ -132,9 +140,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		}
 		
 		function valCreditLine(){
-			$("#creditLineDiv").siblings('.error').remove();
+			$("#creditLine").siblings('.error').remove();
 			if($("#creditLine").val() ==""){
-				$("#creditLineDiv").after('<div class="error">请输入信用额度！</div>');
+				$("#creditLine").after('<div class="error">请输入信用额度！</div>');
 				con = 0;
 			}
 		}

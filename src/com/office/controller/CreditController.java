@@ -25,7 +25,7 @@ public class CreditController {
 	private UserService userService;
 	@Autowired
 	private PubCodeService pubCodeService;
-	
+
 	private static Logger logger = Logger.getLogger(CreditController.class);//输出Log日志
 	/**
 	 * 显示代理商信用列表

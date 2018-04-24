@@ -76,6 +76,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	</div>
 </div>
 	<script type="text/javascript">
+	//如果是session过期后跳转至登入界面，则需要重新刷新一下父层
+	if($('#mainFrame', parent.document).length >0){
+		parent.location = window.location;
+	}
 		var errInfo = "${errInfo}";
 		$(document).ready(function(){
 			changeCode();

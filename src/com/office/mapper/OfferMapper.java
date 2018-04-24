@@ -2,14 +2,15 @@ package com.office.mapper;
 
 import java.util.List;
 
-import com.office.entity.Customer;
+import org.apache.ibatis.annotations.Param;
+
 import com.office.entity.Offer;
 
 public interface OfferMapper  {
 
-	List<Offer> listOfferByLevel(int level);
+	List<Offer> listOfferByLevel(@Param("level")int level,@Param("isTrial")String isTrial);
 	
 	List<Offer> listOfferByParent(String parent);
 	
-	void insertCustomer(Customer customer);
+	List<Offer> listPageOffer(Offer offer);
 }

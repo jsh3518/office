@@ -23,7 +23,7 @@ public class LoginHandlerInterceptor extends HandlerInterceptorAdapter{
 			if(user!=null){
 				return true;
 			}else{
-				response.sendRedirect(request.getContextPath()+"/login.html");
+				response.sendRedirect(request.getContextPath()+"/logout.html");
 				return false;
 			}
 		}

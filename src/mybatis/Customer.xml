@@ -40,13 +40,13 @@
 		<if test="companyName!=null and companyName!=''">
 			and u.companyname like "%"#{companyName}"%"
 		</if>
-		<if test="domain!=null and domain!=0">
+		<if test="domain!=null and domain!=''">
 			and u.domain like "%"#{domain}"%"
 		</if>
 	</select>
 
 	<select id="selectCustomerById" resultMap="customerResultMap">
-		select u.id,u.companyname,u.country,u.province,u.city,u.region,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName, u.address,u.postalcode,u.email,u.firstname,u.lastname,u.phonenumber,u.domain,u.createtime,u.createuser
+		select u.*,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName
 			from customer u
 			left join organ p on u.province = p.orgid and p.level = 1 and p.valid = 1
 			left join organ c on u.city = c.orgid and c.level = 2 and c.valid = 1
@@ -58,7 +58,11 @@
 		insert customer (<include refid="customerColumns"/>) values (#{companyName},#{country},#{province},#{city},#{region},#{address},#{postalCode},#{email},#{firstName},#{lastName},#{phoneNumber},#{domain},#{domain1},#{domain2},#{status},#{tenantId},#{createTime},#{createUser})
 	</insert>
 	
+	<update id="updateCustomer" parameterType="Customer">
+		update customer set companyname=#{companyName},country=#{country},province=#{province},city=#{city},region=#{region},address=#{address},postalcode=#{postalCode},email=#{email},firstname=#{firstName},lastname=#{lastName},domain=#{domain},phonenumber=#{phoneNumber} where id=#{id}
+	</update>
+	
 	<update id="updateTenantId" parameterType="int">
-		update customer set tenantid=#{tenantId} where id=#{id}
+		update customer set tenantid=#{tenantId},password=#{password} where id=#{id}
 	</update>
 </mapper>

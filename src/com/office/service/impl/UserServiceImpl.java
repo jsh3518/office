@@ -11,12 +11,10 @@ public class UserServiceImpl implements UserService {
 	private UserMapper userMapper;
 	
 	public User getUserById(Integer userId) {
-		// TODO Auto-generated method stub
 		return userMapper.getUserById(userId);
 	}
 
 	public boolean insertUser(User user) {
-		// TODO Auto-generated method stub
 		int count = userMapper.getCountByName(user.getLoginname());
 		if(count>0){
 			return false;
@@ -36,7 +34,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public void updateUser(User user) {
-		// TODO Auto-generated method stub
 		userMapper.updateUser(user);
 	}
 
@@ -58,7 +55,6 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public User getUserByNameAndPwd(String loginname, String password) {
-		// TODO Auto-generated method stub
 		User user = new User();
 		user.setLoginname(loginname);
 		user.setPassword(password);
@@ -78,26 +74,29 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public User getUserAndRoleById(Integer userId) {
-		// TODO Auto-generated method stub
 		return userMapper.getUserAndRoleById(userId);
 	}
 
 	public void updateLastLogin(User user) {
-		// TODO Auto-generated method stub
 		userMapper.updateLastLogin(user);
 	}
 
 	public List<User> listAllUser() {
-		// TODO Auto-generated method stub
 		return userMapper.listAllUser();
 	}
 	
 	public List<User> getUsers(User user) {
-		// TODO Auto-generated method stub
 		return userMapper.getUsers(user);
 	}
 	
 	public void updateUserStatus(User user){
 		userMapper.updateUserStatus(user);
+	}
+
+	public void updatePassword(Integer userId, String password) {
+		User user = new User();
+		user.setUserId(userId);
+		user.setPassword(password);
+		userMapper.updateUser(user);
 	}
 }

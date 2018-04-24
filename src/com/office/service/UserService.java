@@ -34,4 +34,6 @@ public interface UserService {
 	List<User> getUsers(User user);
 	
 	void updateUserStatus(User user);
+	
+	void updatePassword(Integer userId,String password);
 }

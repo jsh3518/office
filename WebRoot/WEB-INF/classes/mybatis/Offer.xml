@@ -2,20 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.OfferMapper">
-	<sql id="offerColumns">offerid,offername,parent,level,sort,istrial</sql>
+	<sql id="offerColumns">offerid,offername,parent,level,mininum,maxinum,sort,istrial,valid</sql>
 
 	<resultMap type="Offer" id="offerResultMap">
 		<id column="offerid" property="offerId"/>
 		<result column="offername" property="offerName"/>
 		<result column="parent" property="parent"/>
 		<result column="level" property="level"/>
+		<result column="mininum" property="mininum"/>
+		<result column="maxinum" property="maxinum"/>
 		<result column="sort" property="sort"/>
 		<result column="istrial" property="isTrial"/>
+		<result column="valid" property="valid"/>
 	</resultMap>
 	
-	<select id="listOffer" resultMap="offerResultMap">
+	<select id="listPageOffer" resultMap="offerResultMap">
 		select * from offer where 1=1
-		<if test="offerId!=null and offerId!=0">
+		<if test="offerId!=null and offerId!=''">
 			and offerid = #{offerId}
 		</if>
 		<if test="offerName!=null and offerName!=''">
@@ -30,19 +33,29 @@
 		<if test="istrial!=null and istrial!=''">
 			and istrial = #{isTrial}
 		</if>
+		<if test="valid!=null and valid!=''">
+			and valid = #{valid}
+		</if>
 		order by sort
 	</select>
 	
 	<select id="listOfferByLevel" resultMap="offerResultMap">
-		select o.offerid,o.offername,o.parent,o.level,o.sort,o.istrial
+		select <include refid="offerColumns"/>
 		from offer o 
-		where o.level = #{level} order by sort
+		where valid = 1
+		<if test="level!=null and level!=0">
+			and level = #{level}
+		</if>
+		<if test="isTrial!=null and isTrial!=''">
+			and istrial = #{isTrial}
+		</if>
+		order by sort
 	</select>
 	
 	<select id="listOfferByParent" resultMap="offerResultMap">
-		select o.offerid,o.offername,o.parent,o.level,o.sort,o.istrial
+		select <include refid="offerColumns"/>
 		from offer o 
-		where o.parent = #{parent}
+		where o.parent = #{parent} and valid = 1
 	</select>
 
 </mapper>

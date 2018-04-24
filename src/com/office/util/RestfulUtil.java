@@ -106,6 +106,10 @@ public class RestfulUtil {
 		return resultJson;
 	}
 	
+	/**
+	 * 获取伟仕总代Token
+	 * @return
+	 */
 	public static JSONObject getToken(){
 		String url = "https://login.chinacloudapi.cn/vstecs.partner.onmschina.cn/oauth2/token?api-version=1.0";
 		String method = "POST";
@@ -126,5 +130,20 @@ public class RestfulUtil {
 		}else{
 			return new JSONObject();
 		}
+	}
+	
+	/**
+	 * 根据mpnId获取代理商信息
+	 * @param access_token
+	 * @param mpnId
+	 * @return
+	 */
+	public static JSONObject getMpnId(String access_token,String mpnId){
+		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/profiles/mpn?mpnId="+mpnId; 
+		String method = "GET";
+		Map<String, String> paramHeader = new HashMap<String, String>();
+		paramHeader.put("Accept", "application/json");
+		paramHeader.put("Authorization",  "Bearer "+access_token);
+		return getRestfulData(targetURL,method,paramHeader,null);
 	}
 }

@@ -1,18 +1,22 @@
 package com.office.entity;
 
+import java.util.Date;
+
 public class Subscription {
 	
 	private Integer id;//订阅id
-	private Integer ordersId;//订单Id
+	private Integer customerId;//客户Id
+	private Integer detailId;//订单明细Id
 	private String offerId;//Office产品Id
 	private String offerName;//Office产品名称
 	private String quantity;//坐席数量
 	private String billingCycle;//收费周期
 	private String subscriptionId;//O365订阅Id
-	private String amount;//订阅数量
+	private Date effectTime;//生效时间
+	private Integer renew;//续订时长（单位：月）
+	private String mpnId;//经销商Id
+	private String reseller;//经销商名称
 	private String createUser;//创建者
-	private String parent;//产品父级Id
-	private String parentName;//产品父级名称
 	
 	public Integer getId() {
 		return id;
@@ -21,6 +25,12 @@ public class Subscription {
 		this.id = id;
 	}
 	
+	public Integer getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(Integer customerId) {
+		this.customerId = customerId;
+	}
 	public String getOfferId() {
 		return offerId;
 	}
@@ -45,11 +55,11 @@ public class Subscription {
 	public void setBillingCycle(String billingCycle) {
 		this.billingCycle = billingCycle;
 	}
-	public Integer getOrdersId() {
-		return ordersId;
+	public Integer getDetailId() {
+		return detailId;
 	}
-	public void setOrdersId(Integer ordersId) {
-		this.ordersId = ordersId;
+	public void setDetailId(Integer detailId) {
+		this.detailId = detailId;
 	}
 	public String getSubscriptionId() {
 		return subscriptionId;
@@ -57,29 +67,35 @@ public class Subscription {
 	public void setSubscriptionId(String subscriptionId) {
 		this.subscriptionId = subscriptionId;
 	}
-	public String getAmount() {
-		return amount;
+	public Date getEffectTime() {
+		return effectTime;
 	}
-	public void setAmount(String amount) {
-		this.amount = amount;
+	public void setEffectTime(Date effectTime) {
+		this.effectTime = effectTime;
+	}
+	public Integer getRenew() {
+		return renew;
+	}
+	public void setRenew(Integer renew) {
+		this.renew = renew;
+	}
+	public String getMpnId() {
+		return mpnId;
+	}
+	public void setMpnId(String mpnId) {
+		this.mpnId = mpnId;
+	}
+	public String getReseller() {
+		return reseller;
+	}
+	public void setReseller(String reseller) {
+		this.reseller = reseller;
 	}
 	public String getCreateUser() {
 		return createUser;
 	}
 	public void setCreateUser(String createUser) {
 		this.createUser = createUser;
-	}
-	public String getParent() {
-		return parent;
-	}
-	public void setParent(String parent) {
-		this.parent = parent;
-	}
-	public String getParentName() {
-		return parentName;
-	}
-	public void setParentName(String parentName) {
-		this.parentName = parentName;
 	}
 
 }

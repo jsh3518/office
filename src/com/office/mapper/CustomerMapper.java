@@ -14,5 +14,7 @@ public interface CustomerMapper  {
 	
 	public Customer selectCustomerById(String id);
 	
-	public void updateTenantId(@Param("id")int id,@Param("tenantId")String tenantId);
+	public void updateCustomer(Customer customer);
+	
+	public void updateTenantId(@Param("id")int id,@Param("tenantId")String tenantId,@Param("password")String password);
 }

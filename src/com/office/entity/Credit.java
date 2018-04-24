@@ -6,8 +6,9 @@ public class Credit {
 	private String agentName;//代理商名称
 	private String creditRating;//信用等级
 	private String creditLine;//信用额度（单位：元）
-	private Integer account;//账期
+	private String account;//账期
 	private String unit;//账期单位
+	private String discount;//折扣
 	private String valid;//是否有效
 	
 	private Page page;//分页
@@ -42,10 +43,10 @@ public class Credit {
 	public void setCreditLine(String creditLine) {
 		this.creditLine = creditLine;
 	}
-	public Integer getAccount() {
+	public String getAccount() {
 		return account;
 	}
-	public void setAccount(Integer account) {
+	public void setAccount(String account) {
 		this.account = account;
 	}
 	public String getUnit() {
@@ -53,6 +54,12 @@ public class Credit {
 	}
 	public void setUnit(String unit) {
 		this.unit = unit;
+	}
+	public String getDiscount() {
+		return discount;
+	}
+	public void setDiscount(String discount) {
+		this.discount = discount;
 	}
 	public String getValid() {
 		return valid;

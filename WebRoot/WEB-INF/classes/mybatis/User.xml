@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.UserMapper">
-	<sql id="userColumns">loginname,username,password,rights,status,role_id,contact,phone,email,provincialid,cityid,countyid,address,post,tax,file,type</sql>
+	<sql id="userColumns">loginname,username,password,rights,status,role_id,contact,phone,email,provincialid,cityid,countyid,address,post,tax,file,type,mpnid</sql>
 
 	<resultMap type="User" id="userAndRoleResultMap">
 		<id column="user_id" property="userId"/>
@@ -14,26 +14,31 @@
 		<result column="contact" property="contact"/>
 		<result column="phone" property="phone"/>
 		<result column="email" property="email"/>
+		<result column="provincialId" property="provincialId"/>
+		<result column="cityId" property="cityId"/>
+		<result column="countyId" property="countyId"/>
 		<result column="address" property="address"/>
 		<result column="post" property="post"/>
 		<result column="tax" property="tax"/>
 		<result column="file" property="file"/>
 		<result column="type" property="type"/>
+		<result column="role_id" property="roleId"/>
 		<result column="last_login" property="lastLogin"/>
-		<association property="role" column="role_id" javaType="Role">
+		<result column="mpnid" property="mpnId"/>
+		<association property="role" javaType="Role">
 			<id column="role_id" property="roleId"/>
 			<result column="role_name" property="roleName"/>
 			<result column="role_rights" property="rights"/>
 		</association>
-		<association property="province" column="provincialId" javaType="Organ">
+		<association property="province" javaType="Organ">
 			<id column="proId" property="orgId"/>
 			<result column="proName" property="orgName"/>
 		</association>
-		<association property="city" column="cityId" javaType="Organ">
+		<association property="city" javaType="Organ">
 			<id column="cityId" property="orgId"/>
 			<result column="cityName" property="orgName"/>
 		</association>
-		<association property="county" column="countyId" javaType="Organ">
+		<association property="county" javaType="Organ">
 			<id column="countyId" property="orgId"/>
 			<result column="countyName" property="orgName"/>
 		</association>
@@ -57,17 +62,18 @@
 		<result column="file" property="file"/>
 		<result column="type" property="type"/>
 		<result column="role_id" property="roleId"/>
+		<result column="mpnid" property="mpnId"/>
 	</resultMap>
 	
 	<select id="listAllUser" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.city,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.city,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id
 		where 1=1
 	</select>
 	
 	<select id="listPageUser" parameterType="User" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.loginname,u.password,u.rights as user_rights,r.role_id,r.role_name ,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
 		where 1=1
@@ -86,7 +92,7 @@
 	</select>
 	
 	<select id="getUsers" parameterType="User" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.rights as user_rights,u.role_id,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
+		select u.user_id,u.username,u.loginname,u.rights as user_rights,u.role_id,u.password,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid,
 			p.orgid proid,p.orgname proname,c.orgid cityid,c.orgname cityname,d.orgid countyid,d.orgname countyname 
 		from tb_user u
 		left join organ p on u.provincialid = p.orgid and p.level = 1 and p.valid = 1
@@ -111,7 +117,7 @@
 	</select>
 	
 	<select id="getUserInfo" parameterType="User" resultMap="userResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.rights,u.role_id,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.*
 		from tb_user u
 		where 1=1
 		<if test="loginname!=null">
@@ -126,7 +132,7 @@
 	</select>
 	
 	<select id="getUserById" parameterType="int" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.loginname,u.password,u.rights,u.role_id,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,
+		select u.user_id,u.username,u.loginname,u.password,u.rights,u.role_id,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid,
 			p.orgid proid,p.orgname proname,c.orgid cityid,c.orgname cityname,d.orgid countyid,d.orgname countyname
 		from tb_user u 
 		left join organ p on u.provincialid = p.orgid and p.level = 1 and p.valid = 1
@@ -136,7 +142,7 @@
 	</select>
 	
 	<select id="getUserAndRoleById" parameterType="int" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights ,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type
+		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights ,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
 		where u.user_id=#{userId}
@@ -170,18 +176,62 @@
 	</select>
 	
 	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="userId">
-		insert tb_user (<include refid="userColumns"/>) values (#{loginname},#{username},#{password},#{rights},0,#{roleId},#{contact},#{phone},#{email},#{provincialId},#{cityId},#{countyId},#{address},#{post},#{tax},#{file},#{type})
+		insert tb_user (<include refid="userColumns"/>) values (#{loginname},#{username},#{password},#{rights},0,#{roleId},#{contact},#{phone},#{email},#{provincialId},#{cityId},#{countyId},#{address},#{post},#{tax},#{file},#{type},#{mpnId})
 	</insert>
 	
 	<update id="updateUser" parameterType="User">
-		update tb_user set 
-		loginname=#{loginname},
-		username=#{username},
-		password=#{password},
-		rights=#{rights},
-		status=#{status},
-		role_id=#{roleId},
-		last_login=#{lastLogin} 
+		update tb_user set user_id=#{userId}
+		<if test="loginname!=null and loginname!=''">
+			,loginname = #{loginname}
+		</if>
+		<if test="username!=null and username!=''">
+			,username=#{username}
+		</if>
+		<if test="password!=null and password!=''">
+			,password=#{password}
+		</if>
+		<if test="provincialId!=null">
+			,provincialid=#{provincialId}
+		</if>
+		<if test="cityId!=null">
+			,cityid=#{cityId}
+		</if>
+		<if test="countyId!=null">
+			,countyid=#{countyId}
+		</if>
+		<if test="address!=null">
+			,address=#{address}
+		</if>
+		<if test="rights!=null and rights!=''">
+			,rights=#{rights}
+		</if>
+		<if test="status!=null">
+			,status=#{status}
+		</if>
+		<if test="contact!=null">
+			,contact=#{contact}
+		</if>
+		<if test="phone!=null">
+			,phone=#{phone}
+		</if>
+		<if test="email!=null">
+			,email=#{email}
+		</if>
+		<if test="post!=null">
+			,post=#{post}
+		</if>
+		<if test="tax!=null and tax!=''">
+			,tax=#{tax}
+		</if>
+		<if test="roleId!=null">
+			,role_id=#{roleId}
+		</if>
+		<if test="lastLogin!=null and lastLogin!=''">
+			,last_login=#{lastLogin}
+		</if>
+		<if test="mpnId!=null and mpnId!=''">
+			,mpnid=#{mpnId}
+		</if>
 		where user_id=#{userId}
 	</update>
 	

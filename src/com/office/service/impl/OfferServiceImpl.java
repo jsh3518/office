@@ -24,8 +24,8 @@ public class OfferServiceImpl implements OfferService {
 	 * @param parent
 	 * @return
 	 */
-	public List<Offer> listOfferByLevel(int level) {
-		return offerMapper.listOfferByLevel(level);
+	public List<Offer> listOfferByLevel(int level,String isTrial) {
+		return offerMapper.listOfferByLevel(level,isTrial);
 	}
 	
 	/**

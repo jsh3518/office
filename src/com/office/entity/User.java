@@ -7,7 +7,7 @@ public class User {
 	private String loginname;//登录名
 	private String username;//用户名
 	private String password;//用户密码
-	private String rights;//
+	private String rights;//权限
 	private Integer status;//状态
 	private Integer roleId;//角色ID
 	private String contact;//联系人
@@ -22,10 +22,11 @@ public class User {
 	private String file;//附件
 	private Integer type;//类型
 	private Date lastLogin;//最后登录时间
-	private Role role;//角色
-	private Page page;
 	private Date lastLoginStart;
 	private Date lastLoginEnd;
+	private Role role;//角色
+	private Page page;
+	private String mpnId;//MPNID
 	
 	private Organ province;//地址--省
 	private Organ city;//地址--市
@@ -106,6 +107,12 @@ public class User {
 		this.page = page;
 	}
 
+	public String getMpnId() {
+		return mpnId;
+	}
+	public void setMpnId(String mpnId) {
+		this.mpnId = mpnId;
+	}
 	public String getContact() {
 		return contact;
 	}

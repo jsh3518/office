@@ -74,7 +74,7 @@ public class UserController {
 		List<User> userList = userService.listPageUser(user);
 		List<Role> roleList = roleService.listAllRoles();
 		ModelAndView mv = new ModelAndView();
-		mv.setViewName("users");
+		mv.setViewName("user/users");
 		mv.addObject("userList", userList);
 		mv.addObject("roleList", roleList);
 		mv.addObject("user", user);
@@ -90,7 +90,7 @@ public class UserController {
 	public String toAdd(Model model){
 		List<Role> roleList = roleService.listAllRoles();
 		model.addAttribute("roleList", roleList);
-		return "user_info";
+		return "user/user_info";
 	}
 	
 	
@@ -103,7 +103,7 @@ public class UserController {
 	public String toRegedit(Model model){
 		List<Organ> provinList = organService.listOrganByLevel(1);
 		model.addAttribute("provinList", provinList);
-		return "regist";
+		return "user/user_regist";
 	}
 	
 	/**
@@ -156,7 +156,7 @@ public class UserController {
 		mv.addObject("cityList", cityList);
 		List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
 		mv.addObject("countyList", countyList);
-		mv.setViewName("regist");
+		mv.setViewName("user/user_regist");
 		return mv;
 	}
 	
@@ -200,7 +200,7 @@ public class UserController {
 		List<Role> roleList = roleService.listAllRoles();
 		mv.addObject("user", user);
 		mv.addObject("roleList", roleList);
-		mv.setViewName("user_info");
+		mv.setViewName("user/user_info");
 		return mv;
 	}
 	
@@ -346,7 +346,7 @@ public class UserController {
 		user.setType(1);//用户类型：0,管理员;1,代理商
 		List<User> userList = userService.getUsers(user);
 		ModelAndView mv = new ModelAndView();
-		mv.setViewName("useraudits");
+		mv.setViewName("user/user_list");
 		mv.addObject("userList", userList);
 		mv.addObject("user", user);
 		return mv;
@@ -365,16 +365,16 @@ public class UserController {
 
 		List<Organ> provinList = organService.listOrganByLevel(1);
 		mv.addObject("provinList", provinList);
-		List<Organ> cityList = organService.listOrganByParent(2, user.getProvincialId());
+		List<Organ> cityList = organService.listOrganByParent(2, user.getProvince()==null?"": user.getProvince().getOrgId());
 		mv.addObject("cityList", cityList);
-		List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
+		List<Organ> countyList = organService.listOrganByParent(3,user.getCity()==null?"":user.getCity().getOrgId());
 		mv.addObject("countyList", countyList);
-		mv.setViewName("user_audit");
+		mv.setViewName("user/user_audit");
 		return mv;
 	}
 	
 	/**
-	 * 请求编辑用户页面
+	 * 审核用户（代理商）
 	 * @param userId
 	 * @return
 	 */
@@ -389,5 +389,85 @@ public class UserController {
 		out.write("success");
 		out.flush();
 		out.close();
+	}
+	
+	/**
+	 * 用户明细信息
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/detail")
+	public ModelAndView detail(HttpSession session){
+		ModelAndView mv = new ModelAndView();
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		mv.addObject("user", user);
+
+		List<Organ> provinList = organService.listOrganByLevel(1);
+		mv.addObject("provinList", provinList);
+		if(user!=null){
+			List<Organ> cityList = organService.listOrganByParent(2, user.getProvincialId());
+			mv.addObject("cityList", cityList);
+			List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
+			mv.addObject("countyList", countyList);
+		}
+		mv.setViewName("user/user_detail");
+		return mv;
+	}
+	
+	/**
+	 * 更新用户信息
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value="/updateUser")
+	public String updateUser(HttpSession session,User user,Model model){
+
+		userService.updateUser(user);
+		user = userService.getUserById(user.getUserId());
+		session.setAttribute(Const.SESSION_USER, user);
+		model.addAttribute("user", user);
+		List<Organ> provinList = organService.listOrganByLevel(1);
+		model.addAttribute("provinList", provinList);
+		List<Organ> cityList = organService.listOrganByParent(2, user.getProvincialId());
+		model.addAttribute("cityList", cityList);
+		List<Organ> countyList = organService.listOrganByParent(3,user.getCityId());
+		model.addAttribute("countyList", countyList);	
+		return "user/user_detail";
+	}
+	
+	/**
+	 * 用户密码
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/password")
+	public String password(Model model){
+		return "user/password";
+	}
+	
+	/**
+	 * 更新密码
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/changePassword")
+	public void changePassword(PrintWriter out,HttpSession session,@RequestParam String password,@RequestParam String newPassword){
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		String message = "";
+		try {
+			if(MD5Util.validPassword(password, user.getPassword())){
+				userService.updatePassword(user.getUserId(),MD5Util.getEncryptedPwd(newPassword));
+				message = "success";
+			}else{
+				message = "用户名或密码错误！";
+			}
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			message = "密码修改失败！";
+			e.printStackTrace();
+		}finally {
+			out.write(message);
+			out.flush();
+			out.close();
+		}
 	}
 }

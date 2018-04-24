@@ -19,6 +19,7 @@ import com.office.util.Tools;
 
 public class UserExcelView extends AbstractExcelView{
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void buildExcelDocument(Map<String, Object> model,
 			HSSFWorkbook workbook, HttpServletRequest request,

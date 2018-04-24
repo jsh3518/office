@@ -26,6 +26,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<th>信用等级</th>
 			<th>信用额度（元）</th>
 			<th>账期</th>
+			<th>折扣</th>
 			<th>操作</th>
 		</tr>
 		<c:choose>
@@ -37,6 +38,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<td>${credit.creditRating }</td>
 				<td>${credit.creditLine }</td>
 				<td>${credit.account }${credit.unit }</td>
+				<td>${credit.discount }%</td>
 				<td><a href="javascript:queryCredit(${credit.agentId });">维护</a></td>
 				</tr>
 				</c:forEach>

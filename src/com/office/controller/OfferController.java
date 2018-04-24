@@ -23,12 +23,12 @@ public class OfferController {
 	private OfferService offerService;
 	
 	/**
-	 * 显示用户列表
+	 * 显示产品信息列表
 	 * @param user
 	 * @return
 	 */
 	@RequestMapping(value="/getOffers")
-	public void getOrgans(@RequestParam String parentId,HttpServletResponse response){
+	public void getOffers(@RequestParam String parentId,HttpServletResponse response){
 		List<Offer> listOffer = offerService.listOfferByParent(parentId);
 		JSONArray arr = JSONArray.fromObject(listOffer);
 		PrintWriter out;

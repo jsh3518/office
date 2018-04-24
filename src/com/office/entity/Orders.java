@@ -12,6 +12,7 @@ public class Orders {
 	private Date createTime;//创建时间
 	private Date effectTime;//生效时间
 	private BigDecimal sum;//金额
+	private BigDecimal actualSum;//实际金额
 	private String status;//状态
 	private String mpnId;//经销商Id
 	private String reseller;//经销商名称
@@ -19,6 +20,7 @@ public class Orders {
 	private String payment;//付款方式
 	private String file;//附件
 	private String orderId;//O365订单Id
+	private String type;//订单类型。0:新增;1:续费。
 	
 	private Customer customer;//客户信息
 	
@@ -46,6 +48,12 @@ public class Orders {
 	}
 	public void setSum(BigDecimal sum) {
 		this.sum = sum;
+	}
+	public BigDecimal getActualSum() {
+		return actualSum;
+	}
+	public void setActualSum(BigDecimal actualSum) {
+		this.actualSum = actualSum;
 	}
 	public String getStatus() {
 		return status;
@@ -109,6 +117,12 @@ public class Orders {
 		this.orderId = orderId;
 	}
 	
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 	public Customer getCustomer() {
 		return customer;
 	}

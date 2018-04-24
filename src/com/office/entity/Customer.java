@@ -27,6 +27,7 @@ public class Customer {
 	private String tenantId;//O365客户Id
 	private Date createTime;//创建时间
 	private String createUser;//创建者
+	private String password;//临时密码
 	
 	private Page page;//分页
 	
@@ -168,6 +169,13 @@ public class Customer {
 	public void setCreateUser(String createUser) {
 		this.createUser = createUser;
 	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
 	public Page getPage() {
 		if(page==null)
 			page = new Page();

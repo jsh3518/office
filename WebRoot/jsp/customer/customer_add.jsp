@@ -27,12 +27,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <body>
 <div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
-		<form action="orders/forNew.html" method="post" name="customerForm" onsubmit="return check();">
-			<div class="info" style="text-align:right;margin-top: 15px">
-				<input type="submit" name="registBtn" id="registBtn" value="下一步" class="btn"/>
-				<input type="button" name="backBtn" id="backBtn" value="返回" class="btn" onclick="forBack()"/>
-			</div>
-			<div style="width: 50%;float: left">
+		<form action="customer/addCustomer.html" method="post" name="customerForm" onsubmit="return check();">
+			<div style="width: 50%;float: left;margin-top:15px">
 				<div class="title">
 					公司
 				</div>
@@ -71,7 +67,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						</select>
 						<select name="city" id="city" class="select" onChange="changeOrg('region',this.value)">
 							<option value="">请选择</option>
-							<c:forEach items="${city}" var="organ">
+							<c:forEach items="${cityList}" var="organ">
 								<option <c:if test="${customer.city == organ.orgId}"> selected="selected"</c:if> value="${organ.orgId }">${organ.orgName }</option>
 							</c:forEach>
 						</select>
@@ -90,7 +86,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 			</div>
-			<div style="width: 50%;float: left">
+			<div style="width: 50%;float: left;margin-top:15px">
 				<div class="title">
 					主要联系人
 				</div>
@@ -120,6 +116,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 			</div>
+				<input type="text" name="status" id="status" style="display:none" value="${customer.status }"/>
+			<div class="info" style="width:100%;float: left;margin-left: 25px">
+				<input type="submit" name="saveBtn" id="saveBtn" value="下一步" class="btn"/>
+				<input type="button" name="backBtn" id="backBtn" value="返回" class="btn" onclick="forBack()"/>
+			</div>
 		</form>
 	</div>
 </div>
@@ -137,13 +138,15 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		}
 		
 		function forBack(){
-			window.location="<%=basePath%>default.html";
+			if(confirm("尚未创建新用户，是否确定返回？")){
+				window.location="<%=basePath%>customer.html";
+			}
 		}
 		
 		var con;
 		function check(){
 			con=1;
-			$("#registBtn").attr("disabled",true);
+			$("#saveBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
 			valName();
 			valDomain();
@@ -156,7 +159,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if(con==1){
 				return true;
 			}else{
-				$("#registBtn").attr("disabled",false);
+				$("#saveBtn").attr("disabled",false);
 				$("#backBtn").attr("disabled",false);
 				return false;
 			}
@@ -176,7 +179,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			var domainDiv = $("#domainDiv");
 			domainDiv.siblings('.error').remove();
 			domainDiv.siblings('.message').remove();
-			var reg =/^[0-9a-zA_Z]+$/;
+			var reg =/^[0-9a-zA-Z]+$/;
 		  if($("#domain").val() ==""){
 			  domainDiv.after('<div class="error">请输入域名！</div>');
 			  con = 0;

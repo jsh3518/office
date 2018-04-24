@@ -5,19 +5,23 @@ import com.office.entity.Customer;
 
 public interface CustomerService {
 	/*
-	 * 查询用户列表
+	 * 查询客户列表
 	 */
 	public List<Customer> listCustomer(Customer customer);
 	/*
-	 * 根据id查询用户
+	 * 根据id查询客户
 	 */
 	public Customer selectCustomerById(String id);
 	/*
-	 * 新增用户列表
+	 * 新增客户
 	 */
 	public void insertCustomer(Customer customer);
 	/*
-	 * 更新用户
+	 * 更新客户
 	 */
-	public void updateTenantId(int id,String tenantId);
+	public void updateCustomer(Customer customer);
+	/*
+	 * 更新Office客户Id
+	 */
+	public void updateTenantId(int id,String tenantId,String password);
 }

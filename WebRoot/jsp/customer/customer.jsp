@@ -23,18 +23,20 @@
 			<th>联系人</th>
 			<th>电话号码</th>
 			<th>邮箱</th>
+			<th>操作</th>
 		</tr>
 		<c:choose>
 			<c:when test="${not empty customerList }">
 				<c:forEach items="${customerList }" var="customer"  varStatus="vs">
 					<tr class="main_info">
 						<td>${vs.index+1 }</td>
-						<td>${customer.companyName }</td>
+						<td><a href="javascript:detail(${customer.id },${customer.status });">${customer.companyName }</a></td>
 						<td>${customer.domain }.partner.onmschina.cn</td>
 						<td>${customer.provincialName }${customer.cityName }${customer.regionName }</td>
 						<td>${customer.lastName }${customer.firstName }</td>
 						<td>${customer.phoneNumber }</td>
 						<td>${customer.email }</td>
+						<td><a href="javascript:addSubscription(${customer.id },'${customer.tenantId }');">添加订阅</a> | <a href="javascript:querySubscription(${customer.id });">查看订阅</a></td>
 					</tr>
 				</c:forEach>
 			</c:when>
@@ -53,6 +55,7 @@
 	</div>
 	</form>
 	<script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
+	<script type="text/javascript" src="js/lhgdialog/lhgdialog.min.js?t=self&s=areo_blue"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$(".main_info:even").addClass("main_table_even");
@@ -65,6 +68,46 @@
 		function search(){
 			$("#customerForm").submit();
 		}
+		
+		function detail(customerId,status){
+			var url = "customer/detailCustomer.html?method=detail&customerId="+customerId;
+			if(status==0||status==3){//新增或退回状态客户可编辑
+				url = "customer/detailCustomer.html?method=edit&customerId="+customerId;;
+			}
+			var dg = new $.dialog({
+				title:'客户信息',
+				id:'detail',
+				width:950,
+				height:400,
+				iconTitle:false,
+				cover:true,
+				maxBtn:false,
+				btnBar:false,
+				resize:false,
+				page:url
+				});
+    		dg.ShowDialog();
+		}
+		
+		//查看客户信息
+		function querySubscription1(customerId,status){
+			var url = "customer/detailCustomer.html?method=detail&customerId="+customerId;
+			if(status==0||status==3){//新增或退回状态客户可编辑
+				url = "customer/editCustomer.html?method=edit&customerId="+customerId;;
+			}
+			window.location=url;
+		}
+		
+		//添加订阅
+		function addSubscription(customerId,tenantId){
+			window.location="orders/forAdd.html?customerId="+customerId;
+		}
+		
+		//查看订阅
+		function querySubscription(customerId){
+			window.location="orders/querySubscription.html?customerId="+customerId;
+		}
+		
 	</script>
 </body>
 </html>

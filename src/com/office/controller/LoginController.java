@@ -22,11 +22,11 @@ import com.office.service.MenuService;
 import com.office.service.UserService;
 import com.office.util.Const;
 import com.office.util.MD5Util;
-import com.office.util.RestfulUtil;
 import com.office.util.RightsHelper;
 import com.office.util.Tools;
+//import com.office.util.RestfulUtil;
 
-import net.sf.json.JSONObject;
+//import net.sf.json.JSONObject;
 
 @Controller
 public class LoginController {
@@ -63,7 +63,7 @@ public class LoginController {
 		String errInfo = "";
 		if(Tools.notEmpty(sessionCode) && sessionCode.equalsIgnoreCase(code)){
 
-			//根据用户登录名查询用户列表，如果长度对应1，则存在重复账号；如果长度为0，则查询无结果。
+			//根据用户登录名查询用户列表，如果长度大于1，则存在重复账号；如果长度为0，则查询无结果。
 			List<User> userList = userService.getUserByName(loginname);
 			if(userList.size()>1){
 				errInfo = "存在重复的用户名，请联系系统管理员！";
@@ -116,9 +116,9 @@ public class LoginController {
 		//避免每次拦截用户操作时查询数据库，以下将用户所属角色权限、用户权限限都存入session
 		session.setAttribute(Const.SESSION_ROLE_RIGHTS, roleRights); //将角色权限存入session
 		session.setAttribute(Const.SESSION_USER_RIGHTS, userRights); //将用户权限存入session
-		JSONObject resultJson = RestfulUtil.getToken();
-		String access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
-		session.setAttribute(Const.ACCESS_TOKEN, access_token);
+		//JSONObject resultJson = RestfulUtil.getToken();
+		//String access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
+		//session.setAttribute(Const.ACCESS_TOKEN, access_token);
 		
 		List<Menu> menuList = menuService.listAllMenu();
 		if(Tools.notEmpty(userRights) || Tools.notEmpty(roleRights)){
@@ -156,6 +156,6 @@ public class LoginController {
 		session.removeAttribute(Const.SESSION_USER);
 		session.removeAttribute(Const.SESSION_ROLE_RIGHTS);
 		session.removeAttribute(Const.SESSION_USER_RIGHTS);
-		return "login";
+		return "logout";
 	}
 }

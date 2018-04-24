@@ -15,8 +15,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.header{width:100%;height:20px;background: url(images/login-top-bg.gif) repeat-x;}
 	.center{width:100%;height:532px;background: url(images/login_bg.jpg);}
 	.regist_left{float:left;width:100%;height:100%;background: url(images/login-wel.gif) bottom no-repeat;}
-	.login_title{text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 14px;height:35px;line-height: 35px;color: #666666;font-weight: bold;}
-	.regist_info{font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:35px;line-height: 35px;color: #333333;}
+	.login_title{text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 14px;height:32px;line-height: 32px;color: #666666;font-weight: bold;}
+	.regist_info{font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:32px;line-height: 32px;color: #333333;}
 	.regist_label{margin-left:50px;width:120px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block;text-align: right;}
 	.regist_input{width:250px;height:20px;margin-left:20px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.file{width:250px;height:20px;margin-left:20px;vertical-align: middle;}
@@ -26,7 +26,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.regist_info img{vertical-align: middle;cursor: pointer;}
 	.errInfo{color:red;width:180px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block; }
 	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 25px;color: #666666;}
-	
 	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
@@ -42,42 +41,42 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					新用户注册
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">用户名：</label>
+					<label class="regist_label">用户名<font color="red">*</font></label>
 					<input type="text" name="loginname" id="loginname" class="regist_input" value="${user.loginname }" placeholder="必须是三位以上的英文字母或数字"/>
 					&nbsp;<span id="nameerr" class="errInfo">&nbsp;</span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">密码：</label>
+					<label class="regist_label">密码<font color="red">*</font></label>
 					<input type="password" name="password" id="password" class="regist_input" value="" placeholder="数字和字母组成，六位以上"/>
 					&nbsp;<span id="pwderr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">确认密码：</label>
+					<label class="regist_label">确认密码<font color="red">*</font></label>
 					<input type="password" name="password1" id="password1" class="regist_input" value=""/>
 					&nbsp;<span id="pwderr1" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">公司名称：</label>
+					<label class="regist_label">公司名称<font color="red">*</font></label>
 					<input type="text" name="username" id="username" class="regist_input" value="${user.username }"/>
 					&nbsp;<span id="usererr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">主要联系人：</label>
+					<label class="regist_label">主要联系人<font color="red">*</font></label>
 					<input type="text" name="contact" id="contact" class="regist_input" value="${user.contact }"/>
 					&nbsp;<span id="contacterr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">主要联系人电话号码：</label>
+					<label class="regist_label">主要联系人电话号码<font color="red">*</font></label>
 					<input type="text" name="phone" id="phone" class="regist_input" value="${user.phone }"/>
 					&nbsp;<span id="phoneerr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">主要联系人电子邮箱：</label>
+					<label class="regist_label">主要联系人电子邮箱<font color="red">&nbsp;*</font></label>
 					<input type="text" name="email" id="email" class="regist_input" value="${user.email }"/>
 					&nbsp;<span id="emailerr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">公司地址：</label>
+					<label class="regist_label">公司地址<font color="red">&nbsp;*</font></label>
 					<select name="provincialId" id="provincialId" class="organ_select" style="margin-left: 20px" onChange="changeOrg('cityId',this.value)">
 						<option value="">请选择</option>
 						<c:forEach items="${provinList}" var="organ">
@@ -103,21 +102,26 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					&nbsp;<span id="addresserr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">邮政编码：</label>
+					<label class="regist_label">邮政编码&nbsp;&nbsp;</label>
 					<input type="text" name="post" id="post" class="regist_input" value="${user.post }"/>
 					&nbsp;<span id="posterr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">税号：</label>
+					<label class="regist_label">税号<font color="red">&nbsp;*</font></label>
 					<input type="text" name="tax" id="tax" class="regist_input" value="${user.tax }"/>
 					&nbsp;<span id="taxerr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">上传营业执照扫描件：</label><input type="file" id="buslic" name="buslic" class="file">
+					<label class="regist_label">MPNID&nbsp;&nbsp;</label>
+					<input type="text" name="mpnId" id="mpnId" class="regist_input" value="${user.mpnId }" onblur="valMpnId()"/>
+					&nbsp;<span id="mpnIderr" class="errInfo"></span>
+				</div>
+				<div class="regist_info">
+					<label class="regist_label">上传营业执照扫描件<font color="red">&nbsp;*</font></label><input type="file" id="buslic" name="buslic" class="file">
 					&nbsp;<span id="fileerr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">验证码：</label>
+					<label class="regist_label">验证码<font color="red">&nbsp;*</font></label>
 					<input type="text" name="code" id="code" class="regist_code"/>&nbsp;&nbsp;
 					<img id="codeImg" alt="点击更换" title="点击更换" src=""/>
 					&nbsp;<span id="codeerr" class="errInfo"></span>
@@ -182,6 +186,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$("#posterr").html("");
 			$("#taxerr").html("");
 			$("#fileerr").html("");
+			$("#mpnIderr").html("");
 			$("#codeerr").html("");
 		}
 		
@@ -200,9 +205,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			valContact();
 			valPhone();
 			valEmail();
+			valPost();
 			valTax();
 			valFile();
 			valCode();
+			valMpnId();
 			if(con==1){
 				return true;
 			}else{
@@ -316,6 +323,17 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		  }
 		}
 		
+		
+		//判断邮政编码
+		function valPost(){
+			$("#posterr").html("");
+			var reg= /^[0-9]{6,6}$/;
+			if($("#post").val() !=""&&!reg.test($("#post").val())){
+				$("#posterr").html("请输入正确的邮政编码！");
+				con = 0;
+			}
+		}
+		
 		//判断税号
 		function valTax(){
 			$("#taxerr").html("");
@@ -361,6 +379,32 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						}
 					});
 			  }
+		}
+		
+		//验证mpnId
+		function valMpnId(){
+			$("#mpnIderr").html("");
+			var mpnId = $("#mpnId").val();
+			
+			if(mpnId!=""){
+				  var url = "orders/checkMpnId.html";
+					var postData = {"mpnId":mpnId};
+					$.post(url,postData,function(data){
+						var mpn = JSON.parse(data);
+						if(mpn.responseCode==200){
+							var result = JSON.parse(mpn.result.substr(mpn.result.indexOf("{")));
+							$("#mpnIderr").css("color","blue");
+							$("#mpnIderr").html(result.partnerName);
+						}else	if(mpn.responseCode==401){
+							$("#mpnIderr").css("color","red");
+							$("#mpnIderr").html("查询请求被拒绝！");
+						}else{
+							$("#mpnIderr").css("color","red");
+							$("#mpnIderr").html("找不到记录！");
+							con = 0;
+						}
+					});
+			}
 		}
 		
 		//组织机构onchange事件

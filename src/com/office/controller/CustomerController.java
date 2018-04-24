@@ -2,8 +2,7 @@ package com.office.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.office.entity.Customer;
 import com.office.entity.Organ;
+import com.office.entity.User;
 import com.office.service.CustomerService;
 import com.office.service.OrganService;
 import com.office.util.Const;
@@ -44,30 +43,70 @@ public class CustomerController {
 	}
 	
 	/**
-	 * 添加客户初始化页面
+	 * 客户初始化页面
 	 * @param model
 	 * @return
 	 */
 	@RequestMapping(value="/forAdd")
-	public String forAdd(Model model){
+	public String forAdd(Model model,Customer customer){
 		List<Organ> provinList = organService.listOrganByLevel(1);
 		model.addAttribute("provinList", provinList);
+		model.addAttribute("customer", customer);
 		return "customer/customer_add";
 	}
 
 	/**
-	 * 保存用户信息
-	 * @param user
+	 * 添加客户初始化页面
+	 * @param model
 	 * @return
-	 * @throws UnsupportedEncodingException 
-	 * @throws NoSuchAlgorithmException 
 	 */
-	@RequestMapping(value="/add",method=RequestMethod.POST)
-	public ModelAndView addCustomer(Customer customer){
+	@RequestMapping(value="/addCustomer")
+	public String addCustomer(Model model,Customer customer,HttpSession session){
+
+		User user= (User)session.getAttribute(Const.SESSION_USER);
 		customer.setCountry("CN");
-		ModelAndView mv = new ModelAndView();
+		customer.setCreateTime(new Date());
+		customer.setCreateUser(user==null?null:user.getLoginname());
+		customer.setStatus("0");//客户新增
 		customerService.insertCustomer(customer);
-		mv.setViewName("default");
+		return "redirect:../orders/forAdd.html?customerId="+customer.getId();
+	}
+
+	/**
+	 * 客户信息更新
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/saveCustomer")
+	public String saveCustomer(Model model,Customer customer,HttpSession session){
+
+		customerService.updateCustomer(customer);
+		model.addAttribute("msg", "success");
+		return "save_result";
+	}
+	
+	/**
+	 * 保存用户信息
+	 * @param customerId
+	 * @return
+	 */
+	@RequestMapping(value="/detailCustomer")
+	public ModelAndView detailCustomer(String customerId,String method){
+		Customer customer = customerService.selectCustomerById(customerId);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("customer", customer);
+
+		List<Organ> provinList = organService.listOrganByLevel(1);
+		mv.addObject("provinList", provinList);
+		List<Organ> cityList = organService.listOrganByParent(2,customer==null?"":customer.getProvince());
+		mv.addObject("cityList", cityList);
+		List<Organ> regionList = organService.listOrganByParent(3,customer==null?"":customer.getCity());
+		mv.addObject("regionList", regionList);
+		if(method.equals("edit")){
+			mv.setViewName("customer/customer_edit");
+		}else{
+			mv.setViewName("customer/customer_detail");
+		}
 		return mv;
 	}
 	

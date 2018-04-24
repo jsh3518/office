@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.office.entity.Customer;
 import com.office.entity.Orders;
+import com.office.entity.OrdersDetail;
 import com.office.entity.Subscription;
 import com.office.mapper.OrdersMapper;
 import com.office.service.OrdersService;
@@ -37,13 +38,21 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	/*
-	 * 批量新增订阅
-	 * @see com.office.service.OrdersService#insertSubscription(java.util.List)
+	 * 批量新增订单明细
+	 * @see com.office.service.OrdersService#insertOrdersDetail(java.util.List)
 	 */
-	public void insertSubscription(List<Subscription> subscriptionList) {
-		ordersMapper.insertSubscription(subscriptionList);
+	public void insertOrdersDetail(List<OrdersDetail> ordersDetailList) {
+		ordersMapper.insertOrdersDetail(ordersDetailList);
 	}
-		
+	
+	/*
+	 * 新增订阅
+	 * @see com.office.service.OrdersService#insertSubscription(com.office.entity.Subscription)
+	 */
+	public void insertSubscription(Subscription subscription) {
+		ordersMapper.insertSubscription(subscription);
+	}
+	
 	/*
 	 * 根据日期查询系统中最大的订单编号
 	 * @see com.office.service.OrdersService#getMaxOrdersNo(java.sql.Date)
@@ -69,11 +78,19 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	/*
-	 * 根据订单Id查询订阅信息
-	 * @see com.office.service.OrdersService#getSubscription(java.lang.String)
+	 * 根据订单Id查询订单明细信息
+	 * @see com.office.service.OrdersService#getOrdersDetail(java.lang.String)
 	 */
-	public List<Subscription> getSubscription(String OrdersId){
-		return ordersMapper.getSubscription(OrdersId);
+	public List<OrdersDetail> getOrdersDetail(String ordersId){
+		return ordersMapper.getOrdersDetail(ordersId);
+	}
+	
+	/*
+	 * 根据订单明细Id查询订单明细信息
+	 * @see com.office.service.OrdersService#selectOrdersDetail(java.lang.String)
+	 */
+	public OrdersDetail selectOrdersDetail(String detailId){
+		return ordersMapper.selectOrdersDetail(detailId);
 	}
 	
 	/*
@@ -85,10 +102,34 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	/*
+	 * 更新订单明细信息
+	 * @see com.office.service.OrdersService#updateOrdersDetail(com.office.entity.OrdersDetail)
+	 */
+	public void updateOrdersDetail(OrdersDetail ordersDetail){
+		ordersMapper.updateOrdersDetail(ordersDetail);
+	}
+
+	/*
 	 * 更新订阅信息
 	 * @see com.office.service.OrdersService#updateSubscription(com.office.entity.Subscription)
 	 */
 	public void updateSubscription(Subscription subscription){
 		ordersMapper.updateSubscription(subscription);
+	}
+	
+	/*
+	 * 根据订单id删除明细信息
+	 * @see com.office.service.OrdersService#deleteOrdersDetail(java.lang.String)
+	 */
+	public void deleteOrdersDetail(String ordersId){
+		ordersMapper.deleteOrdersDetail(ordersId);
+	}
+	
+	/*
+	 * 查询订阅信息
+	 * @see com.office.service.OrdersService#listSubscription(java.util.Map)
+	 */
+	public List<Object> listSubscription(Map<String,Object> map) {
+		return ordersMapper.listPageSubscription(map);
 	}
 }
