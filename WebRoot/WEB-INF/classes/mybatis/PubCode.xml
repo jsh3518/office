@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.PubCodeMapper">
-	<sql id="pubCodeColumns">id,classid,code,name,sort,valid,level,detail</sql>
+	<sql id="pubCodeColumns">classid,code,name,sort,valid,level,detail</sql>
 
 	
 	<resultMap type="PubCode" id="pubCodeResultMap">
@@ -46,8 +46,80 @@
 		order by sort
 	</select>
 	
+	<select id="getPubCodeById" resultMap="pubCodeResultMap">
+		select * from pub_code where id = #{id}
+	</select>
+	
+	<select id="getPubCode" resultMap="pubCodeResultMap">
+		select * from pub_code where 1=1 
+		<if test="id!=null and id!=''">
+			and id = #{id}
+		</if>
+		<if test="classId!=null and classId!=''">
+			and classid = #{classId}
+		</if>
+		<if test="code!=null and code!=''">
+			and code = #{code}
+		</if>
+		<if test="name!=null and name!=''">
+			and name = #{name}
+		</if>
+		<if test="valid!=null and valid!=''">
+			and valid = #{valid}
+		</if>
+		<if test="level!=null and level!=''">
+			and level = #{level}
+		</if>
+		<if test="detail!=null and detail!=''">
+			and detail = #{detail}
+		</if>
+		order by sort
+	</select>
+	
+	<select id="getCount" parameterType="PubCode" resultType="int">
+		select count(id) from pub_code where 1=1 
+		<if test="id!=null and id!=''">
+			and id != #{id}
+		</if>
+		<if test="classId!=null and classId!=''">
+			and classid = #{classId}
+		</if>
+		<if test="code!=null and code!=''">
+			and code = #{code}
+		</if>
+		<if test="name!=null and name!=''">
+			and name = #{name}
+		</if>
+	</select>
+	
 	<insert id="insertPubCode" parameterType="PubCode">
-		insert pub_code (<include refid="pubCodeColumns"/>) values (#{id},#{classId},#{code},#{name},#{sort},#{valid},#{level},#{detail})
+		insert pub_code (<include refid="pubCodeColumns"/>) values (#{classId},#{code},#{name},#{sort},#{valid},#{level},#{detail})
 	</insert>
 
+	<update id="updatePubCode" parameterType="PubCode">
+		update pub_code set id = #{id} 
+		<if test="classId!=null and classId!=''">
+			, classid = #{classId}
+		</if>
+		<if test="code!=null and code!=''">
+			, code = #{code}
+		</if>
+		<if test="name!=null and name!=''">
+			, name = #{name}
+		</if>
+		<if test="valid!=null and valid!=''">
+			, valid = #{valid}
+		</if>
+		<if test="level!=null and level!=''">
+			, level = #{level}
+		</if>
+		<if test="detail!=null and detail!=''">
+			, detail = #{detail}
+		</if>
+		where id = #{id}
+	</update>
+	
+	<delete id="deletePubCode" parameterType="String">
+		delete from  pub_code where id = #{id}
+	</delete>
 </mapper>

@@ -19,11 +19,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.login_info{margin-left:35px;font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:36px;line-height: 36px;color: #333333;}
 	.login_input{width:150px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.login_code{width:70px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
-	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 2px;margin-right:25px;cursor: pointer;}
+	.btn{width:70px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif); background-size:70px 25px;letter-spacing: 2px;margin-right:25px;cursor: pointer;}
 	.login_info img{vertical-align: middle;cursor: pointer;}
-	
 	.errInfo{display:none;color:red;}
-	
 	.logo{width:100%;height:40px;background: url(images/office_logo.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/office_logo.png';)}
 	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 32px;font-weight:bold ; line-height: 10px;color: #4ae;}
 	
@@ -57,7 +55,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="login_info">
 					<input type="submit" name="loginBtn" value="登录" class="btn"/>
 					<input type="button" name="registBtn" value="注册" class="btn" onclick="regist()"/>
-					<input type="reset" name="cancelBtn" value="取消" class="btn"/>
+					<!-- <input type="reset" name="cancelBtn" value="取消" class="btn"/> -->
+					<input type="button" name="renewBtn" value="忘记密码" class="btn"  onclick="renew()"/>
 				</div>
 			</form>
 			</div>
@@ -141,6 +140,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		//用户注册--跳转至注册界面
 		function regist(){
 			window.location="<%=basePath%>user/toRegedit.html";
+		}
+		
+		//用户注册--重置密码
+		function renew(){
+			window.location="<%=basePath%>user/toRenew.html";
 		}
 	</script>
 </body>

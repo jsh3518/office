@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.MailboxMapper">
+	<sql id="mailboxColumns">server,account,password,valid</sql>
+
+	
+	<resultMap type="Mailbox" id="mailboxResultMap">
+		<id column="id" property="id"/>
+		<result column="server" property="server"/>
+		<result column="account" property="account"/>
+		<result column="password" property="password"/>
+		<result column="valid" property="valid"/>
+	</resultMap>
+	
+	<select id="getMailbox" resultMap="mailboxResultMap">
+		select id,<include refid="mailboxColumns"/>
+		 from mailbox
+		 where 1=1
+		<if test="id!=null">
+			and id = #{id}
+		</if>
+		<if test="server!=null and server!=''">
+			and server = #{server}
+		</if>
+		<if test="account!=null and account!=''">
+			and account = #{account}
+		</if>
+		<if test="valid!=null and valid!=''">
+			and valid = #{valid}
+		</if>
+	</select>
+	
+	<insert id="insertMailbox" parameterType="Mailbox">
+		insert mailbox (<include refid="mailboxColumns"/>) values (#{server},#{account},#{password},#{valid})
+	</insert>
+	
+	<update id="updateMailbox" parameterType="Mailbox">
+		update mailbox set id =#{id}
+		<if test="server!=null and server!=''">
+			, server = #{server}
+		</if>
+		<if test="account!=null and account!=''">
+			, account = #{account}
+		</if>
+		<if test="password!=null and password!=''">
+			, password = #{password}
+		</if>
+		<if test="valid!=null and valid!=''">
+			, valid = #{valid}
+		</if>
+		where id =#{id}
+	</update>
+</mapper>

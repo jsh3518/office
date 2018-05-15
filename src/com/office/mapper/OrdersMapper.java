@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.office.entity.Customer;
 import com.office.entity.Orders;
 import com.office.entity.OrdersDetail;
@@ -18,6 +20,8 @@ public interface OrdersMapper  {
 	public void insertOrdersDetail(List<OrdersDetail> ordersDetailList);
 	
 	public void insertSubscription(Subscription subscription);
+	
+	public void insertSubscriptionList(List<Subscription> subscriptionList);
 	
 	public String getMaxOrdersNo(Date date);
 	
@@ -38,4 +42,6 @@ public interface OrdersMapper  {
 	public void deleteOrdersDetail(String ordersId);
 	
 	public List<Object> listPageSubscription(Map<String,Object> map);
+	
+	public void updateRenew(@Param("detailId")String detailId,@Param("renew")int renew);
 }

@@ -142,7 +142,7 @@
 	</select>
 	
 	<select id="getUserAndRoleById" parameterType="int" resultMap="userAndRoleResultMap">
-		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights ,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid
+		select u.user_id,u.username,u.rights as user_rights,u.loginname,u.password,r.role_id,r.role_name,r.rights as role_rights ,u.status,u.last_login,u.contact,u.phone,u.email,u.provincialid,u.cityid,u.countyid,u.address,u.post,u.tax,u.file,u.type,u.mpnid
 		from tb_user u 
 		left join tb_role r on u.role_id=r.role_id 
 		where u.user_id=#{userId}

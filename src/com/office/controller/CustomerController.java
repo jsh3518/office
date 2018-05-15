@@ -119,7 +119,7 @@ public class CustomerController {
 	public void checkDomain(String domain,HttpServletResponse response,HttpSession session){
 
 		String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-		if(access_token == null){//如果session中不包含access_token，则通过调用接口重新获取token
+		if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
 			JSONObject resultJson = RestfulUtil.getToken();
 			access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
 			session.setAttribute(Const.ACCESS_TOKEN, access_token);		

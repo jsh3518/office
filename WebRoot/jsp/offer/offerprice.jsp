@@ -16,7 +16,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.title{text-align:center;padding-left:40px;padding-bottom:10px; font-family:Arial,Helvetica,sans-serif;font-size:14px;height:25px;line-height:25px;color:#666666;font-weight:bold;}
 	.info{font-family:Arial,Helvetica,sans-serif;font-size:12px;height:25px;line-height:25px;color:#333333;margin-bottom:25px}
 	.select{width:60px;height:25px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
-	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:15px;cursor: pointer;}
+	.btn{width:60px;height:25px;float:left; border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:15px;cursor: pointer;}
 	.right{width:280px;margin-left:20px;vertical-align:middle;text-align: left;float:left;}
 	.input{width:100%;height:25px;line-height:25px; align:center;vertical-align:middle;font-size:12px;color:#222;background-color:#fff;border:1px solid #ccc;border-radius:3px;}
 	.left{color:#262626;text-align:right;width:80px;vertical-align:middle;float:left}
@@ -71,8 +71,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<input type="text" name="offerId" id="offerId" value="${offerPrice.offerId }"/>
 				<input type="text" name="id" id="id" value="${offerPrice.id }"/>
 			</div>
-			<div class="info" style="width:100%;float: left;padding-left: 50px">
-				<input type="submit" name="saveBtn" id="saveBtn" value="保存" class="btn"/>
+			<div class="info" style="width:100%;float: left;padding-left: 10px">
+				<input type="submit" name="saveBtn" id="saveBtn" value="保存" class="btn" style="display: none"/>
 				<input type="button" name="closeBtn" id="closeBtn" value="关闭" class="btn" onclick="cancel()"/>
 			</div>
 		</form>
@@ -89,9 +89,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if("${method}"=="edit"){
 				$("input").attr("disabled",false);
 				$("select").attr("disabled",false);
+				$("#saveBtn").css("display","block");
 			}else{
 				$("input.input").attr("disabled",true);
 				$("select").attr("disabled",true);
+				$("#saveBtn").css("display","none");
 			}
 		});
 

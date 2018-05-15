@@ -17,6 +17,8 @@
 		<typeAlias type="com.office.entity.Subscription" alias="Subscription"/>
 		<typeAlias type="com.office.entity.PubCode" alias="PubCode"/>
 		<typeAlias type="com.office.entity.Credit" alias="Credit"/>
+		<typeAlias type="com.office.entity.Partner" alias="Partner"/>
+		<typeAlias type="com.office.entity.Mailbox" alias="Mailbox"/>
 	</typeAliases>
 	
 	<plugins>
@@ -38,5 +40,7 @@
 		<mapper resource="mybatis/Orders.xml"/>
 		<mapper resource="mybatis/PubCode.xml"/>
 		<mapper resource="mybatis/Credit.xml"/>
+		<mapper resource="mybatis/Partner.xml"/>
+		<mapper resource="mybatis/Mailbox.xml"/>
 	</mappers>
 </configuration>

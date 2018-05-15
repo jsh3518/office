@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,6 +50,7 @@ import com.office.service.UserService;
 import com.office.util.Const;
 import com.office.util.FileUploadUtil;
 import com.office.util.MD5Util;
+import com.office.util.Mail;
 import com.office.util.RightsHelper;
 import com.office.util.Tools;
 import com.office.view.UserExcelView;
@@ -92,7 +98,6 @@ public class UserController {
 		model.addAttribute("roleList", roleList);
 		return "user/user_info";
 	}
-	
 	
 	/**
 	 * 用户注册初始化页面
@@ -301,33 +306,8 @@ public class UserController {
         int count = userService.getCount(user);
 		PrintWriter out;
 		try {
-			response.setCharacterEncoding("utf-8");
 			out = response.getWriter();
 			out.write(Integer.toString(count));
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-	/**
-	 * 判断验证码是否正确
-	 * @param code
-	 * @param response
-	 */
-	@RequestMapping(value="/checkCode")
-	public void checkCode(String code,HttpServletResponse response,HttpSession session){
-		String sessionCode = (String)session.getAttribute(Const.SESSION_SECURITY_CODE);
-		String msg = "";
-		if(Tools.isEmpty(sessionCode)||!sessionCode.equalsIgnoreCase(code)){
-			msg = "验证码不正确！";
-		}
-		
-		PrintWriter out;
-		try {
-			response.setCharacterEncoding("utf-8");
-			out = response.getWriter();
-			out.write(msg);
 			out.flush();
 			out.close();
 		} catch (IOException e) {
@@ -459,7 +439,7 @@ public class UserController {
 				userService.updatePassword(user.getUserId(),MD5Util.getEncryptedPwd(newPassword));
 				message = "success";
 			}else{
-				message = "用户名或密码错误！";
+				message = "原密码错误！";
 			}
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			message = "密码修改失败！";
@@ -469,5 +449,75 @@ public class UserController {
 			out.flush();
 			out.close();
 		}
+	}
+	
+	/**
+	 * 忘记密码页面
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/toRenew")
+	public String toRenew(Model model){
+		return "user/password_renew";
+	}
+	
+	/**
+	 * 更新密码
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/renewPassword")
+	public void renewPassword(HttpServletRequest request,PrintWriter out,String loginname){
+
+		String errInfo = null;
+		//根据用户登录名查询用户列表，如果长度大于1，则存在重复账号；如果长度为0，则查询无结果。
+		List<User> userList = userService.getUserByName(loginname);
+		if(userList.size()>1){
+			errInfo = "存在重复的用户名，请联系系统管理员！";
+		}else if(userList.size()==0){
+			errInfo = "用户不存在！";
+		}else{
+			User user = userList.get(0);
+			String password = Tools.getStringRandom(6);
+			userService.updatePassword(user.getUserId(),MD5Util.getEncryptedPwd(password));
+			user.setPassword(password);
+			sendMail(user,"password",request);
+		}
+
+		out.write(errInfo);
+		out.flush();
+		out.close();
+	}
+	
+	/**
+	 * 发送邮件通知代理商信息
+	 * @param user
+	 * @param method
+	 * @param request
+	 */
+	private void sendMail(User user,String method,HttpServletRequest request){
+		
+		Mail mail = new Mail();
+		Multipart multipart = new MimeMultipart(); // 向multipart对象中添加邮件的各个部分内容，包括文本内容和附件
+		BodyPart contentPart = new MimeBodyPart(); // 设置邮件的文本内容
+		StringBuffer textBuffer = new StringBuffer();
+		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/";
+		textBuffer.append("<img src='cid:img'><br>");
+		textBuffer.append("<font style='font-weight:bold;' size='4'>尊敬的用户(").append(user.getUsername()).append(")</font><br>");
+		if("audit".equals(method)){
+			textBuffer.append("<p style='text-indent:2em'>您的账号已被审核成功，请您登陆系统。</p>");
+		}
+		if("password".equals(method)){
+			textBuffer.append("<p style='text-indent:2em'>您的密码已被重置为【"+user.getPassword()+"】。请您登陆系统后在“基本信息管理”-“修改密码”菜单下重新修改密码。</p>");
+		}
+		textBuffer.append("<p style='text-indent:2em'>登录地址：<a href='").append(basePath).append("'>").append(basePath).append("</a></p>");
+		try {
+			contentPart.setContent(textBuffer.toString(), "text/html;charset=utf-8");
+			multipart.addBodyPart(contentPart);
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+	
+		mail.sendMail(user.getEmail(),"账号密码修改", multipart);
 	}
 }

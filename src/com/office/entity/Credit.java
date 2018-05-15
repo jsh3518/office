@@ -1,5 +1,7 @@
 package com.office.entity;
 
+import java.math.BigDecimal;
+
 public class Credit {
 	private Integer id;//信用id
 	private Integer agentId;//代理商Id
@@ -8,7 +10,7 @@ public class Credit {
 	private String creditLine;//信用额度（单位：元）
 	private String account;//账期
 	private String unit;//账期单位
-	private String discount;//折扣
+	private BigDecimal discount;//折扣
 	private String valid;//是否有效
 	
 	private Page page;//分页
@@ -55,10 +57,10 @@ public class Credit {
 	public void setUnit(String unit) {
 		this.unit = unit;
 	}
-	public String getDiscount() {
+	public BigDecimal getDiscount() {
 		return discount;
 	}
-	public void setDiscount(String discount) {
+	public void setDiscount(BigDecimal discount) {
 		this.discount = discount;
 	}
 	public String getValid() {

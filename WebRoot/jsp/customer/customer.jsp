@@ -30,7 +30,7 @@
 				<c:forEach items="${customerList }" var="customer"  varStatus="vs">
 					<tr class="main_info">
 						<td>${vs.index+1 }</td>
-						<td><a href="javascript:detail(${customer.id },${customer.status });">${customer.companyName }</a></td>
+						<td><a href="javascript:detail('${customer.id }','${customer.status }');">${customer.companyName }</a></td>
 						<td>${customer.domain }.partner.onmschina.cn</td>
 						<td>${customer.provincialName }${customer.cityName }${customer.regionName }</td>
 						<td>${customer.lastName }${customer.firstName }</td>
@@ -72,7 +72,7 @@
 		function detail(customerId,status){
 			var url = "customer/detailCustomer.html?method=detail&customerId="+customerId;
 			if(status==0||status==3){//新增或退回状态客户可编辑
-				url = "customer/detailCustomer.html?method=edit&customerId="+customerId;;
+				url = "customer/detailCustomer.html?method=edit&customerId="+customerId;
 			}
 			var dg = new $.dialog({
 				title:'客户信息',
@@ -87,15 +87,6 @@
 				page:url
 				});
     		dg.ShowDialog();
-		}
-		
-		//查看客户信息
-		function querySubscription1(customerId,status){
-			var url = "customer/detailCustomer.html?method=detail&customerId="+customerId;
-			if(status==0||status==3){//新增或退回状态客户可编辑
-				url = "customer/editCustomer.html?method=edit&customerId="+customerId;;
-			}
-			window.location=url;
 		}
 		
 		//添加订阅

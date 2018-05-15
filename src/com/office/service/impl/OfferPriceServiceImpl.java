@@ -43,6 +43,14 @@ public class OfferPriceServiceImpl implements OfferPriceService {
 	}
 	
 	/*
+	 * 根据产品id查询产品价格
+	 * @see com.office.service.OfferPriceService#getPriceByOfferId(java.lang.String)
+	 */
+	public OfferPrice getPriceByOfferId(String offerId){
+		return offerPriceMapper.getPriceByOfferId(offerId);
+	}
+	
+	/*
 	 *  保存产品价格
 	 * @see com.office.service.OfferPriceService#saveOfferPrice(com.office.entity.OfferPrice)
 	 */

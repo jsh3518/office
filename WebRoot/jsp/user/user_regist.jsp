@@ -337,8 +337,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		//判断税号
 		function valTax(){
 			$("#taxerr").html("");
+			var reg = /^[A-Z0-9]{15}$|^[A-Z0-9]{16}$|^[A-Z0-9]{17}$|^[A-Z0-9]{18}$|^[A-Z0-9]{20}$/;
 			if( $("#tax").val() ==""){
 				$("#taxerr").html("税号不能为空!");
+				con=0;
+			}else if(!reg.test($("#tax").val())){
+				$("#taxerr").html("税号不正确，请重新输入!");
 				con=0;
 			}else{
 				  var url = "user/checkUser.html";
@@ -350,7 +354,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					    con = 0;
 						}
 					});
-			  }
+			 }
 		}
 		
 		//判断营业执照扫描件
@@ -369,7 +373,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				$("#codeerr").html("验证码不能为空!");
 				con=0;
 			}else{
-				  var url = "user/checkCode.html";
+				  var url = "code/checkCode.html";
 					var postData = {"code":$("#code").val()};
 					$.post(url,postData,function(data){	
 						if(data!=""){

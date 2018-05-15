@@ -79,7 +79,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			</div>
 			<div style="display: none">
 				<input type="text" name="customerId" id="customerId" value="${customerId}"/>
-				<input type="text" name="id" id="id" value="${ordersId}"/>
+				<input type="text" name="id" id="id" value="${orders.id}"/>
 			</div>
 		</form>
 	</div>
@@ -126,8 +126,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if("${flag}"=="edit"){
 				message = "订阅信息未修改，是否确定返回？";
 				url = "<%=basePath%>orders/getOrders.html?id=${orders.id}";
-			}else{
-				
 			}
 			if(confirm(message)){
 				window.location=url;

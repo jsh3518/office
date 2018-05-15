@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.OrdersMapper">
-	<sql id="ordersColumns">ordersno,billingcycle,customerid,createtime,effecttime,sum,actualsum,status,mpnid,reseller,createuser,payment,file,orderid,type</sql>
+	<sql id="ordersColumns">ordersno,billingcycle,customerid,createtime,effecttime,sum,actualsum,discount,status,mpnid,reseller,createuser,payment,file,orderid,type</sql>
 	<sql id="detailColumns">ordersid,offerid,offername,quantity,billingcycle,subscriptionid,amount,actualamount,createuser,originalid</sql>
 	<sql id="subscriptionColumns">customerid,detailid,offerid,offername,quantity,billingcycle,subscriptionid,effecttime,renew,mpnid,reseller,createuser</sql>
 
@@ -15,6 +15,7 @@
 		<result column="effecttime" property="effectTime"/>
 		<result column="sum" property="sum"/>
 		<result column="actualsum" property="actualSum"/>
+		<result column="discount" property="discount"/>
 		<result column="status" property="status"/>
 		<result column="mpnid" property="mpnId"/>
 		<result column="reseller" property="reseller"/>
@@ -67,9 +68,6 @@
 		select o.id,<include refid="ordersColumns"/>
 		from orders o
 		where exists(select 1 from customer c where c.id = o.customerid
-		<if test="createUser!=null and createUser!=''">
-			and c.createuser = #{createUser}
-		</if>
 		<if test="companyName!=null and companyName!=''">
 			and c.companyname like "%"#{companyName}"%"
 		</if>
@@ -77,6 +75,9 @@
 			and c.domain like "%"#{domain}"%"
 		</if>
 		)
+		<if test="createUser!=null and createUser!=''">
+			and o.createuser = #{createUser}
+		</if>
 		<if test="customerId!=null and customerId!=0">
 			and o.customerid =#{customerId}
 		</if>
@@ -104,7 +105,7 @@
 	</select>
 	
 	<select id="getOrdersDetail" resultMap="detailResultMap">
-		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser
+		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
@@ -112,7 +113,7 @@
 	</select>
 	
 	<select id="selectOrdersDetail" resultMap="detailResultMap">
-		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser
+		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
@@ -120,7 +121,7 @@
 	</select>
 	
 	<insert id="insertOrders" parameterType="Orders" useGeneratedKeys="true" keyProperty="id">
-		insert orders (<include refid="ordersColumns"/>) values (#{ordersNo},#{billingCycle},#{customerId},#{createTime},#{effectTime},#{sum},#{actualSum},#{status},#{mpnId},#{reseller},#{createUser},#{payment},#{file},#{orderId},#{type})
+		insert orders (<include refid="ordersColumns"/>) values (#{ordersNo},#{billingCycle},#{customerId},#{createTime},#{effectTime},#{sum},#{actualSum},#{discount},#{status},#{mpnId},#{reseller},#{createUser},#{payment},#{file},#{orderId},#{type})
 	</insert>
 	
 	<insert id="insertOrdersDetail" parameterType="List" useGeneratedKeys="true" keyProperty="id">
@@ -130,8 +131,15 @@
 		</foreach>
 	</insert>
 	
+	<insert id="insertSubscriptionList" parameterType="List" useGeneratedKeys="true" keyProperty="id">
+		insert subscription (<include refid="subscriptionColumns"/>) values
+		<foreach collection="list" item="subscription" index="index" open="(" close=")" separator="),(">
+			#{subscription.customerId},#{subscription.detailId},#{subscription.offerId},#{subscription.offerName},#{subscription.quantity},#{subscription.billingCycle},#{subscription.subscriptionId},#{subscription.effectTime},#{subscription.renew},#{subscription.mpnId},#{subscription.reseller},#{subscription.createUser}
+		</foreach>
+	</insert>
+	
 	<insert id="insertSubscription" parameterType="Subscription" useGeneratedKeys="true" keyProperty="id">
-		insert orders (<include refid="subscriptionColumns"/>) values (#{customerId},#{detailId},#{offerId},#{offerName},#{quantity},#{billingCycle},#{subscriptionId},#{effectTime},#{renew},#{mpnId},#{reseller},#{createUser})
+		insert subscription (<include refid="subscriptionColumns"/>) values (#{customerId},#{detailId},#{offerId},#{offerName},#{quantity},#{billingCycle},#{subscriptionId},#{effectTime},#{renew},#{mpnId},#{reseller},#{createUser})
 	</insert>
 	
 	<update id="updateOrders" parameterType="Orders">
@@ -154,6 +162,18 @@
 		<if test="effectTime!=null and effectTime!=''">
 			,effecttime=#{effectTime}
 		</if>
+		<if test="sum!=null and sum!=''">
+			,sum=#{sum}
+		</if>
+		<if test="actualSum!=null and actualSum!=''">
+			,actualsum=#{actualSum}
+		</if>
+		<if test="billingCycle!=null and billingCycle!=''">
+			,billingcycle=#{billingCycle}
+		</if>
+		<if test="discount!=null and actualSum!=''">
+			,discount=#{discount}
+		</if>
 		where id=#{id}
 	</update>
 	
@@ -161,6 +181,12 @@
 		update orders_detail set subscriptionid=#{subscriptionId}
 		<if test="amount!=null and amount!=''">
 			,amount = #{amount}
+		</if>
+		<if test="actualAmount!=null and actualAmount!=''">
+			,actualamount = #{actualAmount}
+		</if>
+		<if test="billingCycle!=null and billingCycle!=''">
+			,billingcycle = #{billingCycle}
 		</if>
 		where 1=1
 		<if test="ordersId!=null and ordersId!=''">
@@ -190,4 +216,9 @@
 	</if>
 		order by s.offerid,s.effecttime
 	</select>
+	
+	<update id="updateRenew">
+		update subscription set renew=renew+#{renew} where detailId = #{detailId}
+	</update>
+	
 </mapper>

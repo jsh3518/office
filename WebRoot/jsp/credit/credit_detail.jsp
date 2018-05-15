@@ -84,7 +84,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<label class="left">账期<font color="red">*</font>：</label>
 					<div class="right">
 						<div  id="unitDiv">
-							<input type="text" id="account" name="account" class="input" style="width: 73px" value="${credit.account }">
+							<input type="text" id="account" name="account" class="input" style="width: 70px" value="${credit.account }">
 							<select name="unit" id="unit" class="select" style="width: 120px">
 								<option value="">请选择</option>
 								<c:forEach items="${unitList}" var="timeUnit">
@@ -121,6 +121,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			valCreditRating();
 			valCreditLine();
 			valAccount();
+			valDiscount();
 			if(con==1){
 				return true;
 			}else{
@@ -161,6 +162,17 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		}
 		
+		function valDiscount(){
+			$("#discount").siblings('.error').remove();
+			if($("#discount").val() !=""){
+				var reg = /^([1-9]\d?|100)$/;
+				if(!reg.test($("#discount").val())){
+					$("#discount").after('<div class="error">折扣范围1-100内的正整数！</div>');
+					con = 0;
+				}
+			}
+		}
+
 		function forReturn(){
 			window.location="<%=basePath%>credit.html";
 		}

@@ -8,6 +8,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.office.util.Const;
+import com.office.util.Tools;
 
 /**
  * @author Administrator
@@ -33,12 +35,10 @@ public class SecCodeController {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		String code = drawImg(output);
 		session.setAttribute(Const.SESSION_SECURITY_CODE, code); //放入session
-		//System.out.println(session.getAttribute(Const.SESSION_SECURITY_CODE));
 		try {
 			ServletOutputStream out = response.getOutputStream();
 			output.writeTo(out);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -69,11 +69,35 @@ public class SecCodeController {
 		try {
 			ImageIO.write(bi, "jpg", output);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return code;
 	}
+	
+	/**
+	 * 判断验证码是否正确
+	 * @param code
+	 * @param response
+	 */
+	@RequestMapping(value="/checkCode")
+	public void checkCode(String code,HttpServletResponse response,HttpSession session){
+		String sessionCode = (String)session.getAttribute(Const.SESSION_SECURITY_CODE);
+		String msg = "";
+		if(Tools.isEmpty(sessionCode)||!sessionCode.equalsIgnoreCase(code)){
+			msg = "验证码不正确！";
+		}
+		
+		PrintWriter out;
+		try {
+			response.setCharacterEncoding("utf-8");
+			out = response.getWriter();
+			out.write(msg);
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 	
 	private char randomChar(){
 		Random r = new Random();

@@ -33,6 +33,11 @@ public interface OrdersService {
 	public void insertSubscription(Subscription subscription);
 	
 	/*
+	 * 新增订阅（批量）
+	 */
+	public void insertSubscriptionList(List<Subscription> subscriptionList);
+	
+	/*
 	 * 根据日期查询系统中最大的订单编号
 	 */
 	public String getMaxOrdersNo(Date date);
@@ -81,4 +86,14 @@ public interface OrdersService {
 	 * 查询订阅信息列表
 	 */
 	public List<Object> listSubscription(Map<String,Object> map);
+	
+	/*
+	 * 在微软创建订单信息(订阅新增)
+	 */
+	public String CreateOrders(Orders orders,String access_token,String imagePath);
+	
+	/*
+	 * 坐席续订
+	 */
+	public String renewOrders(Orders orders,String access_token);
 }

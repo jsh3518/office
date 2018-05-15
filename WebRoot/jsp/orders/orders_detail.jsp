@@ -25,6 +25,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.error{float: left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
 	.table{margin-left:20px;width:100%;cellpadding:0; cellspacing:0;font-family:Arial,Helvetica,sans-serif;}
 	.table td{font-size:13px;text-align: left;width:33%;}
+	.info img{vertical-align: middle;cursor: pointer;width:auto;height:220px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="js/lhgdialog/lhgdialog.min.js?t=self&s=areo_blue"></script>
@@ -87,9 +88,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="title"  style="width:100%;">付款信息</div>
 				<div class="info" id ="sumDiv">
 					<label class="left">金额：</label>
-					<div class="right"><input class="input" readonly="readonly" value="${orders.sum }"/></div>
+					<div class="right"><input class="input" readonly="readonly" name="sum" id="sum" value="${orders.sum }"/></div>
 					<label class="left">结算金额：</label>
-					<div class="right"><input class="input" readonly="readonly" value="${orders.actualSum }"/></div>
+					<div class="right"><input class="input" readonly="readonly" name="actualSum" id="actualSum" value="${orders.actualSum }"/></div>
+					<label class="left">折扣：</label>
+					<div class="right"><input class="input" readonly="readonly" name="discount" id="discount" value="${orders.discount }" style="width: 40px" onblur="calSum()"/>%</div>
 				</div>
 				<div class="info" id ="paymentDiv">
 					<label class="left">付款方式<font color="red">*</font>：</label>
@@ -105,7 +108,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info" id="voucherDiv" style="height: auto">
 					<label class="left">付款凭证<font color="red">*</font>：</label>
 					<input type="file" id="voucher" name="voucher" class="file" value="${orders.file }">
-					<img height="220px" id="voucherImg" width="auto" src="<%=basePath%>files/${orders.file}">
+					<img id="voucherImg" src="<%=basePath%>files/${orders.file}">
 				</div>
 			<input type="hidden" name="id" id="id" value="${orders.id}">
 			<div class="info" style="margin-top: 5px">
@@ -117,21 +120,26 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 </div>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			if("${orders.customer.status}"==0||"${orders.customer.status}"==3){
-				//如果客户是“新增”或“退回”状态，允许修改客户信息
-				$("#customerDiv").show();
-			}
 			var status = "${orders.status}";
 			if(status=="0"||status=="3"){//如果订单是“新增”或“退回”状态，允许修改订阅信息、付款方式和付款凭证
 				if("${orders.type}"==1){//如果为续订，则订阅信息不允许修改
 					$("#ordersDiv").hide();
 				}else{
 					$("#ordersDiv").show();
+					if("${orders.customer.status}"==0||"${orders.customer.status}"==3){
+						//如果客户是“新增”或“退回”状态，允许修改客户信息
+						$("#customerDiv").show();
+					}
 				}
 				$("#payment").attr("disabled",false);
 				$("#voucher").show();
 				$("#voucherImg").hide();
 				$("#submitBtn").show();
+
+				if("${roleId}"==2){//如果为总代理商角色，则折扣可编辑
+					$("#discount").attr("readonly",false);
+					$("#discount").css("background-color","#fff");
+				}
 			}else{
 				$("#payment").attr("disabled",true);
 				$("#voucher").hide();
@@ -147,10 +155,28 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		});
 		
+		//根据折扣计算结算金额
+		function calSum(){
+			if("${roleId}"==2){
+				var discount = $("#discount").val();
+				if(discount!=""){
+					var reg = /^([1-9]\d?|100)$/;
+					if(!reg.test(discount)){
+						con = 0;
+						alert("折扣为1-100以内的正整数,请重新输入！");
+					}else{
+						var sum = $("#sum").val();
+						$("#actualSum").val((sum*discount/100.00).toFixed(2));
+					}
+				}
+			}
+		}
+		
 		function forBack(){
 			window.location="<%=basePath%>orders/listOrders.html";
 		}
 		
+		//编辑客户信息
 		function editCustomer(customerId){
 
 			var dg = new $.dialog({
@@ -168,6 +194,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     		dg.ShowDialog();
 		}
 		
+		//编辑订单信息
 		function editOrders(ordersId){
 			window.location="<%=basePath%>orders/forEdit.html?ordersId="+ordersId;
 		}
@@ -177,6 +204,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			con=1;
 			$("#submitBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
+			calSum();
 			valPayment();
 			valFile();
 			if(con==1){
@@ -188,6 +216,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		}
 		
+		//判断付款方式
 		function valPayment(){
 			var paymentDiv = $("#paymentDiv");
 			paymentDiv.siblings('.error').remove();
@@ -197,8 +226,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		}
 		
+		//判断付款凭证
 		function valFile(){
 			var voucherDiv = $("#voucherDiv");
+			voucherDiv.siblings('.error').remove();
 			if($("#payment").val()!=1&&$("#voucher").val() ==""){
 				voucherDiv.after('<div class="error">请上传付款凭证！</div>');
 				con = 0;

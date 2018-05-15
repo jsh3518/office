@@ -45,6 +45,25 @@ public class PubCodeServiceImpl implements PubCodeService {
 		return pubCodeMapper.listPagePubCode(pubCode);
 	}
 
+	
+	/**
+	 * 根据id查询公共编码
+	 * @param id
+	 * @return
+	 */
+	public PubCode getPubCodeById(String id) {
+		return pubCodeMapper.getPubCodeById(id);
+	}
+	
+	/**
+	 * 查询公共编码
+	 * @param pubCode
+	 * @return
+	 */
+	public PubCode getPubCode(PubCode pubCode) {
+		return pubCodeMapper.getPubCode(pubCode);
+	}
+	
 	/**
 	 * 新增公共编码
 	 * @param pubCode
@@ -53,6 +72,27 @@ public class PubCodeServiceImpl implements PubCodeService {
 		pubCodeMapper.insertPubCode(pubCode);
 	}
 
+	/**
+	 * 更新公共编码
+	 * @param pubCode
+	 */
+	public void updatePubCode(PubCode pubCode) {
+		pubCodeMapper.updatePubCode(pubCode);
+	}
+	
+	/**
+	 * 删除公共编码
+	 * @param id
+	 */
+	public void deletePubCode(String id) {
+		pubCodeMapper.deletePubCode(id);
+	}
+	
+	
+	public int getCount(PubCode pubCode){
+		return pubCodeMapper.getCount(pubCode);
+	}
+	
 	/**
 	 * 根据类别查询公共编码
 	 * @param classId

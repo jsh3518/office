@@ -206,10 +206,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		//判断地址
 		function valAddress(){
 			var province = $("#province");
+			var city = $("#city");
 			var address = $("#address");
 			$("#address").siblings('.error').remove();
-			if(province.val() ==""||address.val() ==""){
-				$("#address").after('<div class="error">请输入公司地址！</div>');
+			if(province.val() ==""||city.val() ==""||address.val() ==""){
+				$("#address").after('<div class="error">请选择公司地址！</div>');
 				con = 0;
 			}else if(province.val()==710000||province.val()==810000||province.val()==820000){
 				$("#address").after('<div class="error">香港、澳门、台湾地区客户无法在本系统注册，请您理解！</div>');

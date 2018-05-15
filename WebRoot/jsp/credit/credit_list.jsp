@@ -38,7 +38,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<td>${credit.creditRating }</td>
 				<td>${credit.creditLine }</td>
 				<td>${credit.account }${credit.unit }</td>
-				<td>${credit.discount }%</td>
+				<td>${credit.discount }<c:if test="${not empty credit.discount}">%</c:if></td>
 				<td><a href="javascript:queryCredit(${credit.agentId });">维护</a></td>
 				</tr>
 				</c:forEach>

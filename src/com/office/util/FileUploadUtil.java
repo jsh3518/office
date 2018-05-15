@@ -14,19 +14,23 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.multipart.MultipartFile;
+
 /**
- * 文件上传工具类   *
+ * 文件上传工具类 *
+ * 
  * @author *
- */ 
+ */
 public class FileUploadUtil {
-	
-	private static Logger logger = Logger.getLogger(FileUploadUtil.class);//输出Log日志
+
+	private static Logger logger = Logger.getLogger(FileUploadUtil.class);// 输出Log日志
 	/**
-	 *服务器上的保存路径，在使用到上传功能的Controller中对其进行赋值
+	 * 服务器上的保存路径，在使用到上传功能的Controller中对其进行赋值
 	 */
 	public static String FILEDIR = null;
+
 	/**
-	 *上传多个文件，返回文件名称和服务器存储路径列表 *     
+	 * 上传多个文件，返回文件名称和服务器存储路径列表 *
+	 * 
 	 * @param files
 	 * @return
 	 * @throws IOException
@@ -46,9 +50,10 @@ public class FileUploadUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 上传单个文件，并返回其在服务器中的存储路径
+	 * 
 	 * @param aFile
 	 * @return
 	 * @throws FileNotFoundException
@@ -64,8 +69,10 @@ public class FileUploadUtil {
 		}
 		return filePath;
 	}
+
 	/**
-	 * 写入数据     *
+	 * 写入数据 *
+	 * 
 	 * @param in
 	 * @param out
 	 * @throws IOException
@@ -83,12 +90,14 @@ public class FileUploadUtil {
 				in.close();
 				out.close();
 			} catch (IOException ex) {
-				
-			} 
+
+			}
 		}
 	}
+
 	/**
 	 * 遍历服务器目录，列举出目录中的所有文件（含子目录）
+	 * 
 	 * @return
 	 */
 	public static Map<String, String> getFileMap() {
@@ -104,16 +113,19 @@ public class FileUploadUtil {
 							String name = file2.getName();
 							logger.info(file2.getParentFile().getAbsolutePath());
 							logger.info(file2.getAbsolutePath());
-							map.put(file2.getParentFile().getName() + "/" + name,name.substring(name.lastIndexOf("_") + 1));
-							}
+							map.put(file2.getParentFile().getName() + "/" + name,
+									name.substring(name.lastIndexOf("_") + 1));
 						}
 					}
 				}
 			}
+		}
 		return map;
 	}
+
 	/**
-	 * 返回文件存储路径，为防止重名文件被覆盖，在文件名称中增加了随机数 
+	 * 返回文件存储路径，为防止重名文件被覆盖，在文件名称中增加了随机数
+	 * 
 	 * @param name
 	 * @return
 	 */
@@ -122,11 +134,12 @@ public class FileUploadUtil {
 		File file = new File(FILEDIR + dir);
 		if (!file.exists()) {
 			file.mkdir();
-			}
+		}
 		Long num = new Date().getTime();
 		Double d = Math.random() * num;
-		return file.getPath() +File.separator +( num + d.longValue() + "_" + name).replaceAll(" ", "-");
+		return file.getPath() + File.separator + (num + d.longValue() + "_" + name).replaceAll(" ", "-");
 	}
+
 	/**
 	 * @param name
 	 * @return
@@ -134,23 +147,24 @@ public class FileUploadUtil {
 	private static int getFileDir(String name) {
 		return name.hashCode() & 0xf;
 	}
-	
+
 	/**
 	 * 上传单个文件，并返回其在服务器中的存储路径
+	 * 
 	 * @param mFile
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static String uploadFile(MultipartFile mFile,String filePath){
+	public static String uploadFile(MultipartFile mFile, String filePath) {
 
 		try {
 			write(mFile.getInputStream(), new FileOutputStream(filePath));
-			
+
 		} catch (IOException e) {
 			logger.error("上传的文件: " + mFile.getName() + " 不存在！！");
 			e.printStackTrace();
 		}
 		return filePath;
 	}
-} 
+}

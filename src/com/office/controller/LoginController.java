@@ -110,6 +110,9 @@ public class LoginController {
 	public String index(HttpSession session,Model model){
 		User user = (User)session.getAttribute(Const.SESSION_USER);
 		user = userService.getUserAndRoleById(user.getUserId());
+		if(user!=null){
+			session.setAttribute(Const.SESSION_USER, user); //将用户信息重新存入session
+		}
 		Role role = user.getRole();
 		String roleRights = role!=null ? role.getRights() : "";
 		String userRights = user.getRights();

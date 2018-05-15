@@ -69,7 +69,7 @@
 				maxBtn:false,
 				btnBar:false,
 				resize:false,
-				page:'detail.html?id='+id+"&offerId="+offerId+"&offerName1="+offerName+"&method="+method
+				page:"detail.html?id="+id+"&offerId="+offerId+"&offerName="+encodeURI(encodeURI(offerName))+"&method="+method
 			});
     	dg.ShowDialog();
 		}

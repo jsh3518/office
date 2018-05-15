@@ -37,6 +37,10 @@
 		select id,<include refid="offerPriceColumns"/> from offer_price where id = #{id}
 	</select>
 	
+	<select id="getPriceByOfferId" parameterType="String" resultMap="offerPriceResultMap">
+		select id,<include refid="offerPriceColumns"/> from offer_price where offerid = #{offerId} and valid =1
+	</select>
+	
 	<insert id="insertOfferPrice" parameterType="OfferPrice" useGeneratedKeys="true" keyProperty="id">
 		insert offer_price (<include refid="offerPriceColumns"/>) values (#{offerId},#{offerName},#{priceMonth},#{priceYear},#{unit},#{valid})
 	</insert>

@@ -2,6 +2,7 @@ package com.office.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,13 +42,13 @@ public class OfferPriceController {
 	 * @return
 	 */
 	@RequestMapping(value="/detail")
-	public ModelAndView detail(String id,String offerId,String offerName1,String method){
+	public ModelAndView detail(String id,String offerId,String offerName,String method){
 		ModelAndView mv = new ModelAndView();
 		OfferPrice offerPrice = new OfferPrice();
 		if("".equals(id)||id==null){
 			offerPrice.setOfferId(offerId);
 			try {
-				offerPrice.setOfferName(new String(offerName1.getBytes("iso8859-1"),"utf-8"));
+				offerPrice.setOfferName(java.net.URLDecoder.decode(offerName,"UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

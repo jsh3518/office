@@ -3,6 +3,7 @@ package com.office.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -24,15 +25,18 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.office.entity.Credit;
 import com.office.entity.Customer;
 import com.office.entity.Offer;
+import com.office.entity.OfferPrice;
 import com.office.entity.Orders;
 import com.office.entity.Page;
 import com.office.entity.PubCode;
-import com.office.entity.Subscription;
 import com.office.entity.OrdersDetail;
 import com.office.entity.User;
+import com.office.service.CreditService;
 import com.office.service.CustomerService;
+import com.office.service.OfferPriceService;
 import com.office.service.OfferService;
 import com.office.service.OrdersService;
 import com.office.service.PubCodeService;
@@ -40,7 +44,6 @@ import com.office.util.Const;
 import com.office.util.FileUploadUtil;
 import com.office.util.RestfulUtil;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Controller
@@ -54,6 +57,10 @@ public class OrdersController {
 	private CustomerService customerService;
 	@Autowired
 	private PubCodeService pubCodeService;
+	@Autowired
+	private OfferPriceService offerPriceService;
+	@Autowired
+	private CreditService creditService;
 	
 	private static Logger logger = Logger.getLogger(OrdersController.class);//输出Log日志
 	
@@ -130,6 +137,7 @@ public class OrdersController {
 	public ModelAndView addOrders(Orders orders,HttpSession session,HttpServletRequest req){
 		
 		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
+		User user = (User) session.getAttribute(Const.SESSION_USER);
 		Customer customer = customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
 		if(orders.getId()==null||"".equals(orders.getId())){
 			
@@ -157,7 +165,13 @@ public class OrdersController {
 		String[] checkbox = req.getParameterValues("checkbox");
 		String quantity;
 		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
-
+		BigDecimal sum = new BigDecimal(0);
+		BigDecimal actualSum = new BigDecimal(0);
+		BigDecimal discount = null;
+		if(user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
+			Credit credit = creditService.queryCredit(user.getUserId());
+			discount = credit ==null?null:credit.getDiscount();
+		}
 		for(String str:checkbox){
 			quantity = req.getParameter("quantity_"+str);
 			OrdersDetail ordersDetail = new OrdersDetail();
@@ -166,8 +180,19 @@ public class OrdersController {
 			ordersDetail.setOrdersId(orders.getId());
 			ordersDetail.setBillingCycle(orders.getBillingCycle());
 			ordersDetail.setCreateUser(userId);
+			OfferPrice offerPrice = offerPriceService.getPriceByOfferId(str);
+			BigDecimal amount = offerPrice.getPriceYear()==null?new BigDecimal(0):offerPrice.getPriceYear().multiply(new BigDecimal(quantity));
+			BigDecimal actualAmount = amount.multiply(discount==null?new BigDecimal(1):discount.divide(new BigDecimal(100)));
+			ordersDetail.setAmount(amount.setScale(2));
+			ordersDetail.setActualAmount(actualAmount.setScale(2));
 			ordersDetailList.add(ordersDetail);
+			sum = sum.add(amount);
+			actualSum = actualSum.add(actualAmount);
 		}
+		orders.setActualSum(actualSum.setScale(2));
+		orders.setSum(sum.setScale(2));
+		orders.setDiscount(discount);
+		ordersService.updateOrders(orders);
 		ordersService.insertOrdersDetail(ordersDetailList);
 		
 		//跳转至付款信息界面
@@ -182,6 +207,7 @@ public class OrdersController {
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("statusMap", statusMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
+		mv.addObject("roleId", user.getRoleId());
 		//返回订单信息
 		mv.setViewName("orders/orders_detail");
 		return mv;
@@ -195,20 +221,21 @@ public class OrdersController {
 	 * @return
 	 */
 	@RequestMapping(value="/getOrders")
-	public String getOrdersById(Model model,HttpServletRequest req){
-		
+	public String getOrdersById(Model model,HttpServletRequest req,HttpSession session){
+		User user = (User) session.getAttribute(Const.SESSION_USER);
 		String id = req.getParameter("id")==null?"":req.getParameter("id");
 		String flag = req.getParameter("flag")==null?"":req.getParameter("flag");
 		Orders orders = ordersService.getOrdersById(id);
 		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(id);
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
+		List<PubCode> billingCycleList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
 		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
-		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
 		model.addAttribute("orders", orders);
-		model.addAttribute("ordersDetailMap", ordersDetailMap);
 		model.addAttribute("paymentList", paymentList);
+		model.addAttribute("billingCycleList", billingCycleList);
 		model.addAttribute("statusMap", statusMap);
-		model.addAttribute("billingCycleMap", billingCycleMap);
+		model.addAttribute("ordersDetailMap", ordersDetailMap);
+		model.addAttribute("roleId", user==null?"":user.getRoleId());
 		if("audit".equals(flag)){
 			return "orders/orders_audit";
 		}else{
@@ -223,7 +250,7 @@ public class OrdersController {
 	 * @return
 	 */
 	@RequestMapping(value="/confirmOrders",method=RequestMethod.POST)
-	public String confirmOrders(MultipartHttpServletRequest request,Model model) {
+	public String confirmOrders(MultipartHttpServletRequest request,HttpSession session,Model model) {
 		
 		String payment = request.getParameter("payment")==null?"":request.getParameter("payment");
 		String ordersNo = request.getParameter("ordersNo")==null?"":request.getParameter("ordersNo");
@@ -234,6 +261,16 @@ public class OrdersController {
 		orders.setOrdersNo(ordersNo);
 		orders.setPayment(payment);
 		orders.setStatus("1");
+		
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		if(user!=null&&user.getRoleId()==2){//如果为总代理商角色，可以手动修改折扣
+			BigDecimal sum = request.getParameter("sum")==null||"".equals(request.getParameter("sum"))?null:new BigDecimal(request.getParameter("sum"));
+			BigDecimal actualSum = request.getParameter("actualSum")==null||"".equals(request.getParameter("actualSum"))?null:new BigDecimal(request.getParameter("actualSum"));
+			BigDecimal discount = request.getParameter("discount")==null||"".equals(request.getParameter("discount"))?null:new BigDecimal(request.getParameter("discount"));
+			orders.setSum(sum);
+			orders.setActualSum(actualSum);
+			orders.setDiscount(discount);
+		}
 		//现付需要上传付款凭证
 		if("0".equals(payment)){
 			MultipartFile mfile = (MultipartFile)request.getFile("voucher");
@@ -263,163 +300,50 @@ public class OrdersController {
 
 		String id = request.getParameter("id") ==null?"":request.getParameter("id");
 		String opinion = request.getParameter("opinion") ==null?"":request.getParameter("opinion");
+		String billingCycle = request.getParameter("billingCycle") ==null?"monthly":request.getParameter("billingCycle");
+		Orders orders = ordersService.getOrdersById(id);
 		Orders tmpOrders = new Orders();
 		if(!"".equals(id)){
 			tmpOrders.setId(Integer.valueOf(id));
 		}
+		Customer customer = orders.getCustomer();
 		//1:审核通过;0:审核不通过
 		if("1".equals(opinion)){
 			tmpOrders.setStatus("2");
+			tmpOrders.setBillingCycle(billingCycle);
+			tmpOrders.setMpnId(orders.getMpnId());
+			tmpOrders.setReseller(orders.getReseller());
 			//审核通过，将订阅数据发送到Office
 			
 			HttpSession session = request.getSession();
 			String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-			if(access_token == null){//如果session中不包含access_token，则通过调用接口重新获取token
+			if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
 				JSONObject resultJson = RestfulUtil.getToken();
 				access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
 				session.setAttribute(Const.ACCESS_TOKEN, access_token);
 			}
-			Orders orders = ordersService.getOrdersById(id);
-			Customer customer = orders.getCustomer();
-			String tenantId = customer.getTenantId();
+
+			String imagePath = request.getSession().getServletContext().getRealPath("/") + "images"+File.separator;
 			//如果tenantId属性为空，说明该客户信息未同步至微软O365，需要在O365新增客户信息
-			if(tenantId==null||"".equals(tenantId)){
-				JSONObject companyJson = new JSONObject();
-				String attr = " {'objectType': 'CustomerCompanyProfile'}";
-				companyJson.put("tenantId", null);//"5978683a-9b93-470e-b651-2328e863ec6c"
-				companyJson.put("domain", customer.getDomain()+".partner.onmschina.cn");
-				companyJson.put("companyName", customer.getCompanyName());
-				companyJson.put("attributes", JSONObject.fromObject(attr));
-				JSONObject addressJson = new JSONObject();
-				addressJson.put("country", "CN");
-				addressJson.put("state", customer.getAbbr());
-				addressJson.put("city", customer.getCityName());
-				addressJson.put("region", customer.getRegionName());
-				addressJson.put("addressLine1", customer.getAddress());
-				addressJson.put("postalCode", customer.getPostalCode());
-				addressJson.put("firstName", customer.getFirstName());
-				addressJson.put("lastName", customer.getLastName());
-				addressJson.put("phoneNumber", customer.getPhoneNumber());
-				JSONObject billingJson = new JSONObject();
-				attr = "{'objectType': 'CustomerBillingProfile'}";
-				billingJson.put("attributes", JSONObject.fromObject(attr));
-				billingJson.put("defaultAddress", addressJson);
-				billingJson.put("id", null);
-				billingJson.put("firstName", customer.getFirstName());
-				billingJson.put("lastName", customer.getLastName());
-				billingJson.put("email", customer.getEmail());
-				billingJson.put("culture", "zh-cn");
-				billingJson.put("language", "zh-CHS");
-				billingJson.put("companyName", customer.getCompanyName());
-				JSONObject customerJson = new JSONObject();
-				customerJson.put("companyProfile", companyJson);
-				customerJson.put("billingProfile", billingJson);
-				String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers"; 
-				String method = "POST";
-				Map<String, String> paramHeader = new HashMap<String, String>();
-				paramHeader.put("Accept", "application/json");
-				paramHeader.put("Content-Type", "application/json");
-				paramHeader.put("Authorization",  "Bearer "+access_token);
-				String paramBody = customerJson.toString();       
-				JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,paramBody);
-
-				if(resultJson.get("responseCode").toString().startsWith("2")){
-					//2018-04-02 该接口返回值前有一个特殊符号，需要截取掉再转换成json
-					String result = resultJson.get("result").toString();
-					if(result.indexOf("{")>=0){
-						JSONObject reCustomerJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
-						tenantId = reCustomerJson.get("id")==null?"":reCustomerJson.get("id").toString();
-						JSONObject json = (JSONObject)reCustomerJson.get("userCredentials");
-						String password = json.get("password")==null?"":json.get("password").toString();
-						customerService.updateTenantId(customer.getId(), tenantId,password);
-					}
-				}
+			if(customer.getTenantId()==null||"".equals(customer.getTenantId())){		
+				customer=customerService.saveCustomer(customer, access_token, imagePath);
 			}
-			
-			List<OrdersDetail> ordersDetailList = ordersService.getOrdersDetail(id);
-			JSONObject orderJson = new JSONObject();
-			orderJson.put("referenceCustomerId", tenantId);
-			orderJson.put("billingCycle", orders.getBillingCycle());
-			orderJson.put("creationDate", null);
-			orderJson.put("attributes", "'objectType': 'order'");
-			JSONArray jsonArr = new JSONArray();  
-			for(int i=0;i<ordersDetailList.size();i++){
-				OrdersDetail ordersDetail = ordersDetailList.get(i);
-				JSONObject ordersDetailJson = new JSONObject();
-				ordersDetailJson.put("lineItemNumber", i);
-				ordersDetailJson.put("offerId", ordersDetail.getOfferId());
-				ordersDetailJson.put("friendlyName", ordersDetail.getOfferName());
-				ordersDetailJson.put("quantity", ordersDetail.getQuantity());
-				//此处需要验证MPNID是否有效
-				if(orders.getMpnId()!=null){
-					JSONObject json = RestfulUtil.getMpnId(access_token,orders.getMpnId());
-					if(json.get("responseCode").toString().startsWith("2")){
-						ordersDetailJson.put("partnerIdOnRecord",orders.getMpnId());
-					}
-				}
-				ordersDetailJson.put("attributes", "'objectType': 'orderLineItems'");
-				jsonArr.add(ordersDetailJson);
+			tmpOrders.setCustomer(customer);
+			//坐席续费
+			if("1".equals(orders.getType())){//如果是续订,更新续订时长（单位：月）
+				ordersService.renewOrders(orders,access_token);
+			}else{//新增订阅
+				String message = ordersService.CreateOrders(tmpOrders, access_token,imagePath);
+				logger.debug("新增订阅ordersId"+tmpOrders.getOrderId()+":"+message);
 			}
-			orderJson.put("lineItems", jsonArr);
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/orders";
-			String method = "POST";
-			Map<String, String> paramHeader = new HashMap<String, String>();
-			paramHeader.put("Accept", "application/json");
-			paramHeader.put("Content-Type", "application/json");
-			paramHeader.put("Authorization",  "Bearer "+access_token);
-			String paramBody = orderJson.toString();       
-			JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,paramBody);
-			if(resultJson.get("responseCode").toString().startsWith("2")){
-				//2018-04-02 该接口返回值前有一个特殊符号，需要截取掉再转换成json
-				String result = resultJson.get("result").toString();
-				JSONArray orderArr = new JSONArray();
-				if(result.indexOf("{")>=0){
-					JSONObject reOrderJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
-					String orderId = reOrderJson.get("id")==null?"":reOrderJson.get("id").toString();
-					//ordersService.updateOrderId(Integer.valueOf(id), orderId);
-					tmpOrders.setOrderId(orderId);//对应O365订单Id
-					orderArr = JSONArray.fromObject(reOrderJson.get("lineItems"));
-				}
-
-				for (Object obj : orderArr){
-					JSONObject o = (JSONObject) obj;
-					OrdersDetail newOrdersDetail = new OrdersDetail();
-					newOrdersDetail.setSubscriptionId(o.getString("subscriptionId"));
-					newOrdersDetail.setOfferId(o.getString("offerId"));
-					newOrdersDetail.setOrdersId(Integer.valueOf(id));
-					ordersService.updateOrdersDetail(newOrdersDetail);
-					
-					if("1".equals(orders.getType())){//如果是续订
-						
-					}else{
-						//将数据写入订阅信息表
-						for(int i=0;i<ordersDetailList.size();i++){
-							OrdersDetail ordersDetail = ordersDetailList.get(i);
-							if(id.equals(ordersDetail.getOrdersId())&&o.getString("offerId").equals(ordersDetail.getOfferId())){
-								Subscription subscription = new Subscription();
-								subscription.setDetailId(ordersDetail.getId());
-								subscription.setOfferId(ordersDetail.getOfferId());
-								subscription.setOfferName(ordersDetail.getOfferName());
-								subscription.setQuantity(ordersDetail.getQuantity());
-								subscription.setEffectTime(new Date());
-								subscription.setRenew(0);
-								subscription.setBillingCycle(ordersDetail.getBillingCycle());
-								subscription.setSubscriptionId(o.getString("subscriptionId"));
-								subscription.setMpnId(orders.getMpnId());
-								subscription.setReseller(orders.getReseller());
-								subscription.setCreateUser(ordersDetail.getCreateUser());
-								ordersService.insertSubscription(subscription);
-							}
-						}
-					}
-				}
-			}
-			tmpOrders.setEffectTime(new Date());
 		}else if("0".equals(opinion)){//审核不通过，退回。
 			tmpOrders.setStatus("3");
+			ordersService.updateOrders(tmpOrders);
+			if(customer!=null&&"1".equals(customer.getStatus())){//如果客户信息未审核通过，则客户状态变更为“已退回”
+				customerService.updateTenantId(customer.getId(), null, null, "3");
+			}
 		}
-
-		ordersService.updateOrders(tmpOrders);
+		
         return "redirect:listOrders.html?flag=audit";
 	}
 
@@ -456,7 +380,7 @@ public class OrdersController {
 	public void checkMpnId(String mpnId,HttpServletResponse response,HttpSession session){
 		
 		String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-		if(access_token == null){//如果session中不包含access_token，则通过调用接口重新获取token
+		if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
 			JSONObject resultJson = RestfulUtil.getToken();
 			access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
 			session.setAttribute(Const.ACCESS_TOKEN, access_token);		
@@ -492,7 +416,7 @@ public class OrdersController {
 		
 		paraMap.put("page", page);
 		paraMap.put("customerId", customerId);
-		if(user!=null&&user.getRoleId()!=2){
+		if(user!=null&&user.getRoleId()!=2){//如果不是总代理商，则只查询自己名下的订阅信息
 			paraMap.put("createUser", user.getLoginname());
 		}
 		List<Object> subscriptionList = ordersService.listSubscription(paraMap);
@@ -513,7 +437,7 @@ public class OrdersController {
 		List<PubCode> billingList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
 		String isTrial = null;
 		User user= (User)session.getAttribute(Const.SESSION_USER);
-		if(user!=null&&user.getRoleId()!=2){
+		if(user!=null&&user.getRoleId()!=null&&user.getRoleId()!=2){
 			isTrial = "0";
 		}
 		List<Offer> listParentOffer = offerService.listOfferByLevel(1,isTrial);
@@ -566,25 +490,25 @@ public class OrdersController {
 		model.addAttribute("ordersDetailMap", ordersDetailMap);
 		model.addAttribute("flag", "edit");
 		model.addAttribute("customerId", orders.getCustomerId());
-		model.addAttribute("ordersId", orders.getId());
+		model.addAttribute("orders", orders);
 		model.addAttribute("roleId", user==null?null:user.getRoleId());
 		return "orders/orders_add";
 	}
 	
 	/**
-	 * 保存订单信息（如果用户不存在，则先保存用户信息）
+	 * 订阅续订
 	 * @param orders
 	 * @return
 	 * @throws Exception 
 	 */
 	@RequestMapping(value="/renewOrders")
 	public ModelAndView renewOrders(String detailId,HttpSession session,HttpServletRequest req){
-		
+		User user = (User) session.getAttribute(Const.SESSION_USER);
 		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
 		OrdersDetail ordersDetail = ordersService.selectOrdersDetail(detailId);
 		Orders orders = ordersService.getOrdersById(ordersDetail.getOrdersId().toString());
 		Customer customer = customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
-		
+
 		//新建orders
 		orders.setId(null);
 		Date day=new Date();
@@ -598,11 +522,25 @@ public class OrdersController {
 			ordersNo = "ORDER-VSTECS-"+num;
 		}
 		
+		
 		orders.setOrdersNo(ordersNo);
 		orders.setStatus("0");//0:新增;1:已提交;2:已审核。
 		orders.setCreateTime(day);
 		orders.setCreateUser(userId);
 		orders.setType("1");//续订
+
+		BigDecimal discount = null;
+		if(user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
+			Credit credit = creditService.queryCredit(user.getUserId());
+			discount = credit ==null?null:credit.getDiscount();
+		}
+		OfferPrice offerPrice = offerPriceService.getPriceByOfferId(ordersDetail.getOfferId());
+		BigDecimal amount = offerPrice.getPriceYear()==null?new BigDecimal(0):offerPrice.getPriceYear().multiply(new BigDecimal(ordersDetail.getQuantity()));
+		BigDecimal actualAmount = amount.multiply(discount==null?new BigDecimal(1):discount.divide(new BigDecimal(100)));
+
+		orders.setSum(amount);
+		orders.setActualSum(actualAmount);
+		orders.setDiscount(discount);
 		ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
 
 		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
@@ -612,6 +550,8 @@ public class OrdersController {
 		ordersDetail.setOrdersId(orders.getId());
 		ordersDetail.setBillingCycle(orders.getBillingCycle());
 		ordersDetail.setCreateUser(userId);
+		ordersDetail.setAmount(amount.setScale(2));
+		ordersDetail.setActualAmount(actualAmount.setScale(2));
 		ordersDetailList.add(ordersDetail);
 		ordersService.insertOrdersDetail(ordersDetailList);
 		
@@ -627,6 +567,7 @@ public class OrdersController {
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("statusMap", statusMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
+		mv.addObject("roleId", user.getRoleId());
 		//返回订单信息
 		mv.setViewName("orders/orders_detail");
 		return mv;

@@ -13,14 +13,13 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <style type="text/css">
 	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;}
 	.center{width:100%;height:400px;background: url(images/login_bg.jpg);}
-	.left{float:left;width:100%;height:100%;background: url(images/login-wel.gif) bottom no-repeat;}
+	.left{float:left;width:100%;height:100%;}
 	.info{font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:32px;line-height: 32px;color: #333333;}
 	.label{margin-left:50px;width:120px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block;text-align: right;}
 	.input{width:250px;height:20px;margin-left:20px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:15px;cursor: pointer;}
 	.errInfo{color:red;width:250px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block; }
 	.left_txt{font-family: Arial, Helvetica, sans-serif;font-size: 12px;line-height: 25px;color: #666666;}
-	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -29,7 +28,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<div class="center">
 		<div class="left">
 			<div style="width:100%;height:auto;margin-top:5px;">
-			<form action="user/changePassword.html" method="post" name="registForm" onsubmit="return check();" enctype="multipart/form-data">
+			<form action="user/changePassword.html" method="post" name="registForm" onsubmit="return check();">
 				<div class="info">
 					<label class="label">原密码<font color="red">*</font></label>
 					<input type="password" name="password" id="password" class="input" value=""/>
@@ -52,9 +51,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			</form>
 			</div>
 		</div>
-	</div>
-	<div class="bottom">
-	Copyright &copy; 2018 伟仕佳杰
 	</div>
 </div>
 	<script type="text/javascript">

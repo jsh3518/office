@@ -9,6 +9,15 @@ public interface PubCodeMapper  {
 
 	public List<PubCode> listPagePubCode(PubCode pubCode);
 	
+	public PubCode getPubCodeById(String id);
+	
+	public PubCode getPubCode(PubCode pubCode);
+	
 	public void insertPubCode(PubCode pubCode);
 
+	public void updatePubCode(PubCode pubCode);
+	
+	public void deletePubCode(String id);
+	
+	public int getCount(PubCode pubCode);
 }

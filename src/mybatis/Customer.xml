@@ -63,6 +63,13 @@
 	</update>
 	
 	<update id="updateTenantId" parameterType="int">
-		update customer set tenantid=#{tenantId},password=#{password} where id=#{id}
+		update customer set tenantid=#{tenantId}
+		<if test="password!=null and password!=''">
+			and password=#{password}
+		</if>
+		<if test="status!=null and status!=''">
+			and status=#{status}
+		</if>
+		where id=#{id}
 	</update>
 </mapper>

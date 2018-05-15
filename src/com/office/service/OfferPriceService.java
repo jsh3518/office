@@ -12,9 +12,14 @@ public interface OfferPriceService {
 	public List<OfferPrice> listPageOfferPrice(OfferPrice offerPrice);
 	
 	/*
-	 * 查询产品id查询价格
+	 * 根据id查询价格
 	 */
 	public OfferPrice getOfferPriceById(String id);
+	
+	/*
+	 * 查询产品id查询价格
+	 */
+	public OfferPrice getPriceByOfferId(String offerId);
 	
 	/*
 	 * 保存产品价格

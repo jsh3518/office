@@ -39,5 +39,6 @@
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/commons-codec-1.11.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/mybatis-3.0.4.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/mybatis-spring-1.0.0.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

@@ -13,6 +13,7 @@ public class Orders {
 	private Date effectTime;//生效时间
 	private BigDecimal sum;//金额
 	private BigDecimal actualSum;//实际金额
+	private BigDecimal discount;//折扣
 	private String status;//状态
 	private String mpnId;//经销商Id
 	private String reseller;//经销商名称
@@ -54,6 +55,12 @@ public class Orders {
 	}
 	public void setActualSum(BigDecimal actualSum) {
 		this.actualSum = actualSum;
+	}
+	public BigDecimal getDiscount() {
+		return discount;
+	}
+	public void setDiscount(BigDecimal discount) {
+		this.discount = discount;
 	}
 	public String getStatus() {
 		return status;

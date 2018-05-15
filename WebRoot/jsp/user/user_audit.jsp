@@ -22,7 +22,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.file{width:250px;height:20px;margin-left:20px;vertical-align: middle;}
 	.organ_select{width:82px;height:20px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:10px;cursor: pointer;}
-	.audit_info img{vertical-align: middle;cursor: pointer;}
+	.audit_info img{vertical-align: middle;cursor: pointer;width:430px;height:auto;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -109,7 +109,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="audit_info">
 					<label class="audit_label">营业执照扫描件：</label><br>
 					<div style="height:280px;width: 450px;overflow:auto;margin-left: 20px">
-						<img height="auto" width="430px" src="<%=basePath%>files/${user.file}">
+						<img src="<%=basePath%>files/${user.file}">
 					</div>
 				</div>
 			</div>

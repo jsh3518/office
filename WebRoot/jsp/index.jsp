@@ -18,6 +18,7 @@
 			<a href="javascript:logout();"><img src="images/out.gif" border="0"/></a>
 		</div>
 	</div>
+	
 	<div class="main_content">
 		<div class="content_left">
 			<c:forEach items="${menuList}" var="menu">

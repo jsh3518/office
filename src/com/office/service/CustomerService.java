@@ -1,6 +1,7 @@
 package com.office.service;
 
 import java.util.List;
+
 import com.office.entity.Customer;
 
 public interface CustomerService {
@@ -23,5 +24,9 @@ public interface CustomerService {
 	/*
 	 * 更新Office客户Id
 	 */
-	public void updateTenantId(int id,String tenantId,String password);
+	public void updateTenantId(int id,String tenantId,String password,String status);
+	/*
+	 * 在微软新增客户信息
+	 */
+	public Customer saveCustomer(Customer customer,String access_token,String imagePath);
 }

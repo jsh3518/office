@@ -15,7 +15,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
 	.center{width:100%;margin-top:10px; height:415px;background: url(images/login_bg.jpg);}
 	.title{text-align:left;font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#666666;font-weight:bold;}
-	.info{font-family:Arial,Helvetica,sans-serif;font-size:12px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:3px}
+	.info{width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:3px}
 	.select{width:150px;height:20px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-left:15px;cursor: pointer;text-align: center}
 	.left{width:105px;vertical-align:middle;text-align:right; color:#262626;float:left;}
@@ -24,8 +24,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.checkbox{width:15px;height:15px;vertical-align:middle;font-size:12px;color:#222;border:1px solid #ccc;border-radius:4px;}
 	.error{float: left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
 	.table{margin-left:20px;width:100%;cellpadding:0; cellspacing:0;font-family:Arial,Helvetica,sans-serif;}
-	.table td{font-size:13px;text-align: left;}
-	.table th{font-size:14px;text-align: left;}
+	.table td{font-size:13px;text-align: left;width:33%;}
+	.info img{vertical-align: middle;cursor: pointer;width:auto;height:225px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -38,12 +38,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="left">订单编号：</label>
 					<div class="right"><input name="ordersNo" id="ordersNo" class="input" readonly="readonly" value="${orders.ordersNo }"/></div>
-				</div>
-				<div class="info">
 					<label class="left">订单时间：</label>
 					<div class="right"><div class="input"><fmt:formatDate value="${orders.createTime }" pattern="yyyy-MM-dd HH:mm:ss"/></div></div>
-				</div>
-				<div class="info">	
 					<label class="left">订单状态：</label>
 					<div class="right">
 						<input name="status" id="status" style="display:none" value="${orders.status }"/>
@@ -53,20 +49,14 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="left">客户名称：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.companyName }"/></div>
-				</div>
-				<div class="info">
 					<label class="left">主域名：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.domain }.partner.onmschina.cn"/></div>
-				</div>
-				<div class="info">
 					<label class="left">主要联系人：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.lastName }${orders.customer.firstName }"/></div>
 				</div>
 				<div class="info">
 					<label class="left">邮箱：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.email }"/></div>
-				</div>
-				<div class="info">
 					<label class="left">经销商：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.reseller }"/></div>
 				</div>
@@ -74,11 +64,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<fieldset>
 				<legend>订阅信息</legend>
 				<table class="table">
-					<tr>
-						<th width="33%">&nbsp;</th>
-						<th width="33%">数量</th>
-						<th width="33%">记帐频率</th>
-					</tr>
 					<c:forEach items="${ordersDetailMap}" var="ordersDetailMap" >
 					<tr>
 						<td class="title">${ordersDetailMap.key}</td>
@@ -89,7 +74,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<tr>
 								<td>${ordersDetail.offerName}</td>
 								<td>${ordersDetail.quantity}许可证</td>
-								<td>${billingCycleMap[ordersDetail.billingCycle]}</td>
+								<td>${orders.reseller}</td>
 							</tr>
 						</c:forEach>
 					</c:forEach>
@@ -97,7 +82,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			</fieldset>
 			<fieldset>
 				<legend>付款信息</legend>
+				<div class="info" id ="sumDiv">
+					<label class="left">金额：</label>
+					<div class="right"><input class="input" readonly="readonly" name="sum" id="sum" value="${orders.sum }"/></div>
+					<label class="left">结算金额：</label>
+					<div class="right"><input class="input" readonly="readonly" name="actualSum" id="actualSum" value="${orders.actualSum }"/></div>
+					<label class="left">折扣：</label>
+					<div class="right"><input class="input" readonly="readonly" name="discount" id="discount" value="${orders.discount }" style="width: 40px" onblur="calSum()"/>%</div>
+				</div>
 				<div class="info" id ="paymentDiv">
+					<label class="left">计费频率<font color="red">*</font>：</label>
+					<div class="right" id="billings">
+	      		<c:forEach var="billing" varStatus="status" items="${billingCycleList}">
+	      			<span <c:if test="${orders.billingCycle=='none'&&billing.code!='none'||orders.billingCycle!='none'&&billing.code=='none'}">style="display:none"</c:if>>
+	      				<input type="radio" name="billingCycle" id="billingCycle" value="${billing.code }" <c:if test="${orders.billingCycle==billing.code}">checked="checked"</c:if> disabled="disabled"/>${billing.name }
+	          	</span>
+	          </c:forEach>
+	     		</div>
 					<label class="left">付款方式<font color="red">*</font>：</label>
 					<div class="right">
 						<select name="payment" id="payment" class="select" onChange="changePayment(this.value)" disabled="disabled">
@@ -108,10 +109,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						</select>
 					</div>
 				</div>
-				<div class="info" id="voucherDiv" style="height: auto">
+				<div class="info" id="voucherDiv" style="height: auto;">
 					<label class="left">付款凭证<font color="red">*</font>：</label>
 					<input type="file" id="voucher" name="voucher" class="file" value="${orders.file }" disabled="disabled">
-					<img height="225px" id="voucherImg" width="auto" src="<%=basePath%>files/${orders.file}">
+					<img id="voucherImg" src="<%=basePath%>files/${orders.file}">
 				</div>
 			</fieldset>
 			<div class="info" style="margin-top: 5px">
@@ -126,6 +127,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		$(document).ready(function(){
 			var status = "${orders.status}";
 			if(status=="1"){//如果订单是“已提交”状态
+				$("input[name='billingCycle']").attr("disabled",false);
 				$("#submitBtn").show();
 				$("#backBtn").show();
 			}else{
@@ -159,7 +161,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$("#submitBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
 			$("#returnBtn").attr("disabled",true);
-			window.location="<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1";
+			window.location="<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1&billingCycle="+$("#billingCycle:checked").val();
 		}
 	</script>
 </body>

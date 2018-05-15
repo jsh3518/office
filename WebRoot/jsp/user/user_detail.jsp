@@ -22,7 +22,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.file{width:250px;height:20px;margin-left:20px;vertical-align: middle;}
 	.organ_select{width:82px;height:20px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-right:10px;cursor: pointer;}
-	.info img{vertical-align: middle;cursor: pointer;}
+	.info img{vertical-align: middle;cursor: pointer;width:430px;height:auto;}
 	.errInfo{color:red;width:150px;height:20px;line-height: 20px;vertical-align: middle;display:inline-block; }
 	.font{color:red;display: none }
 </style>
@@ -107,7 +107,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="label">营业执照扫描件<font class="font">*</font></label><br>
 					<div style="height:280px;width: 450px;overflow:auto;margin-left: 20px">
-						<img height="auto" width="430px" src="<%=basePath%>files/${user.file}">
+						<img src="<%=basePath%>files/${user.file}">
 					</div>
 				</div>
 			</div>
@@ -290,7 +290,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				$("#codeerr").html("验证码不能为空!");
 				con=0;
 			}else{
-				  var url = "user/checkCode.html";
+				  var url = "code/checkCode.html";
 					var postData = {"code":$("#code").val()};
 					$.post(url,postData,function(data){	
 						if(data!=""){

@@ -9,6 +9,8 @@ public interface OfferPriceMapper  {
 	
 	public OfferPrice getOfferPriceById(String id);
 	
+	public OfferPrice getPriceByOfferId(String offerId);
+	
 	public void insertOfferPrice(OfferPrice offerPrice);
 	
 	public void updateOfferPrice(OfferPrice offerPrice);
