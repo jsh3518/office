@@ -43,5 +43,7 @@ public interface OrdersMapper  {
 	
 	public List<Object> listPageSubscription(Map<String,Object> map);
 	
-	public void updateRenew(@Param("detailId")String detailId,@Param("renew")int renew);
+	public void updateSubscriptionRenew(@Param("detailId")String detailId,@Param("renew")int renew);
+	
+	public void updateDetailRenew(@Param("detailId")String detailId,@Param("renew")int renew);
 }

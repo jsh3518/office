@@ -17,46 +17,66 @@
 		域名：<input type="text" name="domain" value="${domain }"/>
 		<a href="javascript:search();" class="myBtn"><em>查询</em></a>
 	</div>
-	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="main_table">
-		<tr class="main_head">
-			<th>序号</th>
-			<th>订单编号</th>
-			<th>公司名称</th>
-			<th>主域名</th>
-			<th style="display: none">地址</th>
-			<th>联系人</th>
-			<th>电话号码</th>
-			<th>下单时间</th>
-			<th>订单状态</th>
-		</tr>
-		<c:choose>
-			<c:when test="${not empty ordersList }">
-				<c:forEach items="${ordersList }" var="orders" varStatus="vs">
+	<div id="table" style="overflow: auto">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="main_table">
+			<tr class="main_head">
+				<th>序号</th>
+				<th>公司名称</th>
+				<th>主域名</th>
+				<c:if test="${roleId==2 }">
+					<th>经销商</th>
+				</c:if>
+				<th>订阅产品</th>
+				<th>坐席数量</th>
+				<th>生效时间</th>
+				<th>到期时间</th>
+			</tr>
+			<c:choose>
+				<c:when test="${not empty ordersList }">
+					<c:forEach items="${ordersList }" var="orders" varStatus="vs">
+						<tr class="main_info">
+							<td>${vs.index+1 }</td>
+							<td>${orders.customer.companyName }</td>
+							<td>${orders.customer.domain }.partner.onmschina.cn</td>
+							<c:if test="${roleId==2 }">
+								<td>${orders.reseller }</td>
+							</c:if>
+							<td align="left"><a href="javascript:ordersDetail(${orders.id });">${orders.ordersNo }</a></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<c:if test="${not empty orders.detailList }">
+							<c:forEach items="${orders.detailList }" var="ordersDetail" varStatus="vs2">
+							<tr style="height:24px;line-height:24px;" <c:if test="${vs.index%2==0 }"> class="main_table_even" </c:if>>
+								<td></td>
+								<td></td>
+								<td></td>
+								<c:if test="${roleId==2 }">
+									<td></td>
+								</c:if>
+								<td align="left"><img <c:choose><c:when test="${vs2.index+1==orders.detailList.size() }">src="../images/joinbottom.gif"</c:when><c:otherwise>src="../images/join.gif"</c:otherwise></c:choose> style="vertical-align: middle;"/>${ordersDetail.offerName }</td>
+								<td>${ordersDetail.quantity }</td>
+								<td><fmt:formatDate value="${ordersDetail.effectTime }" pattern="yyyy-MM-dd HH:mm:ss"/>&nbsp;</td>
+								<td><fmt:formatDate value="${ordersDetail.dueTime }" pattern="yyyy-MM-dd HH:mm:ss"/>&nbsp;</td>
+							</tr>
+							</c:forEach>
+						</c:if>
+					</c:forEach>
+				</c:when>
+				<c:otherwise>
 					<tr class="main_info">
-						<td>${vs.index+1 }</td>
-						<td><a href="javascript:ordersDetail(${orders.id });">${orders.ordersNo }</a></td>
-						<td>${orders.customer.companyName }</td>
-						<td>${orders.customer.domain }.partner.onmschina.cn</td>
-						<td style="display: none" >${orders.customer.provincialName }${orders.customer.cityName }${orders.customer.regionName }</td>
-						<td>${orders.customer.lastName }${orders.customer.firstName }</td>
-						<td>${orders.customer.phoneNumber }</td>
-						<td><fmt:formatDate value="${orders.createTime }" pattern="yyyy-MM-dd HH:mm:ss"/></td>
-						<td>${statusMap[orders.status]}</td>
+						<td colspan="9">没有相关数据</td>
 					</tr>
-				</c:forEach>
-			</c:when>
-			<c:otherwise>
-				<tr class="main_info">
-					<td colspan="9">没有相关数据</td>
-				</tr>
-			</c:otherwise>
-		</c:choose>
-	</table>
+				</c:otherwise>
+			</c:choose>
+		</table>
+	</div>
 		<div class="page_and_btn">
 		<c:if test="${flag != 'audit'}">
-		<div>
-			<a href="javascript:addCustomer();" class="myBtn"><em>新增</em></a>
-		</div>
+			<div>
+				<a href="javascript:addCustomer();" class="myBtn"><em>新增</em></a>
+			</div>
 		</c:if>
 		${page.pageStr }
 	</div>
@@ -64,9 +84,17 @@
 	<script type="text/javascript" src="../js/jquery-1.5.1.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			resetHeight();
 			$(".main_info:even").addClass("main_table_even");
 		});
-		
+		//设置高度
+		function resetHeight(){
+			var height = $(window).height()<$(document).height()?$(window).height():$(document).height();
+			$("#table").height(height-90);
+		}
+		$(window).resize(function() {
+			resetHeight();
+		});
 		function addCustomer(){
 			window.location="../customer/forAdd.html";
 		}

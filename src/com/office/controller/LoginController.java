@@ -109,6 +109,9 @@ public class LoginController {
 	@RequestMapping(value="/index")
 	public String index(HttpSession session,Model model){
 		User user = (User)session.getAttribute(Const.SESSION_USER);
+		if(user==null){
+			return "login";
+		}
 		user = userService.getUserAndRoleById(user.getUserId());
 		if(user!=null){
 			session.setAttribute(Const.SESSION_USER, user); //将用户信息重新存入session

@@ -224,6 +224,7 @@ public class OrdersServiceImpl implements OrdersService {
 				newOrdersDetail.setOfferId(jsonObject.getString("offerId"));
 				newOrdersDetail.setOrdersId(orders.getId());
 				newOrdersDetail.setBillingCycle(orders.getBillingCycle());
+				newOrdersDetail.setEffectTime(new Date());
 				ordersMapper.updateOrdersDetail(newOrdersDetail);
 
 				//将数据写入订阅信息表
@@ -256,7 +257,8 @@ public class OrdersServiceImpl implements OrdersService {
 		List<OrdersDetail> ordersDetailList = ordersMapper.getOrdersDetail(orders.getId().toString());
 		for(int i=0;i<ordersDetailList.size();i++){
 			OrdersDetail ordersDetail = ordersDetailList.get(i);
-			ordersMapper.updateRenew(ordersDetail.getOriginalId(),12);
+			ordersMapper.updateSubscriptionRenew(ordersDetail.getOriginalId(),12);
+			ordersMapper.updateDetailRenew(ordersDetail.getOriginalId(),12);
 			//TODO 需要往微软写数据
 			Orders tmpOrders = new Orders();
 			tmpOrders.setId(orders.getId());

@@ -72,10 +72,13 @@ public class OrdersController {
 		String domain = req.getParameter("domain")==null?"":req.getParameter("domain");
 		String ordersNo = req.getParameter("ordersNo")==null?"":req.getParameter("ordersNo");
 		String flag = req.getParameter("flag")==null?"":req.getParameter("flag");
-		//如果为订单确认则只查询本代理商创建的订单；否则查询所有订单
-		if(!"audit".equals(flag)){
-			String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
-			map.put("createUser", userId);
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		//如果为总代审核订单，则需查询状态为已提价的订单
+		if("audit".equals(flag)){
+			map.put("status", "1");
+		}else{//否则查询自己创建的订单
+			map.put("createUser", user==null?"":user.getLoginname());
+			map.put("status", flag);
 		}
 		map.put("page", page);
 		map.put("companyName", companyName);
@@ -90,6 +93,7 @@ public class OrdersController {
 		model.addAttribute("ordersNo", ordersNo);
 		model.addAttribute("statusMap", statusMap);
 		model.addAttribute("flag", flag);
+		model.addAttribute("roleId", user==null?"":user.getRoleId());
 		return "orders/orders_list";
 	}
 	/**
@@ -168,7 +172,7 @@ public class OrdersController {
 		BigDecimal sum = new BigDecimal(0);
 		BigDecimal actualSum = new BigDecimal(0);
 		BigDecimal discount = null;
-		if(user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
+		if(user!=null&&user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
 			Credit credit = creditService.queryCredit(user.getUserId());
 			discount = credit ==null?null:credit.getDiscount();
 		}
@@ -208,6 +212,7 @@ public class OrdersController {
 		mv.addObject("statusMap", statusMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
 		mv.addObject("roleId", user.getRoleId());
+		mv.addObject("flag", 0);//新增订单
 		//返回订单信息
 		mv.setViewName("orders/orders_detail");
 		return mv;
@@ -239,6 +244,7 @@ public class OrdersController {
 		if("audit".equals(flag)){
 			return "orders/orders_audit";
 		}else{
+			model.addAttribute("flag", flag);//返回查询状态
 			return "orders/orders_detail";
 		}
 	}
@@ -254,6 +260,7 @@ public class OrdersController {
 		
 		String payment = request.getParameter("payment")==null?"":request.getParameter("payment");
 		String ordersNo = request.getParameter("ordersNo")==null?"":request.getParameter("ordersNo");
+		String flag = request.getParameter("flag")==null?"":request.getParameter("flag");
 		Integer id = request.getParameter("id") ==null?null:Integer.valueOf(request.getParameter("id"));
 
 		Orders orders = new Orders();
@@ -286,7 +293,7 @@ public class OrdersController {
 		}
 
 		ordersService.updateOrders(orders);
-        return "redirect:listOrders.html";
+        return "redirect:listOrders.html?flag="+flag;
 	}
 	
 	/**

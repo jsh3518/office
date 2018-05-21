@@ -14,6 +14,10 @@ public interface CustomerService {
 	 */
 	public Customer selectCustomerById(String id);
 	/*
+	 * 根据domain查询客户
+	 */
+	public Customer getCustomerDomain(String domain,String customerId);
+	/*
 	 * 新增客户
 	 */
 	public void insertCustomer(Customer customer);

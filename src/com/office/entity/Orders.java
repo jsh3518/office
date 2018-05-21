@@ -2,6 +2,7 @@ package com.office.entity;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 public class Orders {
 	
@@ -24,6 +25,7 @@ public class Orders {
 	private String type;//订单类型。0:新增;1:续费。
 	
 	private Customer customer;//客户信息
+	private List<OrdersDetail> detailList;//订单明细信息
 	
 	public Integer getId() {
 		return id;
@@ -135,5 +137,11 @@ public class Orders {
 	}
 	public void setCustomer(Customer customer) {
 		this.customer = customer;
+	}
+	public List<OrdersDetail> getDetailList() {
+		return detailList;
+	}
+	public void setDetailList(List<OrdersDetail> detailList) {
+		this.detailList = detailList;
 	}
 }

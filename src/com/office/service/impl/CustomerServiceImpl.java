@@ -42,6 +42,14 @@ public class CustomerServiceImpl implements CustomerService {
 	public Customer selectCustomerById(String id){
 		return customerMapper.selectCustomerById(id);
 	}
+	
+	/*
+	 * 根据domain查询客户
+	 * @see com.office.service.CustomerService#getCustomerDomain(java.lang.String,java.lang.String)
+	 */
+	public Customer getCustomerDomain(String domain,String customerId){
+		return customerMapper.getCustomerDomain(domain,customerId);
+	}
 	/*
 	 * 新增客户
 	 * @see com.office.service.CustomerService#insertCustomer(com.office.entity.Customer)

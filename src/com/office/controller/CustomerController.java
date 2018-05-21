@@ -116,7 +116,7 @@ public class CustomerController {
 	 * @param response
 	 */
 	@RequestMapping(value="/domain")
-	public void checkDomain(String domain,HttpServletResponse response,HttpSession session){
+	public void domain(String domain,String  customerId,HttpServletResponse response,HttpSession session){
 
 		String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
 		if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
@@ -125,13 +125,19 @@ public class CustomerController {
 			session.setAttribute(Const.ACCESS_TOKEN, access_token);		
 		}
 
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/domains/"+domain; 
+		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/domains/"+domain+".partner.onmschina.cn"; 
 		String method = "HEAD";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");
 		paramHeader.put("Authorization",  "Bearer "+access_token);
 		JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,null);
-		String responseCode = resultJson.get("responseCode").toString();
+		String responseCode = resultJson.get("responseCode")==null?"":resultJson.get("responseCode").toString();
+		if("".equals(responseCode)||!responseCode.startsWith("2")){
+			Customer customer = customerService.getCustomerDomain(domain,customerId);
+			if(customer!=null){
+				responseCode="900";
+			}
+		}
 		PrintWriter out;
 		try {
 			response.setCharacterEncoding("utf-8");

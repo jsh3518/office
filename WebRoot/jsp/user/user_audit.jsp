@@ -99,7 +99,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</div>
 			</div>
 			<div class="audit_left">
-				<div class="audit_info">
+				<div class="audit_info" style="display: none">
 					<label class="audit_label">代理商角色：</label>
 					<select name="roleId" id="roleId" class="role_select">
 						<option value="2">总代理商</option>

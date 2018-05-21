@@ -42,6 +42,7 @@ public class RestfulUtil {
 		try {
 			URL targetUrl = new URL(url);
 			httpConnection = (HttpURLConnection) targetUrl.openConnection();
+
 			if ("PATCH".equals(method.toUpperCase())) {
 				httpConnection.setRequestMethod("POST");
 				httpConnection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
@@ -59,7 +60,8 @@ public class RestfulUtil {
 			if (paramBody != null && !"".equals(paramBody)) {
 				httpConnection.setDoOutput(true);
 				httpConnection.setDoInput(true);
-
+				httpConnection.setConnectTimeout(30000);
+				httpConnection.setReadTimeout(30000);
 				OutputStream outputStream = httpConnection.getOutputStream();
 				outputStream.write(paramBody.getBytes());
 				outputStream.flush();

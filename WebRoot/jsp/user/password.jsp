@@ -59,9 +59,18 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		    async : false 
 		});  
 		$(document).ready(function(){
-
+			retHeight();
 		});
-	
+		//窗口改变大小
+		$(window).resize(function() {
+			retHeight();
+		});
+		//设置高度
+		function retHeight(){
+			var height = $(window).height()<$(document).height()?$(window).height():$(document).height();
+			$(".center").height(height-$(".main_header").height());
+		}
+		
 		function genTimestamp(){
 			var time = new Date();
 			return time.getTime();

@@ -188,17 +188,19 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			  con = 0;
 		  }else if($("#domain").val() !=""){
 			  var url = "customer/domain.html";
-				var postData = {"domain":$("#domain").val()+".partner.onmschina.cn"};
+				var postData = {"domain":$("#domain").val(),"customerId":""};
 				$.post(url,postData,function(data){
 					if(data==200){
 						domainDiv.after('<div class="error">域名已被占用！</div>');
+						con = 0;
+					}else	if(data==900){
+						domainDiv.after('<div class="error">域名在本系统中被临时占用！</div>');
 						con = 0;
 					}else if(data==404){
 						domainDiv.after('<div class="message">'+$("#domain").val()+'.partner.onmschina.cn可用！</div>');
 					}else{
 						domainDiv.after('<div class="error">域名验证失败！</div>');
 					}
-					
 				});
 		  }
 		}

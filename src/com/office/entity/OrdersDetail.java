@@ -1,6 +1,7 @@
 package com.office.entity;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class OrdersDetail {
 	
@@ -17,7 +18,28 @@ public class OrdersDetail {
 	private String originalId;//原订单明细Id（针对续订）
 	private String parent;//产品父级Id
 	private String parentName;//产品父级名称
+	private Date effectTime;//生效时间
+	private Date dueTime;//到期时间
+	private Integer renew;//续订时长（单位：月）
 	
+	public Date getEffectTime() {
+		return effectTime;
+	}
+	public void setEffectTime(Date effectTime) {
+		this.effectTime = effectTime;
+	}
+	public Date getDueTime() {
+		return dueTime;
+	}
+	public void setDueTime(Date dueTime) {
+		this.dueTime = dueTime;
+	}
+	public Integer getRenew() {
+		return renew;
+	}
+	public void setRenew(Integer renew) {
+		this.renew = renew;
+	}
 	public Integer getId() {
 		return id;
 	}
@@ -97,5 +119,4 @@ public class OrdersDetail {
 	public void setParentName(String parentName) {
 		this.parentName = parentName;
 	}
-
 }

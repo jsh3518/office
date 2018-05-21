@@ -34,7 +34,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 				<div class="info" style="text-align: center;">
-					<input type="button" name="saveBtn" value="提交" class="btn" onclick="submit()"/>
+					<input type="button" name="saveBtn" value="提交" class="btn" onclick="save()"/>
 					<input type="button" name="backBtn" value="返回" class="btn" onclick="back()"/>
 				</div>
 			</form>
@@ -45,28 +45,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	Copyright &copy; 2018 伟仕佳杰
 </div>
 	<script type="text/javascript">
-		var msg = "${msg}";
-		var result = false;
+
 		$.ajaxSetup({ 
 		    async : false 
 		});  
 		$(document).ready(function(){
 			changeCode();
-			if(result!=false){//跳转
-				alert("密码已发送至您的邮箱，请重新登录！");
-				window.location="<%=basePath%>login.html";
-			}else{
-				$("#codeImg").bind("click",changeCode);
-				if(msg!=""){
-					if(msg.indexOf("验证码")>-1){
-						$("#codeerr").html(msg);
-						$("#code").focus();
-					}else{
-						$("#nameerr").html(msg);
-						$("#loginname").focus();
-					}
-				}
-			}
 		});
 	
 		function genTimestamp(){
@@ -91,6 +75,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if(con==1){
 				return true;
 			}else{
+				changeCode();
 				return false;
 			}
 		}
@@ -104,7 +89,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		function valLoginname(){
 			if($("#loginname").val()==""){
 				$("#nameerr").show();
-				$("#nameerr").html("用户名不得为空！");
+				$("#nameerr").html("请输入用户名！");
 				con = 0;
 			}else{
 			  var url = "user/checkUser.html";
@@ -128,7 +113,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if ($("#code").val() == "") {
 				$("#codeerr").html("验证码不能为空!");
 				con = 0;
-			} else {
+			}else{
 				var url = "code/checkCode.html";
 				var postData = {
 					"code" : $("#code").val()
@@ -142,51 +127,21 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				});
 			}
 		}
-		//判断新密码
-		function valNewPassword(){
-			$("#newPwderr").html("");
-		  reg1=/^.*[\d]+.*$/;
-		  reg2=/^.*[A-Za-z]+.*$/;
-		  reg3=/^.*[_@#%&^+-/*\/\\]+.*$/;//验证密码
-		  var Pval = $("#newPassword").val();
-		  if( Pval ==""){
-			  $("#newPwderr").html("新密码不能为空!");
-		    con = 0;
-		  }else if(Pval.length<6){
-			  $("#newPwderr").html("密码不能小于6位，区分大小写!");
-			  con = 0;
-		  }else if(!((reg1.test(Pval) && reg2.test(Pval)) || (reg1.test(Pval) && reg3.test(Pval)) || (reg2.test(Pval) && reg3.test(Pval)))){
-			  $("#newPwderr").html("需至少包含数字、字母和符号中的两种类型!");
-			  con = 0;
-		  }else if(Pval == $("#password").val()){
-			  $("#newPwderr").html("新密码不能和原密码相同，请重新设置密码!");
-			  con = 0;
-		  }
-		}
-
-		//判断密码
-		function valPassword1(){
-			$("#pwderr1").html("");
-		  var Pval = $("#newPassword").val();
-		  var Pval1 = $("#password1").val();
-		  if( Pval !=Pval1){
-			  $("#pwderr1").html("两次输入的密码不一致!");
-			  con=0;
-		  }
-		}
 		
 		function save(){
 			if(check()){
-				var url = "user/changePassword.html";
-	
-				var postData = {"password":$("#password").val(),"newPassword":$("#newPassword").val()};
+				var url = "user/renewPassword.html";
+				var postData = {"loginname":$("#loginname").val()};
 				$.post(url,postData,function(data){
 					if(data=="success"){
-						alert("密码修改成功，请重新登陆！");
+						alert("充值后的密码已发送至您的邮箱，请重新登录！");
 						document.location = "login.html";
+					}else if(data=="fail"){
+						alert("请联系管理员修改密码！");
+						document.location = "toRenew.html";
 					}else{
 						alert(data);
-						return;
+						document.location = "toRenew.html";
 					}
 				});
 			}

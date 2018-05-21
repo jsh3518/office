@@ -33,7 +33,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <body>
 <div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
-		<form action="orders/confirmOrders.html" method="post" name="ordersForm" onsubmit="return check();" enctype="multipart/form-data">
+		<form action="orders/confirmOrders.html?flag=${flag} " method="post" name="ordersForm" onsubmit="return check();" enctype="multipart/form-data">
 			<div class="info">
 				<label class="left">订单编号：</label>
 				<div class="right"><input name="ordersNo" id="ordersNo" class="input" readonly="readonly" value="${orders.ordersNo }"/></div>
@@ -72,7 +72,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<table class="table">
 				<c:forEach items="${ordersDetailMap}" var="ordersDetailMap" >
 				<tr>
-					<td class="title">${ordersDetailMap.key}</td>
+					<td class="title" style="width: 40%">${ordersDetailMap.key}</td>
 					<td>&nbsp;</td>
 					<td>&nbsp;</td>
 				</tr>
@@ -173,7 +173,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		}
 		
 		function forBack(){
-			window.location="<%=basePath%>orders/listOrders.html";
+			var flag="${flag}";
+			if(flag==""){//如果未传递flag，返回时默认查询未完成订单
+				flag = 0;
+			}
+			window.location="<%=basePath%>orders/listOrders.html?flag="+flag;
 		}
 		
 		//编辑客户信息

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -469,7 +471,7 @@ public class UserController {
 	@RequestMapping(value="/renewPassword")
 	public void renewPassword(HttpServletRequest request,PrintWriter out,String loginname){
 
-		String errInfo = null;
+		String errInfo = "fail";
 		//根据用户登录名查询用户列表，如果长度大于1，则存在重复账号；如果长度为0，则查询无结果。
 		List<User> userList = userService.getUserByName(loginname);
 		if(userList.size()>1){
@@ -482,6 +484,7 @@ public class UserController {
 			userService.updatePassword(user.getUserId(),MD5Util.getEncryptedPwd(password));
 			user.setPassword(password);
 			sendMail(user,"password",request);
+			errInfo = "success";
 		}
 
 		out.write(errInfo);
@@ -502,7 +505,6 @@ public class UserController {
 		BodyPart contentPart = new MimeBodyPart(); // 设置邮件的文本内容
 		StringBuffer textBuffer = new StringBuffer();
 		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath()+"/";
-		textBuffer.append("<img src='cid:img'><br>");
 		textBuffer.append("<font style='font-weight:bold;' size='4'>尊敬的用户(").append(user.getUsername()).append(")</font><br>");
 		if("audit".equals(method)){
 			textBuffer.append("<p style='text-indent:2em'>您的账号已被审核成功，请您登陆系统。</p>");
@@ -511,13 +513,29 @@ public class UserController {
 			textBuffer.append("<p style='text-indent:2em'>您的密码已被重置为【"+user.getPassword()+"】。请您登陆系统后在“基本信息管理”-“修改密码”菜单下重新修改密码。</p>");
 		}
 		textBuffer.append("<p style='text-indent:2em'>登录地址：<a href='").append(basePath).append("'>").append(basePath).append("</a></p>");
+		textBuffer.append("<p style='text-indent:2em'>*本邮件是从不受监控的电子邮件地址发出的。请不要回复本邮件。</p>");
+		textBuffer.append("<hr width='400px' color='red' align='left' size=10/>");
+		textBuffer.append("<b>&nbsp;&nbsp;Office365 Support Team</b><br>");
+		textBuffer.append("<b>&nbsp;&nbsp;伟仕佳杰中国北京 集团总部</b><br>");
+		textBuffer.append("&nbsp;&nbsp;<img src='cid:qrCode'><br>");
+		textBuffer.append("<font color='red' size ='1'>&nbsp;&nbsp;关注伟仕佳杰官方微信，更多商机，更多共赢</font><br>");
+		textBuffer.append("&nbsp;&nbsp;地 址：北京市海淀区长春桥路11号万柳亿城大厦A座6/7层 100089<br>");
+		textBuffer.append("&nbsp;&nbsp;电话：400-890-1909<br>");
+		textBuffer.append("&nbsp;&nbsp;邮箱：<a href='mailto:365service@ecschina.com'>365service@ecschina.com</a><br>");
+		textBuffer.append("&nbsp;&nbsp;网 址：<a href='www.ecschina.com'>www.ecschina.com</a><br>");
+		textBuffer.append("<p><font color='grey'>本电子邮件以及其所传输的任何文件均为保密信息，仅供传送双方的个人或实体使用。如果您不是指定的收件人，那么我们在此通知您，严格禁止对这些信息进行披露、复制、分发或采取以这些信息内容为基础的任何行动。如果您是由于发送错误收到这封电子邮件或不是指定的收件人，请回电子邮件通知发件人并立即删除该电子邮件（及其所附任何文件）。除非这封电子邮件另有明文指出，否则此电子邮件的发送者的任何观点或意见纯属个人目的，不一定代表佳杰科技（中国）有限公司。佳杰科技（中国）有限公司不负责由于该电子邮件传播相关此病毒而造成的任何损害赔偿责任</font></p>");
 		try {
+			MimeBodyPart qrCode = new MimeBodyPart();
+			String imagePath = request.getSession().getServletContext().getRealPath("/") + "images"+File.separator;
+			DataHandler dh1 = new DataHandler(new FileDataSource(imagePath + "image002.png"));// 图片路径
+			qrCode.setDataHandler(dh1);
+			qrCode.setContentID("qrCode");
 			contentPart.setContent(textBuffer.toString(), "text/html;charset=utf-8");
 			multipart.addBodyPart(contentPart);
+			multipart.addBodyPart(qrCode);
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
-	
 		mail.sendMail(user.getEmail(),"账号密码修改", multipart);
 	}
 }

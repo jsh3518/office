@@ -38,7 +38,7 @@ public class Mail {
 			if(rs.next()){
 				server = rs.getString("server")==null?server:rs.getString("server");
 				user = rs.getString("account")==null?user:rs.getString("account");
-				password = rs.getString("password")==null?password:AesUtil.aesEncrypt(rs.getString("password"));
+				password = rs.getString("password")==null?password:rs.getString("password");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -56,6 +56,10 @@ public class Mail {
 		try {
 			message.setFrom(new InternetAddress(user)); //加载发件人地址
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to)); //加载收件人地址
+			//如果发件人为163邮箱，且附件有图片，为防止163服务器垃圾邮件拦截，给自己抄送一下
+			if(user.contains("@163.com")&&!user.equals(to)){
+				message.addRecipient(Message.RecipientType.CC, new InternetAddress(user));
+			}
 			message.setSubject(title); //加载标题
 			message.setContent(multipart);
 			message.saveChanges(); // 保存变化
@@ -82,8 +86,8 @@ public class Mail {
 			// 设置图片
 			MimeBodyPart img = new MimeBodyPart();
 			MimeBodyPart qrCode = new MimeBodyPart();
+			
 			DataHandler dh = new DataHandler(new FileDataSource(imagePath + "image001.png"));// 图片路径
-
 			img.setDataHandler(dh);
 			img.setContentID("img");
 			DataHandler dh1 = new DataHandler(new FileDataSource(imagePath + "image002.png"));// 图片路径

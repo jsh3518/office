@@ -13,6 +13,7 @@ public class Subscription {
 	private String billingCycle;//收费周期
 	private String subscriptionId;//O365订阅Id
 	private Date effectTime;//生效时间
+	private Date dueTime;//到期时间
 	private Integer renew;//续订时长（单位：月）
 	private String mpnId;//经销商Id
 	private String reseller;//经销商名称
@@ -72,6 +73,12 @@ public class Subscription {
 	}
 	public void setEffectTime(Date effectTime) {
 		this.effectTime = effectTime;
+	}
+	public Date getDueTime() {
+		return dueTime;
+	}
+	public void setDueTime(Date dueTime) {
+		this.dueTime = dueTime;
 	}
 	public Integer getRenew() {
 		return renew;

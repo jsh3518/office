@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>测试系统</title>
+<title>Office365订单管理系统</title>
 <link type="text/css" rel="stylesheet" href="css/index.css"/>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
@@ -20,7 +20,7 @@
 	</div>
 	
 	<div class="main_content">
-		<div class="content_left">
+		<div class="content_left" style="overflow: auto;">
 			<c:forEach items="${menuList}" var="menu">
 				<c:if test="${menu.hasMenu}">
 				<h1><a>${menu.menuName }</a></h1>
@@ -42,6 +42,7 @@
 				</div>
 				</c:if>
 			</c:forEach>
+
 		</div>
 		<div class="content_center">&nbsp;</div>
 		<div class="content_right">
@@ -108,7 +109,13 @@ function initRightContentHeightAndWidth(){
 	var width = $(window).width()<$(document).width()?$(window).width():$(document).width();
 	$(".content_right table").width(width-$(".content_left").width()-$(".content_center").width());
 	$(".content_right table tr:eq(1) td").height(height-$(".main_header").height()-$(".sys_bottom").height()-46);
+	//设置左侧菜单栏高度
+	$(".content_left").height(height-$(".main_header").height());
 }
+
+$(window).resize(function() {
+	initRightContentHeightAndWidth();
+});
 
 function getTime(){
 	var date = new Date();
