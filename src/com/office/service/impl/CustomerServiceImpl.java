@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.mail.Multipart;
 
 import com.office.entity.Customer;
+import com.office.entity.Relationship;
 import com.office.mapper.CustomerMapper;
 import com.office.service.CustomerService;
 import com.office.util.AesUtil;
@@ -33,6 +34,14 @@ public class CustomerServiceImpl implements CustomerService {
 	 */
 	public List<Customer> listCustomer(Customer customer) {
 		return customerMapper.listPageCustomer(customer);
+	}
+	
+	/*
+	 * 查询客户列表
+	 * @see com.office.service.CustomerService#queryCustomer(java.util.HashMap)
+	 */
+	public List<Customer> queryCustomer(HashMap<String, Object> map) {
+		return customerMapper.listPageCustomerQry(map);
 	}
 	
 	/*
@@ -135,5 +144,33 @@ public class CustomerServiceImpl implements CustomerService {
 			}
 		}
 		return customer;
+	}
+	
+	/*
+	 * 新增客户经销商关系
+	 * @see com.office.service.CustomerService#insertRelationship(com.office.entity.Relationship)
+	 */
+	public void insertRelationship(Relationship relationship) {
+		customerMapper.insertRelationship(relationship);
+	}
+	
+	/*
+	 * 删除客户
+	 * @see com.office.service.CustomerService#deleteCustomer(com.office.entity.Customer)
+	 */
+	public String deleteCustomer(Customer customer) {
+		String message = "success";
+		if(("0".equals(customer.getStatus())||"3".equals(customer.getStatus()))&&("".equals(customer.getTenantId())||customer.getTenantId()==null)){
+			int count = customerMapper.getOrdersCount(customer.getId());
+			if(count>=1){
+				message="该客户已下订单，无法删除！";
+			}else{
+				customerMapper.deleteCustomer(customer.getId());
+				customerMapper.deleteRelationship(customer.getId());
+			}
+		}else{
+			message="该客户无法删除！";
+		}
+		return message;
 	}
 }

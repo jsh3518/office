@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-module
   type="WEB"
-  name="pelDem"
+  name="office"
   id="myeclipse.1397018896418"
-  context-root="/pelDem"
+  context-root="/office"
   j2ee-spec="5.0"
-  archive="pelDem.war">
+  archive="office.war">
   <attributes>
     <attribute name="webrootdir" value="WebRoot" />
   </attributes>

@@ -4,17 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.office.entity.Customer;
 import com.office.entity.Orders;
 import com.office.entity.OrdersDetail;
 import com.office.entity.Subscription;
 
 public interface OrdersService {
-	
-	/*
-	 * 查询订单列表
-	 */
-	public List<Orders> listOrdersByCustomer(Customer customer);
 	
 	/*
 	 * 新增订单
@@ -78,6 +72,11 @@ public interface OrdersService {
 	public void updateSubscription(Subscription subscription);
 	
 	/*
+	 * 根据id删除订单
+	 */
+	public void deleteOrders(String ordersId);
+	
+	/*
 	 * 根据订单id删除明细信息
 	 */
 	public void deleteOrdersDetail(String ordersId);
@@ -96,4 +95,9 @@ public interface OrdersService {
 	 * 坐席续订
 	 */
 	public String renewOrders(Orders orders,String access_token);
+	
+	/*
+	 * 根据客户Id和产品id查询订阅坐席数量
+	 */
+	public int getTotalCount(String customerId,String offerId);
 }

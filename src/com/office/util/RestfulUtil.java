@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,7 +13,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,8 +48,10 @@ public class RestfulUtil {
 			httpConnection = (HttpURLConnection) targetUrl.openConnection();
 
 			if ("PATCH".equals(method.toUpperCase())) {
-				httpConnection.setRequestMethod("POST");
-				httpConnection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+				allowMethods(method.toUpperCase());
+				httpConnection.setRequestMethod("PATCH");
+				//httpConnection.setRequestMethod("POST");
+				//httpConnection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
 			} else {
 				httpConnection.setRequestMethod(method.toUpperCase());
 			}
@@ -113,6 +119,93 @@ public class RestfulUtil {
 		return resultJson;
 	}
 
+	/**
+	 * 通过restful接口从PartnerCenter（21V）获取数据
+	 * 
+	 * @param url 接口url，如有查询条件可在url中配置filter
+	 * @param method OPTIONS,GET,HEAD,POST,PUT,PATCH,DELETE,TRACE,CONNECT
+	 * @param paramHeader Header参数
+	 * @param paramBody Body中如不需要传递参数，值为NULL(例：当method为“GET”时，paramBody=null)
+	 * @return JSONObject 返回json对象 {"responseCode":"","result":""} (PartnerCenter接口返回result开头有特殊符号,需要截取处理)
+	 */
+	public static JSONObject getPartnerCenterData(String url, String method, Map<String, String> paramHeader,
+			String paramBody) {
+
+		JSONObject resultJson = new JSONObject();
+
+		StringBuffer result = new StringBuffer();
+		HttpURLConnection httpConnection = null;
+		try {
+			URL targetUrl = new URL(url);
+			httpConnection = (HttpURLConnection) targetUrl.openConnection();
+			//解决HttpURLConnection不支持"PATCH"问题
+			allowMethods(method.toUpperCase());
+			httpConnection.setRequestMethod(method.toUpperCase());
+			
+			if (paramHeader != null && !"".equals(paramHeader)) {
+				Set<String> keySet = paramHeader.keySet();
+				for (String key : keySet) {
+					httpConnection.setRequestProperty(key, paramHeader.get(key));
+				}
+			}
+
+			if (paramBody != null && !"".equals(paramBody)) {
+				httpConnection.setDoOutput(true);
+				httpConnection.setDoInput(true);
+				httpConnection.setConnectTimeout(30000);
+				httpConnection.setReadTimeout(30000);
+				OutputStream outputStream = httpConnection.getOutputStream();
+				outputStream.write(paramBody.getBytes());
+				outputStream.flush();
+			}
+
+			String responseCode = String.valueOf(httpConnection.getResponseCode());
+			resultJson.put("responseCode", responseCode);
+
+			String output;
+
+			logger.debug("Output from Server:\n");
+			if (responseCode.startsWith("2")) {
+
+				BufferedReader responseBuffer = new BufferedReader(
+						new InputStreamReader(httpConnection.getInputStream(), "UTF-8"));
+
+				while ((output = responseBuffer.readLine()) != null) {
+					result.append(output);
+					logger.debug(result);
+				}
+			} else if (httpConnection.getErrorStream() == null) {
+
+				result.append(httpConnection.getResponseMessage());
+				logger.debug(result);
+			} else {
+
+				BufferedReader responseBuffer = new BufferedReader(
+						new InputStreamReader(httpConnection.getErrorStream(), "UTF-8"));
+
+				while ((output = responseBuffer.readLine()) != null) {
+					result.append(output);
+					logger.debug(result);
+				}
+			}
+			//截取，PartnerCenter接口返回数据开头有特殊符号（空格或者不可识别的符号）
+			resultJson.put("result", result.indexOf("{")>=0?result.substring(result.indexOf("{")):result);
+
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+		} finally {
+			if (httpConnection != null)
+				httpConnection.disconnect();
+		}
+		return resultJson;
+	}
+	
 	/**
 	 * 获取总代Token
 	 * 
@@ -182,5 +275,26 @@ public class RestfulUtil {
 			JdbcPool.release(rs,statement,conn);
 		}
 		return map;
+	}
+	
+	/**
+	 * 配置HttpURLConnection支持PATCH方法，默认不支持
+	 * @param methods
+	 */
+	public static void allowMethods(String... methods) {
+		try {
+			Field methodsField = HttpURLConnection.class.getDeclaredField("methods");
+			Field modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+			modifiersField.setInt(methodsField, methodsField.getModifiers() & ~Modifier.FINAL);
+			methodsField.setAccessible(true);
+			String[] oldMethods = (String[]) methodsField.get(null);
+			Set<String> methodsSet = new LinkedHashSet<>(Arrays.asList(oldMethods));
+			methodsSet.addAll(Arrays.asList(methods));
+			String[] newMethods = methodsSet.toArray(new String[0]);
+			methodsField.set(null, newMethods);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

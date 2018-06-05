@@ -11,6 +11,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <base href="<%=basePath%>">
 <title>基础信息维护</title>
 <link type="text/css" rel="stylesheet" href="css/content.css"/>
+<style type="text/css">
+.info{
+	margin-top: 25px;
+}
+</style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
 <body>

@@ -29,6 +29,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.bottom{width:100%;height:auto;text-align:center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;color: #ABCAD3;text-decoration: none;line-height: 20px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
 </head>
 <body>
 <div style="width:650px;height:auto;margin-left:auto;margin-right:auto;">
@@ -117,7 +118,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					&nbsp;<span id="mpnIderr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
-					<label class="regist_label">上传营业执照扫描件<font color="red">&nbsp;*</font></label><input type="file" id="buslic" name="buslic" class="file">
+					<label class="regist_label">上传营业执照扫描件<font color="red">&nbsp;*</font></label><input type="file" id="buslic" name="buslic" class="file" onchange="verifyFile(this)">
 					&nbsp;<span id="fileerr" class="errInfo"></span>
 				</div>
 				<div class="regist_info">
@@ -435,6 +436,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					}
 				}
 			});
+		}
+		
+		//验证文件大小和类型
+		function verifyFile(obj){
+			var type = ".jpg,.png,.gif";//图片
+			return getFileSize(obj, type, 20, "MB");
 		}
 	</script>
 </body>

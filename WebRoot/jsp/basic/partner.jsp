@@ -18,7 +18,9 @@
 	color: red;
 	display: none
 }
-
+.info{
+	margin-top: 25px;
+}
 .hide {
 	display: none
 }

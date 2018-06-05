@@ -14,21 +14,22 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <style type="text/css">
 	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
 	.center{width:100%;margin-top:10px; height:415px;background: url(images/login_bg.jpg);}
-	.title{text-align:left;float:left; font-family:Arial,Helvetica,sans-serif;font-size:18px;height:20px;line-height:20px;color:#666666;font-weight:800;text-overflow: ellipsis;margin:3px}
-	.info{width:100%;font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:5px}
-	.edit{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#006CD8;margin:3px;display:none}
+	.title{text-align:left;float:left; font-family:Arial,Helvetica,sans-serif;font-size:18px;height:20px;line-height:20px;color:#666666;font-weight:600;text-overflow: ellipsis;margin:5px}
+	.info{width:100%;font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:5px;}
+	.edit{float:left;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#006CD8;margin:5px;display:none}
 	.select{width:150px;height:20px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-left:15px;cursor: pointer;text-align: center}
 	.left{width:105px;vertical-align:middle;text-align:right; color:#262626;float:left;}
 	.right{width:180px;vertical-align:middle;text-align: left;float:left;}
 	.input{width:200px;height:18px;align:center;vertical-align:middle;font-size:12px;color:#222;background-color:#D4E8E3; border:1px solid #ccc;border-radius:4px;}
-	.error{float: left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
+	.error{float:left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
 	.table{margin-left:20px;width:100%;cellpadding:0; cellspacing:0;font-family:Arial,Helvetica,sans-serif;}
 	.table td{font-size:13px;text-align: left;width:33%;}
 	.info img{vertical-align: middle;cursor: pointer;width:auto;height:220px;}
 </style>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 <script type="text/javascript" src="js/lhgdialog/lhgdialog.min.js?t=self&s=areo_blue"></script>
+<script type="text/javascript" src="js/common.js"></script>
 </head>
 <body>
 <div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
@@ -71,11 +72,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			</div>
 			<table class="table">
 				<c:forEach items="${ordersDetailMap}" var="ordersDetailMap" >
-				<tr>
-					<td class="title" style="width: 40%">${ordersDetailMap.key}</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				</tr>
+					<tr>
+						<td class="title" style="width: 40%">${ordersDetailMap.key}</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					</tr>
 					<c:forEach items="${ordersDetailMap.value}" var="ordersDetail">
 						<tr>
 							<td>${ordersDetail.offerName}</td>
@@ -85,41 +86,44 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</c:forEach>
 				</c:forEach>
 			</table>
-				<div class="title"  style="width:100%;">付款信息</div>
-				<div class="info" id ="sumDiv">
-					<label class="left">金额：</label>
-					<div class="right"><input class="input" readonly="readonly" name="sum" id="sum" value="${orders.sum }"/></div>
-					<label class="left">结算金额：</label>
-					<div class="right"><input class="input" readonly="readonly" name="actualSum" id="actualSum" value="${orders.actualSum }"/></div>
-					<label class="left">折扣：</label>
-					<div class="right"><input class="input" readonly="readonly" name="discount" id="discount" value="${orders.discount }" style="width: 40px" onblur="calSum()"/>%</div>
+			<div class="title"  style="width:100%;">付款信息</div>
+			<div class="info" id ="sumDiv">
+				<label class="left">金额：</label>
+				<div class="right"><input class="input" readonly="readonly" name="sum" id="sum" value="${orders.sum }"/></div>
+				<label class="left">结算金额：</label>
+				<div class="right"><input class="input" readonly="readonly" name="actualSum" id="actualSum" value="${orders.actualSum }"/></div>
+				<label class="left">折扣：</label>
+				<div class="right"><input class="input" readonly="readonly" name="discount" id="discount" value="${orders.discount }" style="width: 40px" onblur="calSum()"/>%</div>
+			</div>
+			<div class="info" id ="paymentDiv">
+				<label class="left">付款方式<font color="red">*</font>：</label>
+				<div class="right">
+					<select name="payment" id="payment" class="select" onChange="changePayment(this.value)">
+						<option value="">请选择</option>
+						<c:forEach items="${paymentList}" var="payment">
+							<option <c:if test="${payment.code == orders.payment}"> selected="selected"</c:if> value="${payment.code }">${payment.name}</option>
+						</c:forEach>
+					</select>
 				</div>
-				<div class="info" id ="paymentDiv">
-					<label class="left">付款方式<font color="red">*</font>：</label>
-					<div class="right">
-						<select name="payment" id="payment" class="select" onChange="changePayment(this.value)">
-							<option value="">请选择</option>
-							<c:forEach items="${paymentList}" var="payment">
-								<option <c:if test="${payment.code == orders.payment}"> selected="selected"</c:if> value="${payment.code }">${payment.name}</option>
-							</c:forEach>
-						</select>
-					</div>
-				</div>
-				<div class="info" id="voucherDiv" style="height: auto">
-					<label class="left">付款凭证<font color="red">*</font>：</label>
-					<input type="file" id="voucher" name="voucher" class="file" value="${orders.file }">
-					<img id="voucherImg" src="<%=basePath%>files/${orders.file}">
-				</div>
-			<input type="hidden" name="id" id="id" value="${orders.id}">
+			</div>
+			<div class="info" id="voucherDiv" style="height: auto">
+				<label class="left">付款凭证<font color="red">*</font>：</label>
+				<input type="file" id="voucher" name="voucher" class="file" value="${orders.file }" onchange="verifyFile(this)">
+				<img id="voucherImg" src="<%=basePath%>files/${orders.file}">
+			</div>
 			<div class="info" style="margin-top: 5px">
 				<input type="submit" name="submitBtn" id="submitBtn" value="确认" class="btn" style="display:none"/>
 				<input type="button" name="backBtn" id="backBtn" value="返回" class="btn" onclick="forBack()"/>
+			</div>
+			<div style="display: none">
+				<input type="text" name="id" id="id" value="${orders.id}" />
 			</div>
 		</form>
 	</div>
 </div>
 	<script type="text/javascript">
 		$(document).ready(function(){
+
 			var status = "${orders.status}";
 			if(status=="0"||status=="3"){//如果订单是“新增”或“退回”状态，允许修改订阅信息、付款方式和付款凭证
 				if("${orders.type}"==1){//如果为续订，则订阅信息不允许修改
@@ -208,6 +212,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			con=1;
 			$("#submitBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
+			valOffer();
 			calSum();
 			valPayment();
 			valFile();
@@ -217,6 +222,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				$("#submitBtn").attr("disabled",false);
 				$("#backBtn").attr("disabled",false);
 				return false;
+			}
+		}
+		
+		//判断订阅信息
+		function valOffer(){
+			var ordersDiv = $("#ordersDiv");
+			ordersDiv.siblings('.error').remove();
+			if("${not empty ordersDetailMap }"=="false"){
+				ordersDiv.after('<div class="error">未选择任何订阅！</div>');
+				con = 0;
 			}
 		}
 		
@@ -248,6 +263,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}else{
 				$("#voucherDiv").show();
 			}
+		}
+		
+		//验证文件大小和类型
+		function verifyFile(obj){
+			var type = ".jpg,.png,.gif";//图片
+			return getFileSize(obj, type, 20, "MB");
 		}
 	</script>
 </body>

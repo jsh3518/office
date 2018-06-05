@@ -79,7 +79,7 @@
 		<if test="companyName!=null and companyName!=''">
 			and c.companyname like "%"#{companyName}"%"
 		</if>
-		<if test="domain!=null and domain!=0">
+		<if test="domain!=null and domain!=''">
 			and c.domain like "%"#{domain}"%"
 		</if>
 		)
@@ -94,8 +94,8 @@
 		</if>
 		<if test="status!=null and status!=''">
 			<choose>
-			  <when test="status==1">
-	        and o.status in(1,3)
+			  <when test="status==0">
+	        and o.status in(0,3)
 		    </when>
 		    <otherwise>
 		    	and o.status = #{status}
@@ -121,7 +121,8 @@
 	</select>
 	
 	<select id="getOrdersDetail" resultMap="detailResultMap">
-		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid
+		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid,
+				s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
@@ -130,7 +131,7 @@
 	
 	<select id="selectOrdersDetail" resultMap="detailResultMap">
 		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid,
-				s.effecttime,date_add(date_add(s.effecttime, interval 12+s.renew month), interval -1 day) duetime
+				s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
@@ -220,6 +221,10 @@
 		</if>
 	</update>
 	
+	<delete id="deleteOrders" parameterType="String">
+		delete from orders where id=#{ordersId}
+	</delete>
+	
 	<delete id="deleteOrdersDetail" parameterType="String">
 		delete from orders_detail where ordersid=#{ordersId}
 	</delete>
@@ -236,10 +241,16 @@
 	</if>
 		order by s.offerid,s.effecttime
 	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		select count(id) from orders where customerid=#{customerId}
+	</select>
+	
 	<!-- 更新 subscription表-->
 	<update id="updateSubscriptionRenew">
 		update subscription set renew=IFNULL(renew,0)+#{renew} where detailId = #{detailId}
 	</update>
+	
 		<!-- 更新 orders_detail表-->
 	<update id="updateDetailRenew">
 		update orders_detail set renew=IFNULL(renew,0)+#{renew} where id = #{detailId};

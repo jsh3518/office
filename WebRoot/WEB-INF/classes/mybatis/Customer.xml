@@ -3,7 +3,8 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.CustomerMapper">
 	<sql id="customerColumns">companyname,country,province,city,region,address,postalcode,email,firstname,lastname,phonenumber,domain,domain1,domain2,status,tenantid,createtime,createuser</sql>
-
+	<sql id="relationshipColumns">customerid,userid,mpnid,starttime,endtime,valid</sql>
+	
 	<resultMap type="Customer" id="customerResultMap">
 		<id column="id" property="id"/>
 		<result column="companyname" property="companyName"/>
@@ -30,6 +31,16 @@
 		<result column="createuser" property="createUser"/>
 	</resultMap>
 	
+	<resultMap type="Relationship" id="relationshipResultMap">
+		<id column="id" property="id"/>
+		<result column="customerid" property="customerId"/>
+		<result column="userid" property="userId"/>
+		<result column="mpnid" property="mpnId"/>
+		<result column="starttime" property="startTime"/>
+		<result column="endtime" property="endTime"/>
+		<result column="valid" property="valid"/>
+	</resultMap>
+	
 	<select id="listPageCustomer" resultMap="customerResultMap">
 		select u.*,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName
 		 	from customer u
@@ -45,6 +56,36 @@
 		</if>
 	</select>
 
+	<select id="listPageCustomerQry" resultMap="customerResultMap">
+		select u.*,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName
+		 	from customer u
+			left join organ p on u.province = p.orgid and p.level = 1 and p.valid = 1
+			left join organ c on u.city = c.orgid and c.level = 2 and c.valid = 1
+			left join organ d on u.region = d.orgid and d.level = 3 and d.valid = 1
+		 where 1=1
+		<if test="companyName!=null and companyName!=''">
+			and u.companyname like "%"#{companyName}"%"
+		</if>
+		<if test="domain!=null and domain!=''">
+			and u.domain like "%"#{domain}"%"
+		</if>
+		<if test="userId!=null and userId!='' or mpnId!=null and mpnId!='' ">
+			and exists(select 1 from relationship r where r.customerid = u.id
+			<choose>
+			  <when test="userId!=null and userId!='' and mpnId!=null and mpnId!=''">
+	        and( r.userid = #{userId} or r.mpnid = #{mpnId})
+		    </when>
+			  <when test="userId!=null and userId!=''">
+	        and r.userid = #{userId}
+		    </when>
+		    <otherwise>
+		    	and r.mpnid = #{mpnId}
+		    </otherwise>
+	    </choose>
+		)
+		</if>
+	</select>
+	
 	<select id="selectCustomerById" resultMap="customerResultMap">
 		select u.*,p.orgname provincialName,p.abbr abbr,c.orgname cityName,d.orgname regionName
 			from customer u
@@ -71,14 +112,30 @@
 		update customer set companyname=#{companyName},country=#{country},province=#{province},city=#{city},region=#{region},address=#{address},postalcode=#{postalCode},email=#{email},firstname=#{firstName},lastname=#{lastName},domain=#{domain},phonenumber=#{phoneNumber} where id=#{id}
 	</update>
 	
-	<update id="updateTenantId" parameterType="int">
+	<update id="updateTenantId">
 		update customer set tenantid=#{tenantId}
 		<if test="password!=null and password!=''">
-			and password=#{password}
+			, password=#{password}
 		</if>
 		<if test="status!=null and status!=''">
-			and status=#{status}
+			, status=#{status}
 		</if>
 		where id=#{id}
 	</update>
+		
+	<insert id="insertRelationship" parameterType="Relationship" useGeneratedKeys="true" keyProperty="id">
+		insert relationship (<include refid="relationshipColumns"/>) values (#{customerId},#{userId},#{mpnId},#{startTime},#{endTime},#{valid})
+	</insert>
+	
+	<select id="getOrdersCount" resultType="int">
+		select sum(d.quantity) from orders_detail d,orders o where o.id = d.ordersid and o.status='1' and o.customerid=#{0} and d.offerid =#{1} 
+	</select>
+	
+	<delete id="deleteCustomer" parameterType="int">
+		delete from customer where id=#{customerId}
+	</delete>
+	
+	<delete id="deleteRelationship" parameterType="int">
+		delete from relationship where customerid=#{customerId}
+	</delete>
 </mapper>

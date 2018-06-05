@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,18 +33,23 @@ import com.office.entity.OfferPrice;
 import com.office.entity.Orders;
 import com.office.entity.Page;
 import com.office.entity.PubCode;
+import com.office.entity.Relationship;
 import com.office.entity.OrdersDetail;
+import com.office.entity.Organ;
 import com.office.entity.User;
 import com.office.service.CreditService;
 import com.office.service.CustomerService;
 import com.office.service.OfferPriceService;
 import com.office.service.OfferService;
 import com.office.service.OrdersService;
+import com.office.service.OrganService;
 import com.office.service.PubCodeService;
 import com.office.util.Const;
 import com.office.util.FileUploadUtil;
 import com.office.util.RestfulUtil;
+import com.office.util.Tools;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Controller
@@ -61,6 +67,8 @@ public class OrdersController {
 	private OfferPriceService offerPriceService;
 	@Autowired
 	private CreditService creditService;
+	@Autowired
+	private OrganService organService;
 	
 	private static Logger logger = Logger.getLogger(OrdersController.class);//输出Log日志
 	
@@ -125,14 +133,14 @@ public class OrdersController {
 		}
 		model.addAttribute("billingList", billingList);
 		model.addAttribute("offerList", offerList);
-		model.addAttribute("customerId", customer.getId());
+		model.addAttribute("customer", customer);
 		model.addAttribute("roleId", user==null?null:user.getRoleId());
 		//session.setAttribute("tempCustomer", customer);
 		return "orders/orders_add";
 	}
 
 	/**
-	 * 保存订单信息（如果用户不存在，则先保存用户信息）
+	 * 保存订单信息
 	 * @param orders
 	 * @return
 	 * @throws Exception 
@@ -341,7 +349,7 @@ public class OrdersController {
 				ordersService.renewOrders(orders,access_token);
 			}else{//新增订阅
 				String message = ordersService.CreateOrders(tmpOrders, access_token,imagePath);
-				logger.debug("新增订阅ordersId"+tmpOrders.getOrderId()+":"+message);
+				logger.info("新增订阅ordersId"+tmpOrders.getOrderId()+":"+message);
 			}
 		}else if("0".equals(opinion)){//审核不通过，退回。
 			tmpOrders.setStatus("3");
@@ -459,7 +467,7 @@ public class OrdersController {
 		model.addAttribute("offerList", offerList);
 		model.addAttribute("flag", "new");
 		model.addAttribute("roleId", user==null?null:user.getRoleId());
-		model.addAttribute("customerId", customerId);
+		model.addAttribute("customer", customerService.selectCustomerById(customerId));
 		return "orders/orders_add";
 	}
 	
@@ -496,7 +504,7 @@ public class OrdersController {
 		model.addAttribute("offerList", offerList);
 		model.addAttribute("ordersDetailMap", ordersDetailMap);
 		model.addAttribute("flag", "edit");
-		model.addAttribute("customerId", orders.getCustomerId());
+		model.addAttribute("customer", orders.getCustomer());
 		model.addAttribute("orders", orders);
 		model.addAttribute("roleId", user==null?null:user.getRoleId());
 		return "orders/orders_add";
@@ -578,5 +586,186 @@ public class OrdersController {
 		//返回订单信息
 		mv.setViewName("orders/orders_detail");
 		return mv;
+	}
+	
+	/**
+	 * 添加订单初始化页面
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/indexOrders")
+	public String indexOrders(Model model,HttpSession session){
+
+		User user= (User)session.getAttribute(Const.SESSION_USER);
+
+		List<PubCode> billingList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
+		String isTrial = null;
+		
+		if(user!=null&&user.getRoleId()!=2){
+			isTrial = "0";
+		}
+		List<Offer> listParentOffer = offerService.listOfferByLevel(1,isTrial);
+		List<Offer> offerList = new ArrayList<Offer>();
+		for(Offer offer:listParentOffer){
+			String id = offer.getOfferId();
+			offer.setSubOffer(offerService.listOfferByParent(id));
+			offerList.add(offer);
+		}
+		List<Organ> provinList = organService.listOrganByLevel(1);
+		model.addAttribute("provinList", provinList);
+		model.addAttribute("billingList", billingList);
+		model.addAttribute("offerList", offerList);
+		model.addAttribute("roleId", user==null?null:user.getRoleId());
+		return "orders/orders_index";
+	}
+
+
+	/**
+	 * 保存订单信息（如果用户不存在，则先保存用户信息）
+	 * @param orders
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value="/saveOrders",method=RequestMethod.POST)
+	public String saveOrders(Orders orders,Customer customer,HttpSession session,HttpServletRequest req){
+		
+		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
+		User user = (User) session.getAttribute(Const.SESSION_USER);
+		Date day=new Date();
+		//Customer customer = orders.getCustomer();//customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
+		if(orders.getCustomerId()==null){
+			customer.setCountry("CN");//默认中国
+			customer.setStatus("0");//新增
+			customer.setCreateUser(userId);
+			customer.setCreateTime(day);
+			customerService.insertCustomer(customer);
+			orders.setCustomerId(customer.getId());
+			Relationship relationship = new Relationship();
+			relationship.setCustomerId(customer.getId()==null?"":customer.getId().toString());
+			relationship.setUserId(userId);
+			relationship.setMpnId(user.getMpnId());
+			relationship.setStartTime(day);
+			relationship.setEndTime(Tools.str2Date("9999-12-31 23:59:59"));
+			relationship.setValid("1");
+			customerService.insertRelationship(relationship);;
+		}
+		if(orders.getId()==null||"".equals(orders.getId())){
+			
+			String maxNo = ordersService.getMaxOrdersNo(day);
+			String ordersNo;
+			if(maxNo==null||"".equals(maxNo)){
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+				ordersNo = "ORDER-VSTECS-"+ sdf.format(day)+"00001";
+			}else{
+				Long num = Long.valueOf(maxNo.substring(maxNo.length()-13))+1;
+				ordersNo = "ORDER-VSTECS-"+num;
+			}
+	
+			orders.setOrdersNo(ordersNo);
+			orders.setStatus("0");//0:新增;1:已提交;2:已审核。
+			orders.setCreateTime(day);
+			orders.setCreateUser(userId);
+			ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
+		}else{//如果订单id存在，说明是订单更新操作，需要将订单明细表数据删除后重新添加
+			orders = ordersService.getOrdersById(orders.getId().toString());
+			ordersService.deleteOrdersDetail(orders.getId().toString());
+		}
+		String[] checkbox = req.getParameterValues("checkbox");
+		String quantity;
+		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
+		BigDecimal sum = new BigDecimal(0);
+		BigDecimal actualSum = new BigDecimal(0);
+		BigDecimal discount = null;
+		if(user!=null&&user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
+			Credit credit = creditService.queryCredit(user.getUserId());
+			discount = credit ==null?null:credit.getDiscount();
+		}
+		for(String str:checkbox){
+			quantity = req.getParameter("quantity_"+str);
+			OrdersDetail ordersDetail = new OrdersDetail();
+			ordersDetail.setQuantity(quantity);
+			ordersDetail.setOfferId(str);
+			ordersDetail.setOrdersId(orders.getId());
+			ordersDetail.setBillingCycle(orders.getBillingCycle());
+			ordersDetail.setCreateUser(userId);
+			OfferPrice offerPrice = offerPriceService.getPriceByOfferId(str);
+			BigDecimal amount = offerPrice.getPriceYear()==null?new BigDecimal(0):offerPrice.getPriceYear().multiply(new BigDecimal(quantity));
+			BigDecimal actualAmount = amount.multiply(discount==null?new BigDecimal(1):discount.divide(new BigDecimal(100)));
+			ordersDetail.setAmount(amount.setScale(2));
+			ordersDetail.setActualAmount(actualAmount.setScale(2));
+			ordersDetailList.add(ordersDetail);
+			sum = sum.add(amount);
+			actualSum = actualSum.add(actualAmount);
+		}
+		orders.setActualSum(actualSum.setScale(2));
+		orders.setSum(sum.setScale(2));
+		orders.setDiscount(discount);
+		ordersService.updateOrders(orders);
+		ordersService.insertOrdersDetail(ordersDetailList);
+		return "redirect:getOrders.html?flag=0&id="+orders.getId();
+	}
+	
+	/**
+	 * 删除
+	 * @param id
+	 * @param out
+	 */
+	@RequestMapping(value="/deleteOrders")
+	public void deleteOrders(@RequestParam String id,PrintWriter out){
+		Orders orders = ordersService.getOrdersById(id);
+		ordersService.deleteOrders(id);
+		ordersService.deleteOrdersDetail(id);
+		customerService.deleteCustomer(orders.getCustomer());
+		out.write("success");
+		out.flush();
+		out.close();
+	}
+	
+	/**
+	 * 删除
+	 * @param id
+	 * @param out
+	 */
+	@RequestMapping(value="/checkQuantity")
+	public void checkQuantity(@RequestParam String customerId,@RequestParam String tenantId,@RequestParam String offerId,PrintWriter out,HttpSession session){
+		JSONObject dataJson = new JSONObject();
+		int tmpCount = ordersService.getTotalCount(customerId,offerId);
+		int quantity = 0;
+		if(tenantId!=null&&!"".equals(tenantId)){//获取21系统中该客户已下订单数量
+			String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
+			if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
+				JSONObject resultJson = RestfulUtil.getToken();
+				access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
+				session.setAttribute(Const.ACCESS_TOKEN, access_token);
+			}
+			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions";
+			String method = "GET";
+			Map<String, String> paramHeader = new HashMap<String, String>();
+			paramHeader.put("Accept", "application/json");
+			paramHeader.put("Content-Type", "application/json");
+			paramHeader.put("Authorization",  "Bearer "+access_token);
+			JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,null);
+			if(resultJson.get("responseCode").toString().startsWith("2")){
+				//2018-06-03 该接口返回值前有一个特殊符号，需要截取掉再转换成json
+				String result = resultJson.get("result").toString();
+				JSONArray subscriptionArr = new JSONArray();
+				if(result.indexOf("{")>=0){
+					JSONObject subscriptionJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
+					subscriptionArr = JSONArray.fromObject(subscriptionJson.get("items"));
+				}
+
+				for (Object obj : subscriptionArr){
+					JSONObject jsonObject = (JSONObject) obj;
+					if(offerId.equals(jsonObject.get("offerId"))){
+						quantity +=jsonObject.getInt("quantity");
+					}
+				}
+			}
+		}
+		dataJson.put("tmpCount", tmpCount);
+		dataJson.put("quantity", quantity);
+		out.write(dataJson.toString());
+		out.flush();
+		out.close();
 	}
 }

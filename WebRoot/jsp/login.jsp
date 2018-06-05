@@ -19,7 +19,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.login_info{margin-left:35px;font-family: Arial, Helvetica, sans-serif;font-size: 12px;height:36px;line-height: 36px;color: #333333;}
 	.login_input{width:150px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
 	.login_code{width:70px;height:20px;margin-left:30px;border:1px solid #7F9DB9;vertical-align: middle;}
-	.btn{width:70px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif); background-size:70px 25px;letter-spacing: 2px;margin-right:25px;cursor: pointer;}
+	.btn{width:65px;height:25px;border-width:0px;background: url(images/btn-bg2.gif) no-repeat;letter-spacing: 0px;margin-right:20px;cursor: pointer;text-align: center;}
 	.login_info img{vertical-align: middle;cursor: pointer;}
 	.errInfo{display:none;color:red;}
 	.logo{width:100%;height:40px;background: url(images/office_logo.png) no-repeat;_background:none;_filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/office_logo.png';)}

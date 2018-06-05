@@ -30,6 +30,9 @@
 				<th>坐席数量</th>
 				<th>生效时间</th>
 				<th>到期时间</th>
+				<c:if test="${flag=='0' }">
+					<th>操作</th>
+				</c:if>
 			</tr>
 			<c:choose>
 				<c:when test="${not empty ordersList }">
@@ -45,6 +48,9 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<c:if test="${flag=='0' }">
+								<td><a href="javascript:deleteOrders(${orders.id },'${orders.status }');">删除</a></td>
+							</c:if>
 						</tr>
 						<c:if test="${not empty orders.detailList }">
 							<c:forEach items="${orders.detailList }" var="ordersDetail" varStatus="vs2">
@@ -57,8 +63,11 @@
 								</c:if>
 								<td align="left"><img <c:choose><c:when test="${vs2.index+1==orders.detailList.size() }">src="../images/joinbottom.gif"</c:when><c:otherwise>src="../images/join.gif"</c:otherwise></c:choose> style="vertical-align: middle;"/>${ordersDetail.offerName }</td>
 								<td>${ordersDetail.quantity }</td>
-								<td><fmt:formatDate value="${ordersDetail.effectTime }" pattern="yyyy-MM-dd HH:mm:ss"/>&nbsp;</td>
-								<td><fmt:formatDate value="${ordersDetail.dueTime }" pattern="yyyy-MM-dd HH:mm:ss"/>&nbsp;</td>
+								<td><fmt:formatDate value="${ordersDetail.effectTime }" pattern="yyyy-MM-dd"/>&nbsp;</td>
+								<td><fmt:formatDate value="${ordersDetail.dueTime }" pattern="yyyy-MM-dd"/>&nbsp;</td>
+								<c:if test="${flag=='0' }">
+									<td></td>
+								</c:if>
 							</tr>
 							</c:forEach>
 						</c:if>
@@ -72,12 +81,7 @@
 			</c:choose>
 		</table>
 	</div>
-		<div class="page_and_btn">
-		<c:if test="${flag != 'audit'}">
-			<div>
-				<a href="javascript:addCustomer();" class="myBtn"><em>新增</em></a>
-			</div>
-		</c:if>
+	<div class="page_and_btn">
 		${page.pageStr }
 	</div>
 	</form>
@@ -102,6 +106,24 @@
 		function ordersDetail(id){
 			var url = "getOrders.html?id="+id+"&flag=${flag}";
 			window.location=url;
+		}
+		
+		//删除订单
+		function deleteOrders(id,status){
+			if(status==0||status==3){
+				if(confirm("确定要删除该记录？")){
+					var url = "deleteOrders.html?id="+id;
+					$.get(url,function(data){
+						if(data=="success"){
+							alert("订单已删除！");
+						}
+						document.location.reload();
+					});
+				}
+			}else{
+				alert("订单已提交，不能删除！");
+				return;
+			}
 		}
 		
 		function search(){

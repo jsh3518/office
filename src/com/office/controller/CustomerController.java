@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -14,10 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.office.entity.Customer;
 import com.office.entity.Organ;
+import com.office.entity.Page;
 import com.office.entity.User;
 import com.office.service.CustomerService;
 import com.office.service.OrganService;
@@ -149,4 +152,51 @@ public class CustomerController {
 			e.printStackTrace();
 		}
     }
+	
+	@RequestMapping(value="/query")
+	public String query(Model model,Page page,HttpSession session,HttpServletRequest req){
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		String companyName = req.getParameter("companyName")==null?"":req.getParameter("companyName");
+		String domain = req.getParameter("domain")==null?"":req.getParameter("domain");
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("page", page);
+		map.put("companyName", companyName);
+		map.put("domain", domain);
+		if(user!=null&&user.getRoleId()!=2){
+			map.put("userId", user.getLoginname());
+			map.put("mpnId",user.getMpnId());
+		}
+		
+		List<Customer> customerList = customerService.queryCustomer(map);
+		model.addAttribute("customerList", customerList);
+		model.addAttribute("page", page);
+		model.addAttribute("companyName", companyName);
+		model.addAttribute("domain", domain);
+		return "customer/customer_index";
+	}
+	
+	/**
+	 * 显示用户列表
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value="/getCustomer")
+	public void getCustomer(@RequestParam String customerId,HttpServletResponse response){
+		JSONObject jsonObject = new JSONObject();
+		Customer customer = customerService.selectCustomerById(customerId);
+		jsonObject.put("customer", customer);
+
+		PrintWriter out;
+		try {
+			response.setCharacterEncoding("utf-8");
+			out = response.getWriter();
+			String json = jsonObject.toString();
+			out.write(json);
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

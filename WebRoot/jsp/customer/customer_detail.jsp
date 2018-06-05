@@ -11,7 +11,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <base href="<%=basePath%>">
 <title>Office订单管理系统后台</title>
 <style type="text/css">
-	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);w}
+	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
 	.center{width:100%;height:300px;background: url(images/login_bg.jpg);}
 	.title{text-align:center;padding-left:40px;padding-bottom:10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;height:25px;line-height:25px;color:#666666;font-weight:bold;}
 	.info{font-family:Arial,Helvetica,sans-serif;font-size:12px;height:25px;line-height:25px;color:#333333;margin-bottom:25px}

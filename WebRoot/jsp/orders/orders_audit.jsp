@@ -161,6 +161,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$("#submitBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
 			$("#returnBtn").attr("disabled",true);
+			//TODO 需修改为ajax方式根据审核结果返回
+			//alert("<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1&billingCycle=$('#billingCycle:checked').val()");
+			//return;
 			window.location="<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1&billingCycle="+$("#billingCycle:checked").val();
 		}
 	</script>

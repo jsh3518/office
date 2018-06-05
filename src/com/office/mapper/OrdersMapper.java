@@ -6,14 +6,11 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.office.entity.Customer;
 import com.office.entity.Orders;
 import com.office.entity.OrdersDetail;
 import com.office.entity.Subscription;
 
 public interface OrdersMapper  {
-	
-	public List<Orders> listOrdersByCustomer(Customer customer);
 	
 	public void insertOrders(Orders orders);
 	
@@ -39,6 +36,8 @@ public interface OrdersMapper  {
 	
 	public void updateSubscription(Subscription subscription);
 	
+	public void deleteOrders(String ordersId);
+	
 	public void deleteOrdersDetail(String ordersId);
 	
 	public List<Object> listPageSubscription(Map<String,Object> map);
@@ -46,4 +45,6 @@ public interface OrdersMapper  {
 	public void updateSubscriptionRenew(@Param("detailId")String detailId,@Param("renew")int renew);
 	
 	public void updateDetailRenew(@Param("detailId")String detailId,@Param("renew")int renew);
+	
+	public int getTotalCount(String customerId,String offerId);
 }
