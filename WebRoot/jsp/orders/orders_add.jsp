@@ -264,6 +264,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    if(isNaN(value)||value==""){
 				$("#div_"+id).after('<div class="error" style="float:right">请输入数字！</div>');
 				numFlag = 0;
+	    }else if(value<=0){
+				$("#div_"+id).after('<div class="error" style="float:right">订阅数量必须大于0！</div>');
+				con = 0;
 	    }else	if(parseInt(value)>maxinum){
 				$("#div_"+id).after('<div class="error" style="float:right">最大'+maxinum+'许可证</div>');
 				numFlag = 0;

@@ -49,7 +49,7 @@ public class PubCodeController {
 	@RequestMapping(value = "/queryPubCode")
 	public ModelAndView queryPubCode(String id,String classId) {
 		PubCode pubCode = new PubCode();
-		if(id==null||"".endsWith("id")){
+		if(id==null||"".equals("id")){
 			pubCode.setClassId(classId);
 		}else{
 			pubCode = pubCodeService.getPubCodeById(id);

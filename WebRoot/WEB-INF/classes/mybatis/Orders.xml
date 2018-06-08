@@ -51,7 +51,6 @@
 		<result column="renew" property="renew"/>
 		<result column="createuser" property="createUser"/>
 		<result column="originalid" property="originalId"/>
-		
 	</resultMap>
 	
 	<resultMap type="Subscription" id="subscriptionResultMap">
@@ -66,6 +65,7 @@
 		<result column="billingcycle" property="billingCycle"/>
 		<result column="subscriptionid" property="subscriptionId"/>
 		<result column="effecttime" property="effectTime"/>
+		<result column="duetime" property="dueTime"/>
 		<result column="renew" property="renew"/>
 		<result column="mpnid" property="mpnId"/>
 		<result column="reseller" property="reseller"/>
@@ -122,7 +122,7 @@
 	
 	<select id="getOrdersDetail" resultMap="detailResultMap">
 		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid,
-				s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
+				s.subscriptionid,s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
@@ -131,21 +131,33 @@
 	
 	<select id="selectOrdersDetail" resultMap="detailResultMap">
 		SELECT s.id,s.ordersid,s.offerid,s.offername,o.offerid parent,o.offername parentname,s.quantity,billingcycle,s.amount,s.actualamount,s.createuser,s.originalid,
-				s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
+				s.subscriptionid,s.effecttime,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
 		FROM orders_detail s
 		LEFT JOIN offer c ON c.offerid = s.offerid
 		LEFT JOIN offer o ON c.parent = o.offerid
 		WHERE s.id = #{detailId}
+	</select>
+		
+	<select id="selectSubscription" resultMap="subscriptionResultMap">
+		SELECT s.id,<include refid="subscriptionColumns"/>,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
+		FROM subscription s
+		WHERE s.id = #{id}
 	</select>
 	
 	<insert id="insertOrders" parameterType="Orders" useGeneratedKeys="true" keyProperty="id">
 		insert orders (<include refid="ordersColumns"/>) values (#{ordersNo},#{billingCycle},#{customerId},#{createTime},#{effectTime},#{sum},#{actualSum},#{discount},#{status},#{mpnId},#{reseller},#{createUser},#{payment},#{file},#{orderId},#{type})
 	</insert>
 	
-	<insert id="insertOrdersDetail" parameterType="List" useGeneratedKeys="true" keyProperty="id">
+	<insert id="insertOrdersDetail" parameterType="OrdersDetail" useGeneratedKeys="true" keyProperty="id">
+		insert orders_detail (<include refid="detailColumns"/>) values
+		 (#{ordersId}, #{offerId},(select o.offername from offer o where o.offerid=#{offerId}),#{quantity},#{billingCycle},#{subscriptionId},#{amount},#{actualAmount},#{effectTime},#{renew},#{createUser},#{originalId})
+	</insert>
+	
+	<insert id="insertOrdersDetailList" parameterType="List" useGeneratedKeys="true" keyProperty="id">
 		insert orders_detail (<include refid="detailColumns"/>) values
 		<foreach collection="list" item="ordersDetail" index="index" open="(" close=")" separator="),(">
-			#{ordersDetail.ordersId}, #{ordersDetail.offerId},(select o.offername from offer o where o.offerid=#{ordersDetail.offerId}),#{ordersDetail.quantity},#{ordersDetail.billingCycle},#{ordersDetail.subscriptionId},#{ordersDetail.amount},#{ordersDetail.actualAmount},#{ordersDetail.effectTime},#{ordersDetail.renew},#{ordersDetail.createUser},#{ordersDetail.originalId}
+			#{ordersDetail.ordersId}, #{ordersDetail.offerId},(select o.offername from offer o where o.offerid=#{ordersDetail.offerId}),#{ordersDetail.quantity},#{ordersDetail.billingCycle},#{ordersDetail.subscriptionId},
+			#{ordersDetail.amount},#{ordersDetail.actualAmount},#{ordersDetail.effectTime},#{ordersDetail.renew},#{ordersDetail.createUser},#{ordersDetail.originalId}
 		</foreach>
 	</insert>
 	
@@ -230,7 +242,7 @@
 	</delete>
 	
 	<select id="listPageSubscription" resultType="Map">
-	SELECT s.id,<include refid="subscriptionColumns"/>,date_add(date_add(s.effecttime, interval 12+s.renew month), interval -1 day) duetime
+	SELECT s.id,<include refid="subscriptionColumns"/>,date_add(date_add(s.effecttime, interval 12+ifnull(s.renew,0) month), interval -1 day) duetime
 		FROM	subscription s
 		WHERE	1 = 1
 	<if test="createUser!=null and createUser!=''">

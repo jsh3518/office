@@ -8,6 +8,8 @@ import com.office.entity.Orders;
 import com.office.entity.OrdersDetail;
 import com.office.entity.Subscription;
 
+import net.sf.json.JSONObject;
+
 public interface OrdersService {
 	
 	/*
@@ -16,10 +18,14 @@ public interface OrdersService {
 	public void insertOrders(Orders orders);
 	
 	/*
+	 * 新增订单明细
+	 */
+	void insertOrdersDetail(OrdersDetail ordersDetail);
+	
+	/*
 	 * 新增订单明细（批量）
 	 */
-	void insertOrdersDetail(List<OrdersDetail> ordersDetailList);
-	
+	void insertOrdersDetailList(List<OrdersDetail> ordersDetailList);
 	
 	/*
 	 * 新增订阅
@@ -57,6 +63,11 @@ public interface OrdersService {
 	public OrdersDetail selectOrdersDetail(String detailId);
 	
 	/*
+	 * 根据Id查询订阅信息
+	 */
+	public Subscription selectSubscription(String id);
+	
+	/*
 	 * 更新订单信息
 	 */
 	public void updateOrders(Orders orders);
@@ -89,15 +100,25 @@ public interface OrdersService {
 	/*
 	 * 在微软创建订单信息(订阅新增)
 	 */
-	public String CreateOrders(Orders orders,String access_token,String imagePath);
+	public String CreateOrders(Orders orders,String imagePath);
 	
 	/*
 	 * 坐席续订
 	 */
-	public String renewOrders(Orders orders,String access_token);
+	public String renewOrders(Orders orders);
+	
+	/*
+	 * 增加坐席
+	 */
+	public String increaseOrders(Orders orders);
 	
 	/*
 	 * 根据客户Id和产品id查询订阅坐席数量
 	 */
 	public int getTotalCount(String customerId,String offerId);
+	
+	/*
+	 * 从21V查询订阅信息
+	 */
+	public JSONObject getSubscription(String targetURL);
 }

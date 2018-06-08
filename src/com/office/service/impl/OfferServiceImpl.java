@@ -37,4 +37,12 @@ public class OfferServiceImpl implements OfferService {
 		return offerMapper.listOfferByParent(parent);
 	}
 
+	/**
+	 * 根据产品id查询产品信息
+	 * @param offerId
+	 * @return
+	 */
+	public Offer getOffer(String offerId) {
+		return offerMapper.getOffer(offerId);
+	}
 }

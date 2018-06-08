@@ -39,7 +39,7 @@ public interface CustomerService {
 	/*
 	 * 在微软新增客户信息
 	 */
-	public Customer saveCustomer(Customer customer,String access_token,String imagePath);
+	public Customer saveCustomer(Customer customer,String imagePath);
 	/*
 	 * 新增客户经销商关系
 	 */

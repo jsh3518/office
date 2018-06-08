@@ -83,9 +83,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	/*
 	 * 在微软新增客户信息
-	 * @see com.office.service.CustomerService#saveCustomer(com.office.entity.Customer, java.lang.String, java.lang.String)
+	 * @see com.office.service.CustomerService#saveCustomer(com.office.entity.Customer, java.lang.String)
 	 */
-	public Customer saveCustomer(Customer customer,String access_token,String imagePath){
+	public Customer saveCustomer(Customer customer,String imagePath){
 		
 		JSONObject companyJson = new JSONObject();
 		String attr = " {'objectType': 'CustomerCompanyProfile'}";
@@ -117,6 +117,7 @@ public class CustomerServiceImpl implements CustomerService {
 		JSONObject customerJson = new JSONObject();
 		customerJson.put("companyProfile", companyJson);
 		customerJson.put("billingProfile", billingJson);
+		String access_token = RestfulUtil.getAccessToken();
 		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers"; 
 		String method = "POST";
 		Map<String, String> paramHeader = new HashMap<String, String>();

@@ -25,10 +25,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 </head>
 <body>
-<div style="width:870px;height:auto;margin-left:auto;margin-right:auto;">
+<div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
 		<form action="orders/forNew.html" method="post" name="customerForm" onsubmit="return check();">
-			<div style="width: 50%;float: left;margin-top:10px">
+			<div style="width: 49%;float: left;margin-top:10px">
 				<div class="title">
 					公司
 				</div>
@@ -82,7 +82,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 			</div>
-			<div style="width: 50%;float: left;margin-top:10px">
+			<div style="width: 49%;float: left;margin-top:10px">
 				<div class="title">
 					主要联系人
 				</div>

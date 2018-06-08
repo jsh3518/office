@@ -214,7 +214,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		function forBack(){
 			//history.back(-1);
 			var message = "未创建新订阅，是否确定返回？";
-			var url = "<%=basePath%>customer.html";
+			var url = "<%=basePath%>customer/query.html";
 			if("${flag}"=="edit"){
 				message = "订阅信息未修改，是否确定返回？";
 				url = "<%=basePath%>orders/getOrders.html?id=${orders.id}";
@@ -342,6 +342,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		  if(isNaN(value)||value==""){
 				$("#div_"+id).after('<div class="error" style="float:right">请输入数字！</div>');
 				numFlag = 0;
+	    }else if(value<=0){
+				$("#div_"+id).after('<div class="error" style="float:right">订阅数量必须大于0！</div>');
+				con = 0;
 	    }else if(parseInt(value)>maxinum){
 				$("#div_"+id).after('<div class="error" style="float:right">最大'+maxinum+'许可证</div>');
 				numFlag = 0;
@@ -384,7 +387,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			clear();
 			$("#customerDiv").show();
 			$("#customerDiv2").hide();
-			$("#customerFrame").attr("src","customer/query.html");
+			$("#customerFrame").attr("src","customer/query.html?flag=index");
 		}
 		
 		function addCustomer(){

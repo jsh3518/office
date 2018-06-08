@@ -26,7 +26,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="label">编码<font color="red">*</font></label>
 					<div class="right">
-	      		<input type="text" name="code" id="code" class="input" value="${pubCode.code }"/>
+	      		<input type="text" name="code" id="code" class="input" value="${pubCode.code }" <c:if test="${not empty pubCode.id }"> readonly="readonly" </c:if>/>
 	     			&nbsp;<span id="codeerr" class="errInfo"></span>
 	     		</div>
 				</div>

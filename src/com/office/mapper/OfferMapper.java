@@ -13,4 +13,6 @@ public interface OfferMapper  {
 	List<Offer> listOfferByParent(String parent);
 	
 	List<Offer> listPageOffer(Offer offer);
+	
+	Offer getOffer(String OfferId);
 }

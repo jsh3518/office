@@ -12,8 +12,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <base href="<%=basePath%>">
 <title>Office订单管理系统后台</title>
 <style type="text/css">
-	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
-	.center{width:100%;margin-top:10px; height:415px;background: url(images/login_bg.jpg);}
+	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background-color: #EAEDF2;}
+	.center{width:100%;margin-top:10px; height:415px;background-color: #EAEDF2;}
 	.title{text-align:left;float:left; font-family:Arial,Helvetica,sans-serif;font-size:18px;height:20px;line-height:20px;color:#666666;font-weight:600;text-overflow: ellipsis;margin:5px}
 	.info{width:100%;font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:5px;}
 	.edit{float:left;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#006CD8;margin:5px;display:none}
@@ -21,7 +21,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	.btn{width:60px;height:25px;border-width:0px;background-image: url(images/btn-bg2.gif);letter-spacing: 5px;margin-left:15px;cursor: pointer;text-align: center}
 	.left{width:105px;vertical-align:middle;text-align:right; color:#262626;float:left;}
 	.right{width:180px;vertical-align:middle;text-align: left;float:left;}
-	.input{width:200px;height:18px;align:center;vertical-align:middle;font-size:12px;color:#222;background-color:#D4E8E3; border:1px solid #ccc;border-radius:4px;}
+	.input{width:200px;height:18px;align:center;vertical-align:middle;font-size:12px;color:#222;background-color:#D4E8E3;border:1px solid #ccc;border-radius:4px;}
 	.error{float:left;color: #ea644a;font-family:Arial,Helvetica,sans-serif;font-size:12px;}
 	.table{margin-left:20px;width:100%;cellpadding:0; cellspacing:0;font-family:Arial,Helvetica,sans-serif;}
 	.table td{font-size:13px;text-align: left;width:33%;}
@@ -41,10 +41,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<label class="left">订单时间：</label>
 				<div class="right"><div class="input"><fmt:formatDate value="${orders.createTime }" pattern="yyyy-MM-dd HH:mm:ss"/></div></div>
 				<label class="left">订单状态：</label>
-				<div class="right">
-					<input name="status" id="status" style="display:none" value="${orders.status }"/>
-					<input name="statusName" id="statusName" class="input" readonly="readonly" value="${statusMap[orders.status]}"/>
-				</div>
+				<div class="right"><input name="statusName" id="statusName" class="input" readonly="readonly" value="${statusMap[orders.status]}"/></div>
+			</div>
+			<div class="info">
+				<label class="left">订单类型：</label>
+				<div class="right"><input name="typeName" id="typeName" class="input" readonly="readonly" value="${typeMap[empty orders.type?'0':orders.type]}"/></div>
 			</div>
 			<div class="info">
 				<div class="title">客户信息</div>
@@ -116,7 +117,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<input type="button" name="backBtn" id="backBtn" value="返回" class="btn" onclick="forBack()"/>
 			</div>
 			<div style="display: none">
-				<input type="text" name="id" id="id" value="${orders.id}" />
+				<input name="id" id="id" value="${orders.id}" />
+				<input name="status" id="status" value="${orders.status }"/>
+				<input name="type" id="type" value="${orders.type }"/>
 			</div>
 		</form>
 	</div>
@@ -125,12 +128,13 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		$(document).ready(function(){
 
 			var status = "${orders.status}";
+			var type = "${orders.type}";
 			if(status=="0"||status=="3"){//如果订单是“新增”或“退回”状态，允许修改订阅信息、付款方式和付款凭证
-				if("${orders.type}"==1){//如果为续订，则订阅信息不允许修改
+				if(type=="1"||type=="2"){//如果为续订/增加坐席，订阅信息不允许修改
 					$("#ordersDiv").hide();
 				}else{
 					$("#ordersDiv").show();
-					if("${orders.customer.status}"==0||"${orders.customer.status}"==3){
+					if("${orders.customer.status}"=="0"||"${orders.customer.status}"=="3"){
 						//如果客户是“新增”或“退回”状态，允许修改客户信息
 						$("#customerDiv").show();
 					}
@@ -258,6 +262,14 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		//onchange事件
 		function changePayment(payment){
 			$("div.error").remove();
+			//onchange清除掉已选择的附件
+     	var file = document.getElementById("voucher");
+      // for IE, Opera, Safari, Chrome
+      if (file.outerHTML) {
+          file.outerHTML = file.outerHTML;
+      } else {// FF(包括3.5)
+          file.value = "";
+      }
 			if(payment==1){
 				$("#voucherDiv").hide();
 			}else{

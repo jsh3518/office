@@ -14,4 +14,9 @@ public interface OfferService {
 	 * 根据父级查询产品列表
 	 */
 	List<Offer> listOfferByParent(String parent);
+	
+	/*
+	 * 根据产品id查询产品信息
+	 */
+	Offer getOffer(String OfferId);
 }

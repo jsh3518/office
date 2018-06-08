@@ -121,13 +121,7 @@ public class CustomerController {
 	@RequestMapping(value="/domain")
 	public void domain(String domain,String  customerId,HttpServletResponse response,HttpSession session){
 
-		String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-		if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
-			JSONObject resultJson = RestfulUtil.getToken();
-			access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
-			session.setAttribute(Const.ACCESS_TOKEN, access_token);		
-		}
-
+		String access_token = RestfulUtil.getAccessToken();
 		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/domains/"+domain+".partner.onmschina.cn"; 
 		String method = "HEAD";
 		Map<String, String> paramHeader = new HashMap<String, String>();
@@ -158,7 +152,7 @@ public class CustomerController {
 		User user = (User)session.getAttribute(Const.SESSION_USER);
 		String companyName = req.getParameter("companyName")==null?"":req.getParameter("companyName");
 		String domain = req.getParameter("domain")==null?"":req.getParameter("domain");
-		
+		String flag = req.getParameter("flag")==null?"":req.getParameter("flag");
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("page", page);
 		map.put("companyName", companyName);
@@ -173,7 +167,12 @@ public class CustomerController {
 		model.addAttribute("page", page);
 		model.addAttribute("companyName", companyName);
 		model.addAttribute("domain", domain);
-		return "customer/customer_index";
+		model.addAttribute("flag", flag);
+		if("index".equals(flag)){
+			return "customer/customer_index";
+		}else{
+			return "customer/customer";
+		}
 	}
 	
 	/**

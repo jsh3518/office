@@ -12,6 +12,7 @@
 	<div class="search_div">
 		公司名称：<input type="text" name="companyName" value="${companyName }"/>
 		域名：<input type="text" name="domain" value="${domain }"/>
+		<input type="text" name="flag" value="${flag }" style="display: none"/>
 		<a href="javascript:search();" class="myBtn"><em>查询</em></a>
 	</div>
 	<table id="table" width="98%" border="0" cellpadding="0" cellspacing="0" class="main_table">

@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -24,7 +25,8 @@ import org.apache.log4j.Logger;
 import net.sf.json.JSONObject;
 
 public class RestfulUtil {
-
+	static String access_token = null ;
+	static Date start = null;
 	private static Logger logger = Logger.getLogger(RestfulUtil.class);// 输出Log日志
 
 	/**
@@ -206,13 +208,26 @@ public class RestfulUtil {
 		return resultJson;
 	}
 	
+	//获取access_token，并放入静态变量中
+	public static String getAccessToken(){
+	    long current = System.currentTimeMillis();
+	    Date date = new Date(current-30 * 60 * 1000);
+		if(access_token!=null&&start!=null&&start.compareTo(date)>0 ){
+			return access_token;
+		}else{
+			start = new Date();
+			JSONObject jsonObject = getToken();
+			access_token = jsonObject.get("access_token")==null?null:jsonObject.get("access_token").toString();
+			return access_token;
+		}
+	}
+	
 	/**
 	 * 获取总代Token
 	 * 
 	 * @return
 	 */
 	public static JSONObject getToken() {
-		
 		HashMap<String, String> map = getPartnerMap();
 		String url = "https://login.chinacloudapi.cn/vstecs.partner.onmschina.cn/oauth2/token?api-version=1.0";
 		String method = "POST";
@@ -244,7 +259,8 @@ public class RestfulUtil {
 	 * @param mpnId
 	 * @return
 	 */
-	public static JSONObject getMpnId(String access_token, String mpnId) {
+	public static JSONObject getMpnId(String mpnId) {
+		String access_token = RestfulUtil.getAccessToken();
 		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/profiles/mpn?mpnId=" + mpnId;
 		String method = "GET";
 		Map<String, String> paramHeader = new HashMap<String, String>();

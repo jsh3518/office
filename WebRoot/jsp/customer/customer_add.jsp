@@ -28,7 +28,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
 		<form action="customer/addCustomer.html" method="post" name="customerForm" onsubmit="return check();">
-			<div style="width: 50%;float: left;margin-top:15px">
+			<div style="width: 49%;float: left;margin-top:15px">
 				<div class="title">
 					公司
 				</div>
@@ -86,7 +86,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 			</div>
-			<div style="width: 50%;float: left;margin-top:15px">
+			<div style="width: 49%;float: left;margin-top:15px">
 				<div class="title">
 					主要联系人
 				</div>
@@ -139,7 +139,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		
 		function forBack(){
 			if(confirm("尚未创建新用户，是否确定返回？")){
-				window.location="<%=basePath%>customer.html";
+				window.location="<%=basePath%>customer/query.html";
 			}
 		}
 		

@@ -22,7 +22,7 @@ public class Orders {
 	private String payment;//付款方式
 	private String file;//附件
 	private String orderId;//O365订单Id
-	private String type;//订单类型。0:新增;1:续费。
+	private String type;//订单类型。0:新增;1:续费;2:增加坐席。
 	
 	private Customer customer;//客户信息
 	private List<OrdersDetail> detailList;//订单明细信息

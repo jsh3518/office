@@ -34,6 +34,7 @@ import com.office.entity.Orders;
 import com.office.entity.Page;
 import com.office.entity.PubCode;
 import com.office.entity.Relationship;
+import com.office.entity.Subscription;
 import com.office.entity.OrdersDetail;
 import com.office.entity.Organ;
 import com.office.entity.User;
@@ -93,7 +94,7 @@ public class OrdersController {
 		map.put("domain", domain);
 		map.put("ordersNo", ordersNo);
 		List<Orders> ordersList = ordersService.listOrders(map);
-		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("ORDERSTATUS");
 		model.addAttribute("ordersList", ordersList);
 		model.addAttribute("page", page);
 		model.addAttribute("companyName", companyName);
@@ -205,19 +206,21 @@ public class OrdersController {
 		orders.setSum(sum.setScale(2));
 		orders.setDiscount(discount);
 		ordersService.updateOrders(orders);
-		ordersService.insertOrdersDetail(ordersDetailList);
+		ordersService.insertOrdersDetailList(ordersDetailList);
 		
 		//跳转至付款信息界面
 		ModelAndView mv = new ModelAndView();
 		orders.setCustomer(customer);
 		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(orders.getId().toString());
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
-		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("ORDERSTATUS");
+		HashMap<String,String> typeMap = pubCodeService.codeMapByClass("ORDERTYPE");
 		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
 		mv.addObject("orders", orders);
 		mv.addObject("ordersDetailMap", ordersDetailMap);
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("statusMap", statusMap);
+		mv.addObject("typeMap", typeMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
 		mv.addObject("roleId", user.getRoleId());
 		mv.addObject("flag", 0);//新增订单
@@ -242,11 +245,13 @@ public class OrdersController {
 		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(id);
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
 		List<PubCode> billingCycleList = pubCodeService.listPubCodeByClass("BILLINGCYCLE");
-		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("ORDERSTATUS");
+		HashMap<String,String> typeMap = pubCodeService.codeMapByClass("ORDERTYPE");
 		model.addAttribute("orders", orders);
 		model.addAttribute("paymentList", paymentList);
 		model.addAttribute("billingCycleList", billingCycleList);
 		model.addAttribute("statusMap", statusMap);
+		model.addAttribute("typeMap", typeMap);
 		model.addAttribute("ordersDetailMap", ordersDetailMap);
 		model.addAttribute("roleId", user==null?"":user.getRoleId());
 		if("audit".equals(flag)){
@@ -301,55 +306,52 @@ public class OrdersController {
 		}
 
 		ordersService.updateOrders(orders);
-        return "redirect:listOrders.html?flag="+flag;
+        return "redirect:listOrders.html?flag="+("".equals(flag)?"0":flag);
 	}
-	
+
 	/**
 	 * 审核订单信息
 	 * @param request
 	 * @param model
-	 * @return
+	 * @param response
 	 */
 	@RequestMapping(value="/auditOrders")
-	public String auditOrders(HttpServletRequest request,Model model) {
-
+	public void auditOrders(HttpServletRequest request,Model model,HttpServletResponse response){
+		String message ="success";
 		String id = request.getParameter("id") ==null?"":request.getParameter("id");
 		String opinion = request.getParameter("opinion") ==null?"":request.getParameter("opinion");
 		String billingCycle = request.getParameter("billingCycle") ==null?"monthly":request.getParameter("billingCycle");
 		Orders orders = ordersService.getOrdersById(id);
 		Orders tmpOrders = new Orders();
-		if(!"".equals(id)){
-			tmpOrders.setId(Integer.valueOf(id));
+		if(orders!=null){
+			tmpOrders.setId(orders.getId());
 		}
 		Customer customer = orders.getCustomer();
 		//1:审核通过;0:审核不通过
 		if("1".equals(opinion)){
-			tmpOrders.setStatus("2");
-			tmpOrders.setBillingCycle(billingCycle);
-			tmpOrders.setMpnId(orders.getMpnId());
-			tmpOrders.setReseller(orders.getReseller());
 			//审核通过，将订阅数据发送到Office
-			
-			HttpSession session = request.getSession();
-			String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-			if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
-				JSONObject resultJson = RestfulUtil.getToken();
-				access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
-				session.setAttribute(Const.ACCESS_TOKEN, access_token);
-			}
 
 			String imagePath = request.getSession().getServletContext().getRealPath("/") + "images"+File.separator;
 			//如果tenantId属性为空，说明该客户信息未同步至微软O365，需要在O365新增客户信息
 			if(customer.getTenantId()==null||"".equals(customer.getTenantId())){		
-				customer=customerService.saveCustomer(customer, access_token, imagePath);
+				customer=customerService.saveCustomer(customer,imagePath);
 			}
-			tmpOrders.setCustomer(customer);
-			//坐席续费
-			if("1".equals(orders.getType())){//如果是续订,更新续订时长（单位：月）
-				ordersService.renewOrders(orders,access_token);
+
+			if("1".equals(orders.getType())){//如果是坐席续费,更新续订时长（单位：月）
+				message = ordersService.renewOrders(orders);
+			}else if("2".equals(orders.getType())){//增加坐席
+				message = ordersService.increaseOrders(orders);
 			}else{//新增订阅
-				String message = ordersService.CreateOrders(tmpOrders, access_token,imagePath);
-				logger.info("新增订阅ordersId"+tmpOrders.getOrderId()+":"+message);
+				tmpOrders.setStatus("2");
+				tmpOrders.setBillingCycle(billingCycle);
+				tmpOrders.setMpnId(orders.getMpnId());
+				tmpOrders.setReseller(orders.getReseller());
+				tmpOrders.setCustomer(customer);
+				
+				message = ordersService.CreateOrders(tmpOrders,imagePath);
+				if("".equals(message)){
+					message = "审核失败！";
+				}
 			}
 		}else if("0".equals(opinion)){//审核不通过，退回。
 			tmpOrders.setStatus("3");
@@ -359,9 +361,18 @@ public class OrdersController {
 			}
 		}
 		
-        return "redirect:listOrders.html?flag=audit";
+		PrintWriter out;
+		try {
+			response.setCharacterEncoding("utf-8");
+			out = response.getWriter();
+			out.write(message);
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
+	
 	/**
 	 * 根据订单Id查询订阅信息，并对订阅数据进行重新组装。
 	 * 组装格式HashMap(key:parentName,value:List<OrdersDetail>)
@@ -393,15 +404,7 @@ public class OrdersController {
 	 */
 	@RequestMapping(value="/checkMpnId")
 	public void checkMpnId(String mpnId,HttpServletResponse response,HttpSession session){
-		
-		String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-		if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
-			JSONObject resultJson = RestfulUtil.getToken();
-			access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
-			session.setAttribute(Const.ACCESS_TOKEN, access_token);		
-		}
-		JSONObject object = RestfulUtil.getMpnId(access_token,mpnId);
-		
+		JSONObject object = RestfulUtil.getMpnId(mpnId);
 		PrintWriter out;
 		try {
 			response.setCharacterEncoding("utf-8");
@@ -438,6 +441,7 @@ public class OrdersController {
 		
 		model.addAttribute("subscriptionList", subscriptionList);
 		model.addAttribute("page", page);
+		model.addAttribute("customerId", customerId);
 		return "orders/subscription_list";
 	}
 	
@@ -512,9 +516,10 @@ public class OrdersController {
 	
 	/**
 	 * 订阅续订
-	 * @param orders
+	 * @param detailId
+	 * @param session
+	 * @param req
 	 * @return
-	 * @throws Exception 
 	 */
 	@RequestMapping(value="/renewOrders")
 	public ModelAndView renewOrders(String detailId,HttpSession session,HttpServletRequest req){
@@ -522,7 +527,6 @@ public class OrdersController {
 		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
 		OrdersDetail ordersDetail = ordersService.selectOrdersDetail(detailId);
 		Orders orders = ordersService.getOrdersById(ordersDetail.getOrdersId().toString());
-		Customer customer = customerService.selectCustomerById(orders.getCustomerId()==null?"":orders.getCustomerId().toString());
 
 		//新建orders
 		orders.setId(null);
@@ -557,8 +561,7 @@ public class OrdersController {
 		orders.setActualSum(actualAmount);
 		orders.setDiscount(discount);
 		ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
-
-		List<OrdersDetail> ordersDetailList = new ArrayList<OrdersDetail>();
+		
 		//新建订单明细
 		ordersDetail.setOriginalId(detailId);
 		ordersDetail.setId(null);
@@ -567,15 +570,13 @@ public class OrdersController {
 		ordersDetail.setCreateUser(userId);
 		ordersDetail.setAmount(amount.setScale(2));
 		ordersDetail.setActualAmount(actualAmount.setScale(2));
-		ordersDetailList.add(ordersDetail);
-		ordersService.insertOrdersDetail(ordersDetailList);
+		ordersService.insertOrdersDetail(ordersDetail);
 		
 		//跳转至付款信息界面
 		ModelAndView mv = new ModelAndView();
-		orders.setCustomer(customer);
 		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(orders.getId().toString());
 		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
-		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("DDZT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("ORDERSTATUS");
 		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
 		mv.addObject("orders", orders);
 		mv.addObject("ordersDetailMap", ordersDetailMap);
@@ -618,7 +619,6 @@ public class OrdersController {
 		model.addAttribute("roleId", user==null?null:user.getRoleId());
 		return "orders/orders_index";
 	}
-
 
 	/**
 	 * 保存订单信息（如果用户不存在，则先保存用户信息）
@@ -701,7 +701,7 @@ public class OrdersController {
 		orders.setSum(sum.setScale(2));
 		orders.setDiscount(discount);
 		ordersService.updateOrders(orders);
-		ordersService.insertOrdersDetail(ordersDetailList);
+		ordersService.insertOrdersDetailList(ordersDetailList);
 		return "redirect:getOrders.html?flag=0&id="+orders.getId();
 	}
 	
@@ -727,37 +727,32 @@ public class OrdersController {
 	 * @param out
 	 */
 	@RequestMapping(value="/checkQuantity")
-	public void checkQuantity(@RequestParam String customerId,@RequestParam String tenantId,@RequestParam String offerId,PrintWriter out,HttpSession session){
+	public void checkQuantity(HttpServletRequest req,PrintWriter out,HttpSession session){
 		JSONObject dataJson = new JSONObject();
+		String customerId = req.getParameter("customerId")==null?"":req.getParameter("customerId");
+		String offerId = req.getParameter("offerId")==null?"":req.getParameter("offerId");
+		String tenantId = req.getParameter("tenantId")==null?"":req.getParameter("tenantId");
+		String subscriptionId = req.getParameter("subscriptionId")==null?"":req.getParameter("subscriptionId");
+		
 		int tmpCount = ordersService.getTotalCount(customerId,offerId);
 		int quantity = 0;
-		if(tenantId!=null&&!"".equals(tenantId)){//获取21系统中该客户已下订单数量
-			String access_token = (String)session.getAttribute(Const.ACCESS_TOKEN);
-			if(access_token == null||"".equals(access_token)){//如果session中不包含access_token，则通过调用接口重新获取token
-				JSONObject resultJson = RestfulUtil.getToken();
-				access_token = resultJson.get("access_token")==null?"":resultJson.get("access_token").toString();
-				session.setAttribute(Const.ACCESS_TOKEN, access_token);
+		if(!"".equals(tenantId)&&!"".equals(subscriptionId)){//获取21系统中该客户已下订单数量
+			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions/"+subscriptionId;
+			JSONObject jsonObject = ordersService.getSubscription(targetURL);
+			if(jsonObject.get("responseCode").toString().startsWith("2")){
+				JSONObject resultJson = JSONObject.fromObject(jsonObject.get("result"));
+				quantity = resultJson.get("quantity")==null||"".equals(resultJson.get("quantity"))?0:resultJson.getInt("quantity");
 			}
+		}else if(!"".equals(tenantId)){//获取21系统中该客户已下订单数量
 			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions";
-			String method = "GET";
-			Map<String, String> paramHeader = new HashMap<String, String>();
-			paramHeader.put("Accept", "application/json");
-			paramHeader.put("Content-Type", "application/json");
-			paramHeader.put("Authorization",  "Bearer "+access_token);
-			JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,null);
+			JSONObject resultJson = ordersService.getSubscription(targetURL);
 			if(resultJson.get("responseCode").toString().startsWith("2")){
-				//2018-06-03 该接口返回值前有一个特殊符号，需要截取掉再转换成json
-				String result = resultJson.get("result").toString();
-				JSONArray subscriptionArr = new JSONArray();
-				if(result.indexOf("{")>=0){
-					JSONObject subscriptionJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
-					subscriptionArr = JSONArray.fromObject(subscriptionJson.get("items"));
-				}
+				JSONArray subscriptionArr = JSONArray.fromObject(JSONObject.fromObject(resultJson.get("result")).get("items"));
 
 				for (Object obj : subscriptionArr){
 					JSONObject jsonObject = (JSONObject) obj;
 					if(offerId.equals(jsonObject.get("offerId"))){
-						quantity +=jsonObject.getInt("quantity");
+						quantity +=jsonObject.get("quantity")==null||"".equals(jsonObject.get("quantity"))?0:jsonObject.getInt("quantity");
 					}
 				}
 			}
@@ -768,4 +763,110 @@ public class OrdersController {
 		out.flush();
 		out.close();
 	}
+	
+	/**
+	 * 增加坐席数量--初始化
+	 * @param detailId
+	 * @param session
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(value="/forIncrease")
+	public ModelAndView forIncrease(String id,HttpSession session,HttpServletRequest req){
+		User user = (User) session.getAttribute(Const.SESSION_USER);
+		Subscription subscription = ordersService.selectSubscription(id);
+		Customer customer = customerService.selectCustomerById(subscription.getCustomerId()==null?"":subscription.getCustomerId().toString());
+		Offer offer = offerService.getOffer(subscription.getOfferId());
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("customer", customer);
+		mv.addObject("subscription", subscription);
+		mv.addObject("roleId", user.getRoleId());
+		mv.addObject("offer", offer);
+		//返回订单信息
+		mv.setViewName("orders/orders_increase");
+		return mv;
+	}
+	
+	/**
+	 * 增加坐席
+	 * @param orders
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value="/increaseOrders")
+	public ModelAndView increaseOrders(HttpSession session,HttpServletRequest req){
+		String detailId = req.getParameter("detailId")==null?"":req.getParameter("detailId");
+		String quantity = req.getParameter("quantity")==null?"":req.getParameter("quantity");
+		User user = (User) session.getAttribute(Const.SESSION_USER);
+		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
+		OrdersDetail ordersDetail = ordersService.selectOrdersDetail(detailId);
+		Orders orders = ordersService.getOrdersById(ordersDetail.getOrdersId().toString());
+
+		//新建orders
+		orders.setId(null);
+		Date day=new Date();
+		String maxNo = ordersService.getMaxOrdersNo(day);
+		String ordersNo;
+		if(maxNo==null||"".equals(maxNo)){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			ordersNo = "ORDER-VSTECS-"+ sdf.format(day)+"00001";
+		}else{
+			Long num = Long.valueOf(maxNo.substring(maxNo.length()-13))+1;
+			ordersNo = "ORDER-VSTECS-"+num;
+		}
+		
+		
+		orders.setOrdersNo(ordersNo);
+		orders.setStatus("0");//0:新增;1:已提交;2:已审核。
+		orders.setCreateTime(day);
+		orders.setCreateUser(userId);
+		orders.setEffectTime(null);
+		orders.setType("2");//增加坐席
+		
+		BigDecimal discount = null;
+		if(user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
+			Credit credit = creditService.queryCredit(user.getUserId());
+			discount = credit ==null?null:credit.getDiscount();
+		}
+		OfferPrice offerPrice = offerPriceService.getPriceByOfferId(ordersDetail.getOfferId());
+		BigDecimal amount = offerPrice.getPriceYear()==null?new BigDecimal(0):offerPrice.getPriceYear().multiply(new BigDecimal(quantity));
+		BigDecimal actualAmount = amount.multiply(discount==null?new BigDecimal(1):discount.divide(new BigDecimal(100)));
+
+		orders.setSum(amount);
+		orders.setActualSum(actualAmount);
+		orders.setDiscount(discount);
+		ordersService.insertOrders(orders);//mybaits数据新增后主键自动更新
+		
+		//新建订单明细
+		ordersDetail.setId(null);
+		ordersDetail.setOriginalId("");
+		ordersDetail.setOrdersId(orders.getId());
+		ordersDetail.setBillingCycle(orders.getBillingCycle());
+		ordersDetail.setCreateUser(userId);
+		ordersDetail.setQuantity(quantity);
+		ordersDetail.setAmount(amount.setScale(2));
+		ordersDetail.setActualAmount(actualAmount.setScale(2));
+		ordersDetail.setEffectTime(null);
+		ordersDetail.setDueTime(null);
+		ordersService.insertOrdersDetail(ordersDetail);
+		
+		//跳转至付款信息界面
+		ModelAndView mv = new ModelAndView();
+		Map<String, List<OrdersDetail>> ordersDetailMap = getOrdersDetailMap(orders.getId().toString());
+		List<PubCode> paymentList = pubCodeService.listPubCodeByClass("PAYMENT");
+		HashMap<String,String> statusMap = pubCodeService.codeMapByClass("ORDERSTATUS");
+		HashMap<String,String> typeMap = pubCodeService.codeMapByClass("ORDERTYPE");
+		HashMap<String,String> billingCycleMap = pubCodeService.codeMapByClass("BILLINGCYCLE");
+		mv.addObject("orders", orders);
+		mv.addObject("ordersDetailMap", ordersDetailMap);
+		mv.addObject("paymentList", paymentList);
+		mv.addObject("statusMap", statusMap);
+		mv.addObject("typeMap", typeMap);
+		mv.addObject("billingCycleMap", billingCycleMap);
+		mv.addObject("roleId", user.getRoleId());
+		//返回订单信息
+		mv.setViewName("orders/orders_detail");
+		return mv;
+	}
+	
 }

@@ -14,7 +14,9 @@ public interface OrdersMapper  {
 	
 	public void insertOrders(Orders orders);
 	
-	public void insertOrdersDetail(List<OrdersDetail> ordersDetailList);
+	public void insertOrdersDetail(OrdersDetail ordersDetail);
+	
+	public void insertOrdersDetailList(List<OrdersDetail> ordersDetailList);
 	
 	public void insertSubscription(Subscription subscription);
 	
@@ -29,6 +31,8 @@ public interface OrdersMapper  {
 	public List<OrdersDetail> getOrdersDetail(String ordersId);
 	
 	public OrdersDetail selectOrdersDetail(String detailId);
+	
+	public Subscription selectSubscription(String id);
 	
 	public void updateOrders(Orders orders);
 	

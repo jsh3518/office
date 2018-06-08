@@ -58,4 +58,9 @@
 		where o.parent = #{parent} and valid = 1
 	</select>
 
+	<select id="getOffer" resultMap="offerResultMap">
+		select <include refid="offerColumns"/>
+		from offer 
+		where offerid = #{offerId}
+	</select>
 </mapper>

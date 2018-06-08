@@ -43,11 +43,19 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	/*
+	 * 新增订单明细
+	 * @see com.office.service.OrdersService#insertOrdersDetail(com.office.entity.OrdersDetail)
+	 */
+	public void insertOrdersDetail(OrdersDetail ordersDetail) {
+		ordersMapper.insertOrdersDetail(ordersDetail);
+	}
+	
+	/*
 	 * 批量新增订单明细
 	 * @see com.office.service.OrdersService#insertOrdersDetail(java.util.List)
 	 */
-	public void insertOrdersDetail(List<OrdersDetail> ordersDetailList) {
-		ordersMapper.insertOrdersDetail(ordersDetailList);
+	public void insertOrdersDetailList(List<OrdersDetail> ordersDetailList) {
+		ordersMapper.insertOrdersDetailList(ordersDetailList);
 	}
 	
 	/*
@@ -107,6 +115,14 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	/*
+	 * 根据订阅Id查询订阅信息
+	 * @see com.office.service.OrdersService#selectSubscription(java.lang.String)
+	 */
+	public Subscription selectSubscription(String id){
+		return ordersMapper.selectSubscription(id);
+	}
+	
+	/*
 	 * 更新订单信息
 	 * @see com.office.service.OrdersService#updateOrders(com.office.entity.Orders)
 	 */
@@ -158,11 +174,11 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 在微软创建订单信息(订阅新增)
 	 * @see com.office.service.OrdersService#CreateOrders(com.office.entity.Orders, java.lang.String, java.lang.String)
 	 */
-	public String CreateOrders(Orders orders,String access_token,String imagePath){
+	public String CreateOrders(Orders orders,String imagePath){
 
 		List<OrdersDetail> ordersDetailList = ordersMapper.getOrdersDetail(orders.getId().toString());
 		List<Subscription>  subscriptionList= new ArrayList<Subscription>();
-		
+		String access_token = RestfulUtil.getAccessToken();
 		JSONObject orderJson = new JSONObject();
 		orderJson.put("referenceCustomerId", orders.getCustomer().getTenantId());
 		orderJson.put("billingCycle", orders.getBillingCycle());
@@ -171,8 +187,8 @@ public class OrdersServiceImpl implements OrdersService {
 		JSONArray jsonArr = new JSONArray();
 		String mpnId = orders.getMpnId();
 		//此处需要验证MPNID是否有效
-		if(mpnId!=null){
-			JSONObject json = RestfulUtil.getMpnId(access_token,mpnId);
+		if(mpnId!=null&&!"".equals(mpnId)){
+			JSONObject json = RestfulUtil.getMpnId(mpnId);
 			if(!json.get("responseCode").toString().startsWith("2")){
 				mpnId = "";
 			}
@@ -192,11 +208,12 @@ public class OrdersServiceImpl implements OrdersService {
 		HashMap<String,Subscription> subscriptionMap = new HashMap<String,Subscription>();
 		//定义需要更新的订阅信息数组（已有订阅信息的商业版产品直接更新订阅数量）
 		JSONArray updateArr = new JSONArray();
+		int k = 0 ;
 		for(int i=0;i<ordersDetailList.size();i++){
 			OrdersDetail ordersDetail = ordersDetailList.get(i);
 			
 			JSONObject ordersDetailJson = new JSONObject();
-			ordersDetailJson.put("lineItemNumber", i);
+			ordersDetailJson.put("lineItemNumber", k);
 			ordersDetailJson.put("offerId", ordersDetail.getOfferId());
 			ordersDetailJson.put("friendlyName", ordersDetail.getOfferName());
 			ordersDetailJson.put("quantity", ordersDetail.getQuantity());
@@ -213,18 +230,18 @@ public class OrdersServiceImpl implements OrdersService {
 				int maxinum = Integer.valueOf(offer.getMaxinum());
 				int num = ordersDetail.getQuantity()==null?0:Integer.valueOf(ordersDetail.getQuantity().toString());
 				if(num>maxinum){
-					return "failed" ;
+					return  ordersDetail.getOfferName()+"最大允许订阅坐席数量为"+maxinum+"，请修改数量！" ;
 				}else{
 					int quantity = 0;
 					if(businessMap==null){
-						businessMap = getSubscribeMap( offerMap,access_token,orders.getCustomer().getTenantId());
+						businessMap = getSubscribeMap( offerMap,orders.getCustomer().getTenantId());
 					}
 					//已存在该商业版产品的订阅，调用接口修改坐席数量(将信息存入updateArr，后续统一调用，防止中间出错),结束本次循环，进入下一次循环
 					if(businessMap.containsKey(offerId)){
 						JSONObject subscriptionJson = (JSONObject)businessMap.get(offerId);
 						quantity = subscriptionJson.getInt("quantity");
 						if(quantity+num>maxinum){
-							return "failed" ;
+							return ordersDetail.getOfferName()+"最大允许订阅坐席数量为"+maxinum+"，已有订阅"+quantity+"。请修改数量！" ;
 						}else{
 							quantity = quantity+num ;
 							subscriptionJson.put("quantity",quantity);
@@ -260,7 +277,7 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 
 			jsonArr.add(ordersDetailJson);
-			
+			k++;
 			Subscription subscription = new Subscription();
 			subscription.setCustomerId(orders.getCustomer().getId());
 			subscription.setDetailId(ordersDetail.getId());
@@ -284,18 +301,13 @@ public class OrdersServiceImpl implements OrdersService {
 			paramHeader.put("Content-Type", "application/json");
 			paramHeader.put("Authorization",  "Bearer "+access_token);
 			String paramBody = orderJson.toString();     
-			JSONObject resultJson = RestfulUtil.getRestfulData(targetURL,method,paramHeader,paramBody);
+			JSONObject resultJson = RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,paramBody);
 			if(resultJson.get("responseCode").toString().startsWith("2")){
 				//2018-04-02 该接口返回值前有一个特殊符号，需要截取掉再转换成json
-				String result = resultJson.get("result").toString();
-				JSONArray orderArr = new JSONArray();
-				if(result.indexOf("{")>=0){
-					JSONObject reOrderJson = JSONObject.fromObject(result.substring(result.indexOf("{")));
-					String orderId = reOrderJson.get("id")==null?"":reOrderJson.get("id").toString();
-			
-					orders.setOrderId(orderId);//对应O365订单Id
-					orderArr = JSONArray.fromObject(reOrderJson.get("lineItems"));
-				}
+				JSONObject reOrderJson = JSONObject.fromObject(resultJson.get("result"));
+				String orderId = reOrderJson.get("id")==null?"":reOrderJson.get("id").toString();
+				orders.setOrderId(orderId);//对应O365订单Id
+				JSONArray orderArr = JSONArray.fromObject(reOrderJson.get("lineItems"));
 	
 				for (Object obj : orderArr){
 					JSONObject jsonObject = (JSONObject) obj;
@@ -318,7 +330,7 @@ public class OrdersServiceImpl implements OrdersService {
 	
 				}
 			}else{
-				return "failed";
+				return "审核失败！";
 			}
 		}
 		// 已订阅商业版产品修改订阅数量
@@ -329,9 +341,9 @@ public class OrdersServiceImpl implements OrdersService {
 			Map<String, String> paramHeader = new HashMap<String, String>();
 			paramHeader.put("Accept", "application/json");
 			paramHeader.put("Content-Type", "application/json");
-			paramHeader.put("Authorization",  "Bearer "+access_token);   
-			JSONObject resultJson = RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,updateJSON.toString());
-			System.out.println(""+resultJson);
+			paramHeader.put("Authorization",  "Bearer "+access_token); 
+			RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,updateJSON.toString());
+			
 		}
 		ordersMapper.insertSubscriptionList(subscriptionList);
 		orders.setEffectTime(new Date());
@@ -347,19 +359,81 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 坐席续订
 	 * @see com.office.service.OrdersService#renewOrders(com.office.entity.Orders, java.lang.String)
 	 */
-	public String renewOrders(Orders orders,String access_token){
+	public String renewOrders(Orders orders){
 		List<OrdersDetail> ordersDetailList = ordersMapper.getOrdersDetail(orders.getId().toString());
 		for(int i=0;i<ordersDetailList.size();i++){
 			OrdersDetail ordersDetail = ordersDetailList.get(i);
 			ordersMapper.updateSubscriptionRenew(ordersDetail.getOriginalId(),12);
 			ordersMapper.updateDetailRenew(ordersDetail.getOriginalId(),12);
 			//TODO 需要往微软写数据
-			Orders tmpOrders = new Orders();
-			tmpOrders.setId(orders.getId());
-			tmpOrders.setStatus("2");//已审核
-			tmpOrders.setBillingCycle(orders.getBillingCycle());
-			ordersMapper.updateOrders(tmpOrders);
 		}
+		Orders tmpOrders = new Orders();
+		tmpOrders.setId(orders.getId());
+		tmpOrders.setStatus("2");//已审核
+		tmpOrders.setBillingCycle(orders.getBillingCycle());
+		ordersMapper.updateOrders(tmpOrders);
+		return "success";
+	}
+	
+	/*
+	 * 增加坐席
+	 * @see com.office.service.OrdersService#increaseOrders(com.office.entity.Orders)
+	 */
+	public String increaseOrders(Orders orders){
+		List<OrdersDetail> ordersDetailList = ordersMapper.getOrdersDetail(orders.getId().toString());
+		List<Subscription>  subscriptionList= new ArrayList<Subscription>();
+		Date date = new Date();
+		for(int i=0;i<ordersDetailList.size();i++){
+			OrdersDetail ordersDetail = ordersDetailList.get(i);
+			
+			int num = ordersDetail.getQuantity()==null?0:Integer.valueOf(ordersDetail.getQuantity().toString());
+			String access_token = RestfulUtil.getAccessToken();
+			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+orders.getCustomer().getTenantId()+"/subscriptions/"+ordersDetail.getSubscriptionId();
+			String method = "GET";
+			Map<String, String> paramHeader = new HashMap<String, String>();
+			paramHeader.put("Accept", "application/json");
+			paramHeader.put("Content-Type", "application/json");
+			paramHeader.put("Authorization",  "Bearer "+access_token);    
+			JSONObject jsonObject = RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,null);
+			int quantity = 0;
+			if(jsonObject.get("responseCode").toString().startsWith("2")){
+				JSONObject json = JSONObject.fromObject(jsonObject.get("result"));
+				quantity = json.get("quantity")==null||"".equals(json.get("quantity"))?0:Integer.parseInt(json.get("quantity").toString());
+			}
+			JSONObject newJson = new JSONObject();
+			newJson.put("id", ordersDetail.getSubscriptionId());
+			newJson.put("quantity",num+quantity);
+			newJson.put("orderId", orders.getOrderId());
+			method = "PATCH";
+			JSONObject resultJson = RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,newJson.toString());
+			if(resultJson.get("responseCode").toString().startsWith("2")){
+				Subscription subscription = new Subscription();
+				subscription.setCustomerId(orders.getCustomer().getId());
+				subscription.setDetailId(ordersDetail.getId());
+				subscription.setOfferId(ordersDetail.getOfferId());
+				subscription.setOfferName(ordersDetail.getOfferName());
+				subscription.setQuantity(ordersDetail.getQuantity());
+				subscription.setRenew(0);//续订时长为0
+				subscription.setBillingCycle(ordersDetail.getBillingCycle());
+				subscription.setMpnId(orders.getMpnId());
+				subscription.setReseller(orders.getReseller());
+				subscription.setCreateUser(ordersDetail.getCreateUser());
+				subscription.setEffectTime(date);
+				subscriptionList.add(subscription);
+				OrdersDetail tmpDetail = new OrdersDetail();
+				tmpDetail.setId(ordersDetail.getId());
+				tmpDetail.setEffectTime(date);
+				ordersMapper.updateOrdersDetail(tmpDetail);
+			}else{
+				return "审核失败！";
+			}
+		}
+		Orders tmpOrders = new Orders();
+		tmpOrders.setId(orders.getId());
+		tmpOrders.setStatus("2");//已审核
+		tmpOrders.setEffectTime(date);
+		ordersMapper.updateOrders(tmpOrders);
+		ordersMapper.insertOrdersDetailList(ordersDetailList);
 		return "success";
 	}
 	
@@ -372,9 +446,9 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 	
 	//构建21V系统中已订阅商业版产品map信息，包含产品Id，订阅Id，订阅数量等。组装形式  key：产品Id；value：hashMap
-	public HashMap<String,Object> getSubscribeMap(HashMap<String,Offer> offerMap,String access_token,String tenantId){
+	public HashMap<String,Object> getSubscribeMap(HashMap<String,Offer> offerMap,String tenantId){
 		HashMap<String,Object> subscriptionMap = new HashMap<String,Object>();
-
+		String access_token = RestfulUtil.getAccessToken();
 		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions";
 		String method = "GET";
 		Map<String, String> paramHeader = new HashMap<String, String>();
@@ -394,5 +468,16 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 		}
 		return subscriptionMap;
+	}
+	
+	//从21V查询订阅信息
+	public JSONObject getSubscription(String targetURL){
+		String access_token = RestfulUtil.getAccessToken();
+		String method = "GET";
+		Map<String, String> paramHeader = new HashMap<String, String>();
+		paramHeader.put("Accept", "application/json");
+		paramHeader.put("Content-Type", "application/json");
+		paramHeader.put("Authorization",  "Bearer "+access_token);
+		return RestfulUtil.getPartnerCenterData(targetURL,method,paramHeader,null);
 	}
 }

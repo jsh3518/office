@@ -12,8 +12,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <base href="<%=basePath%>">
 <title>Office订单管理系统后台</title>
 <style type="text/css">
-	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background: url(images/login_bg.jpg);}
-	.center{width:100%;margin-top:10px; height:415px;background: url(images/login_bg.jpg);}
+	body{margin-left: 0px;margin-top: 0px;margin-right: 0px;margin-bottom: 0px;background-color: #EAEDF2;}
+	.center{width:100%;margin-top:10px; height:415px;background-color: #EAEDF2;}
 	.title{text-align:left;font-family:Arial,Helvetica,sans-serif;font-size:13px;height:20px;line-height:20px;color:#666666;font-weight:bold;}
 	.info{width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;height:20px;line-height:20px;color:#333333;float: left;margin-bottom:3px}
 	.select{width:150px;height:20px;border:1px solid #ccc;vertical-align:middle;font-size:12px;color:#222;}
@@ -47,14 +47,19 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					</div>
 				</div>
 				<div class="info">
+					<label class="left">订单类型：</label>
+					<div class="right">
+						<input name="type" id="type" style="display:none" value="${orders.type }"/>
+						<input name="typeName" id="typeName" class="input" readonly="readonly" value="${typeMap[empty orders.type?'0':orders.type]}"/>
+					</div>
 					<label class="left">客户名称：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.companyName }"/></div>
 					<label class="left">主域名：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.domain }.partner.onmschina.cn"/></div>
-					<label class="left">主要联系人：</label>
-					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.lastName }${orders.customer.firstName }"/></div>
 				</div>
 				<div class="info">
+					<label class="left">主要联系人：</label>
+					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.lastName }${orders.customer.firstName }"/></div>
 					<label class="left">邮箱：</label>
 					<div class="right"><input class="input" readonly="readonly" value="${orders.customer.email }"/></div>
 					<label class="left">经销商：</label>
@@ -154,17 +159,67 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		function forReturn(){
 			window.location="<%=basePath%>orders/listOrders.html?flag=audit";
 		}
+		
+		//退回
 		function forBack(){
-			window.location="<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=0";
+			$("#submitBtn").attr("disabled",true);
+			$("#backBtn").attr("disabled",true);
+			$("#returnBtn").attr("disabled",true);
+			$.ajax({
+				type:"POST",
+				url:"orders/auditOrders.html",
+				data:{"id":"${orders.id }","opinion":"0","billingCycle":$("#billingCycle:checked").val()},
+				dataType: "text",
+				success:function(data){
+					if (data == "success") {
+						alert("操作成功！");
+						window.location="orders/listOrders.html?flag=audit";
+					}else{
+						alert("操作失败！");
+						$("#submitBtn").attr("disabled",false);
+						$("#backBtn").attr("disabled",false);
+						$("#returnBtn").attr("disabled",false);
+						return;
+					}
+				},
+				error:function(){
+					alert("操作失败！");
+					$("#submitBtn").attr("disabled",false);
+					$("#backBtn").attr("disabled",false);
+					$("#returnBtn").attr("disabled",false);
+				}
+			});
 		}
+		
+		//审核
 		function forSubmit(){
 			$("#submitBtn").attr("disabled",true);
 			$("#backBtn").attr("disabled",true);
 			$("#returnBtn").attr("disabled",true);
-			//TODO 需修改为ajax方式根据审核结果返回
-			//alert("<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1&billingCycle=$('#billingCycle:checked').val()");
-			//return;
-			window.location="<%=basePath%>orders/auditOrders.html?id=${orders.id}&opinion=1&billingCycle="+$("#billingCycle:checked").val();
+			$.ajax({
+				type:"POST",
+				url:"orders/auditOrders.html",
+				data:{"id":"${orders.id }","opinion":"1","billingCycle":$("#billingCycle:checked").val()},
+				dataType: "text",
+				success:function(data){
+					if (data == "success") {
+						alert("审核成功！");
+						window.location="orders/listOrders.html?flag=audit";
+					}else{
+						alert(data);
+						$("#submitBtn").attr("disabled",false);
+						$("#backBtn").attr("disabled",false);
+						$("#returnBtn").attr("disabled",false);
+						return;
+					}
+				},
+				error:function(){
+					alert("操作失败！");
+					$("#submitBtn").attr("disabled",false);
+					$("#backBtn").attr("disabled",false);
+					$("#returnBtn").attr("disabled",false);
+				}
+			});
 		}
 	</script>
 </body>

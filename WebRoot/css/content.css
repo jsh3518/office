@@ -24,7 +24,8 @@ body {
 	line-height: 20px;
 	color: #666666;
 	font-weight: bold;
-	margin-top: 5px
+	margin-top: 5px;
+	width:100%
 }
 
 .info {
