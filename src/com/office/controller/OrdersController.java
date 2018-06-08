@@ -306,7 +306,7 @@ public class OrdersController {
 		}
 
 		ordersService.updateOrders(orders);
-        return "redirect:listOrders.html?flag="+("".equals(flag)?"0":flag);
+        return "redirect:listOrders.html?flag="+flag;
 	}
 
 	/**
@@ -647,7 +647,7 @@ public class OrdersController {
 			relationship.setStartTime(day);
 			relationship.setEndTime(Tools.str2Date("9999-12-31 23:59:59"));
 			relationship.setValid("1");
-			customerService.insertRelationship(relationship);;
+			customerService.insertRelationship(relationship);
 		}
 		if(orders.getId()==null||"".equals(orders.getId())){
 			
@@ -801,7 +801,7 @@ public class OrdersController {
 		String userId = (String) session.getAttribute(Const.SESSION_USER_ID);
 		OrdersDetail ordersDetail = ordersService.selectOrdersDetail(detailId);
 		Orders orders = ordersService.getOrdersById(ordersDetail.getOrdersId().toString());
-
+		
 		//新建orders
 		orders.setId(null);
 		Date day=new Date();
@@ -815,13 +815,15 @@ public class OrdersController {
 			ordersNo = "ORDER-VSTECS-"+num;
 		}
 		
-		
 		orders.setOrdersNo(ordersNo);
 		orders.setStatus("0");//0:新增;1:已提交;2:已审核。
 		orders.setCreateTime(day);
 		orders.setCreateUser(userId);
 		orders.setEffectTime(null);
 		orders.setType("2");//增加坐席
+		orders.setFile(null);//清除原有附件
+		orders.setPayment(null);
+		orders.setBillingCycle("monthly");
 		
 		BigDecimal discount = null;
 		if(user.getRoleId()==3){//如果是总代理商角色，则折扣可以在订单管理界面进行编辑；如果是代理商角色，则查询折扣自动计算。
@@ -841,7 +843,7 @@ public class OrdersController {
 		ordersDetail.setId(null);
 		ordersDetail.setOriginalId("");
 		ordersDetail.setOrdersId(orders.getId());
-		ordersDetail.setBillingCycle(orders.getBillingCycle());
+		ordersDetail.setBillingCycle("monthly");
 		ordersDetail.setCreateUser(userId);
 		ordersDetail.setQuantity(quantity);
 		ordersDetail.setAmount(amount.setScale(2));
@@ -864,6 +866,7 @@ public class OrdersController {
 		mv.addObject("typeMap", typeMap);
 		mv.addObject("billingCycleMap", billingCycleMap);
 		mv.addObject("roleId", user.getRoleId());
+		mv.addObject("flag", 0);//新增订单
 		//返回订单信息
 		mv.setViewName("orders/orders_detail");
 		return mv;

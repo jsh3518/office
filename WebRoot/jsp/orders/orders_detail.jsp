@@ -96,9 +96,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<label class="left">折扣：</label>
 				<div class="right"><input class="input" readonly="readonly" name="discount" id="discount" value="${orders.discount }" style="width: 40px" onblur="calSum()"/>%</div>
 			</div>
-			<div class="info" id ="paymentDiv">
+			<div class="info">
 				<label class="left">付款方式<font color="red">*</font>：</label>
-				<div class="right">
+				<div class="right" id ="paymentDiv">
 					<select name="payment" id="payment" class="select" onChange="changePayment(this.value)">
 						<option value="">请选择</option>
 						<c:forEach items="${paymentList}" var="payment">
@@ -241,6 +241,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		
 		//判断付款方式
 		function valPayment(){
+			debugger;
 			var paymentDiv = $("#paymentDiv");
 			paymentDiv.siblings('.error').remove();
 			if($("#payment").val() ==""){

@@ -32,7 +32,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <body>
 <div style="width:900px;height:auto;margin-left:auto;margin-right:auto;">
 	<div class="center">
-		<form action="orders/auditOrders.html" method="post" name="ordersForm">
+		<form action="<%=basePath%>orders/auditOrders.html" method="post" name="ordersForm">
 			<fieldset>
 				<legend>订单信息</legend>
 				<div class="info">
@@ -173,7 +173,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				success:function(data){
 					if (data == "success") {
 						alert("操作成功！");
-						window.location="orders/listOrders.html?flag=audit";
+						window.location="<%=basePath%>orders/listOrders.html?flag=audit";
 					}else{
 						alert("操作失败！");
 						$("#submitBtn").attr("disabled",false);
@@ -198,13 +198,13 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$("#returnBtn").attr("disabled",true);
 			$.ajax({
 				type:"POST",
-				url:"orders/auditOrders.html",
+				url:"<%=basePath%>orders/auditOrders.html",
 				data:{"id":"${orders.id }","opinion":"1","billingCycle":$("#billingCycle:checked").val()},
 				dataType: "text",
 				success:function(data){
 					if (data == "success") {
 						alert("审核成功！");
-						window.location="orders/listOrders.html?flag=audit";
+						window.location="<%=basePath%>orders/listOrders.html?flag=audit";
 					}else{
 						alert(data);
 						$("#submitBtn").attr("disabled",false);

@@ -128,7 +128,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		function forBack(){
 			//history.back(-1);
 			var message = "未创建新订阅，是否确定返回？";
-			var url = "<%=basePath%>customer.html";
+			var url = "<%=basePath%>customer/query.html";
 			if("${flag}"=="edit"){
 				message = "订阅信息未修改，是否确定返回？";
 				url = "<%=basePath%>orders/getOrders.html?id=${orders.id}";

@@ -21,11 +21,13 @@ import org.springframework.web.servlet.ModelAndView;
 import com.office.entity.Customer;
 import com.office.entity.Organ;
 import com.office.entity.Page;
+import com.office.entity.Relationship;
 import com.office.entity.User;
 import com.office.service.CustomerService;
 import com.office.service.OrganService;
 import com.office.util.Const;
 import com.office.util.RestfulUtil;
+import com.office.util.Tools;
 
 import net.sf.json.JSONObject;
 
@@ -72,6 +74,14 @@ public class CustomerController {
 		customer.setCreateUser(user==null?null:user.getLoginname());
 		customer.setStatus("0");//客户新增
 		customerService.insertCustomer(customer);
+		Relationship relationship = new Relationship();
+		relationship.setCustomerId(customer.getId()==null?"":customer.getId().toString());
+		relationship.setUserId(user.getLoginname());
+		relationship.setMpnId(user.getMpnId());
+		relationship.setStartTime(new Date());
+		relationship.setEndTime(Tools.str2Date("9999-12-31 23:59:59"));
+		relationship.setValid("1");
+		customerService.insertRelationship(relationship);
 		return "redirect:../orders/forAdd.html?customerId="+customer.getId();
 	}
 

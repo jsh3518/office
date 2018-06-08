@@ -12,7 +12,7 @@ a{ color:#687f96; text-decoration:none;}
 .top_right_1,.top_right_1 a{ color:#0473a9;}
 .clearfix:after{content:"&nbsp;";display:block;height:0;clear:both;visibility:hidden;}.clearfix{display:inline-block;}
 .menu{background:url(../images/menu_bg2.gif) repeat-x; height:80px;width:720px;}
-.menusel{ float:left;width:180px; position:relative; margin-top:4px;;z-index:2;}
+.menusel{ float:left;width:180px; position:relative; margin-top:4px;z-index:2;}
 .menusel h2{ font-size:14px; height:32px; font-weight:bold;z-index:2;}
 .menusel a{text-align:center; width:130px;height:25px;  position:relative; z-index:2; color:#fff;}
 .position{ position:absolute; z-index:2; margin-left:-10px;}
