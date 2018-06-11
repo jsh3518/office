@@ -25,8 +25,10 @@ import org.apache.log4j.Logger;
 import net.sf.json.JSONObject;
 
 public class RestfulUtil {
-	static String access_token = null ;
+	static String baseUrl = null;
+	static String access_token = null;
 	static Date start = null;
+
 	private static Logger logger = Logger.getLogger(RestfulUtil.class);// 输出Log日志
 
 	/**
@@ -229,7 +231,9 @@ public class RestfulUtil {
 	 */
 	public static JSONObject getToken() {
 		HashMap<String, String> map = getPartnerMap();
-		String url = "https://login.chinacloudapi.cn/vstecs.partner.onmschina.cn/oauth2/token?api-version=1.0";
+
+		String domain = map.get("username").substring(map.get("username").lastIndexOf("@")+1);
+		String url = "https://login.chinacloudapi.cn/"+domain+"/oauth2/token?api-version="+map.get("version");
 		String method = "POST";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Content-Type", "application/x-www-form-urlencoded");
@@ -261,7 +265,7 @@ public class RestfulUtil {
 	 */
 	public static JSONObject getMpnId(String mpnId) {
 		String access_token = RestfulUtil.getAccessToken();
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/profiles/mpn?mpnId=" + mpnId;
+		String targetURL = "https://"+getBaseUrl()+"/profiles/mpn?mpnId=" + mpnId;
 		String method = "GET";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");
@@ -269,28 +273,45 @@ public class RestfulUtil {
 		return getRestfulData(targetURL, method, paramHeader, null);
 	}
 	
-	public static HashMap<String, String> getPartnerMap(){
-		String sql = "select * from partner";
+	/**
+	 * 获取Restful接口baseUrl 形如：https://url/version
+	 * @return
+	 */
+	public static String getBaseUrl() {
+		if(baseUrl == null){
+			HashMap<String, String> partnerMap = getPartnerMap();
+			String resource = partnerMap.get("resource")==null||"".equals(partnerMap.get("resource"))?"https://partner.partnercenterapi.microsoftonline.cn":partnerMap.get("resource");
+			String version = partnerMap.get("version")==null||"".equals(partnerMap.get("version"))?"v1":partnerMap.get("version");
+			baseUrl = resource + "/v" + version;
+		}
+		return baseUrl;
+	}
+	
+	private static HashMap<String, String> getPartnerMap(){
+		HashMap<String, String> partnerMap = new HashMap<String, String>();
+		String sql = "select * from partner where valid = 1 ";
 		Connection conn = null;
 		Statement statement = null;
 		ResultSet rs = null;
-		HashMap<String, String> map = new HashMap<String, String>();
 		try {
 			conn = JdbcPool.getConnection();
 			statement = conn.createStatement();
 			rs = statement.executeQuery(sql);
 			if(rs.next()){
-				map.put("resource", rs.getString("resource"));
-				map.put("appid", rs.getString("appid"));
-				map.put("username", rs.getString("username"));
-				map.put("password", AesUtil.aesDecrypt(rs.getString("password")));
+				partnerMap = new HashMap<String, String>();
+				partnerMap.put("resource", rs.getString("resource"));
+				partnerMap.put("appid", rs.getString("appid"));
+				partnerMap.put("username", rs.getString("username"));
+				partnerMap.put("password", AesUtil.aesDecrypt(rs.getString("password")));
+				partnerMap.put("version", rs.getString("version"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
 			JdbcPool.release(rs,statement,conn);
 		}
-		return map;
+		
+		return partnerMap;
 	}
 	
 	/**

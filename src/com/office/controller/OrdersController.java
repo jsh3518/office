@@ -737,14 +737,14 @@ public class OrdersController {
 		int tmpCount = ordersService.getTotalCount(customerId,offerId);
 		int quantity = 0;
 		if(!"".equals(tenantId)&&!"".equals(subscriptionId)){//获取21系统中该客户已下订单数量
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions/"+subscriptionId;
+			String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+tenantId+"/subscriptions/"+subscriptionId;
 			JSONObject jsonObject = ordersService.getSubscription(targetURL);
 			if(jsonObject.get("responseCode").toString().startsWith("2")){
 				JSONObject resultJson = JSONObject.fromObject(jsonObject.get("result"));
 				quantity = resultJson.get("quantity")==null||"".equals(resultJson.get("quantity"))?0:resultJson.getInt("quantity");
 			}
 		}else if(!"".equals(tenantId)){//获取21系统中该客户已下订单数量
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions";
+			String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+tenantId+"/subscriptions";
 			JSONObject resultJson = ordersService.getSubscription(targetURL);
 			if(resultJson.get("responseCode").toString().startsWith("2")){
 				JSONArray subscriptionArr = JSONArray.fromObject(JSONObject.fromObject(resultJson.get("result")).get("items"));

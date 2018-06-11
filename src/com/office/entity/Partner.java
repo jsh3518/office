@@ -7,6 +7,7 @@ public class Partner {
 	private String password;//密码
 	private String appid;//应用Id
 	private String resource;//资源（api url）
+	private String version;//版本号
 	private String valid;//是否有效
 	
 	public Integer getId() {
@@ -39,6 +40,12 @@ public class Partner {
 	}
 	public void setResource(String resource) {
 		this.resource = resource;
+	}
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
 	}
 	public String getValid() {
 		return valid;

@@ -2,8 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.office.mapper.PartnerMapper">
-	<sql id="partnerColumns">username,password,appid,resource,valid</sql>
-
+	<sql id="partnerColumns">username,password,appid,resource,version,valid</sql>
 	
 	<resultMap type="Partner" id="partnerResultMap">
 		<id column="id" property="id"/>
@@ -11,6 +10,7 @@
 		<result column="password" property="password"/>
 		<result column="appid" property="appid"/>
 		<result column="resource" property="resource"/>
+		<result column="version" property="version"/>
 		<result column="valid" property="valid"/>
 	</resultMap>
 	
@@ -27,13 +27,16 @@
 		<if test="resource!=null and resource!=''">
 			and resource = #{resource}
 		</if>
+		<if test="version!=null and version!=''">
+			and version = #{version}
+		</if>
 		<if test="valid!=null and valid!=''">
 			and valid = #{valid}
 		</if>
 	</select>
 	
 	<insert id="insertPartner" parameterType="Partner">
-		insert partner (<include refid="partnerColumns"/>) values (#{username},#{password},#{appid},#{resource},#{valid})
+		insert partner (<include refid="partnerColumns"/>) values (#{username},#{password},#{appid},#{resource},#{version},#{valid})
 	</insert>
 	
 	<update id="updatePartner" parameterType="Partner">
@@ -46,6 +49,9 @@
 		</if>
 		<if test="resource!=null and resource!=''">
 			, resource = #{resource}
+		</if>
+		<if test="version!=null and version!=''">
+			, version = #{version}
 		</if>
 		<if test="valid!=null and valid!=''">
 			, valid = #{valid}

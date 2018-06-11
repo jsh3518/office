@@ -32,7 +32,9 @@ public class PartnerController {
 	public ModelAndView getPartner() {
 		Partner partner = new Partner();
 		partner = partnerService.getPartner(partner);
-
+		if(partner.getVersion()==null||"".equals(partner.getVersion())){
+			partner.setVersion("1");
+		}
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("partner", partner);
 		mv.setViewName("basic/partner");
@@ -48,8 +50,9 @@ public class PartnerController {
 	public ModelAndView editPartner(Partner partner) {
 		
 		String message = "failed";
-		//TODO  验证密码
-		String url = "https://login.chinacloudapi.cn/vstecs.partner.onmschina.cn/oauth2/token?api-version=1.0";
+		//  验证密码
+		String domain = partner.getUsername().substring(partner.getUsername().lastIndexOf("@")+1);
+		String url = "https://login.chinacloudapi.cn/"+domain+"/oauth2/token?api-version="+partner.getVersion();
 		String method = "POST";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Content-Type", "application/x-www-form-urlencoded");
@@ -65,6 +68,7 @@ public class PartnerController {
 		if (resultJson.get("responseCode").toString().startsWith("2")) {
 			partner.setPassword(AesUtil.aesEncrypt(partner.getPassword()));
 			if(partner.getId()==null){
+				partner.setValid("1");
 				partnerService.insertPartner(partner);
 			}else{
 				partnerService.updatePartner(partner);

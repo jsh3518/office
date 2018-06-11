@@ -294,7 +294,7 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		if(jsonArr.size()>0){
 			orderJson.put("lineItems", jsonArr);
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+orders.getCustomer().getTenantId()+"/orders";
+			String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+orders.getCustomer().getTenantId()+"/orders";
 			String method = "POST";
 			Map<String, String> paramHeader = new HashMap<String, String>();
 			paramHeader.put("Accept", "application/json");
@@ -336,7 +336,7 @@ public class OrdersServiceImpl implements OrdersService {
 		// 已订阅商业版产品修改订阅数量
 		for (Object object : updateArr){
 			JSONObject updateJSON = (JSONObject) object;
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+orders.getCustomer().getTenantId()+"/subscriptions/"+updateJSON.get("id");
+			String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+orders.getCustomer().getTenantId()+"/subscriptions/"+updateJSON.get("id");
 			String method = "PATCH";
 			Map<String, String> paramHeader = new HashMap<String, String>();
 			paramHeader.put("Accept", "application/json");
@@ -388,7 +388,7 @@ public class OrdersServiceImpl implements OrdersService {
 			
 			int num = ordersDetail.getQuantity()==null?0:Integer.valueOf(ordersDetail.getQuantity().toString());
 			String access_token = RestfulUtil.getAccessToken();
-			String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+orders.getCustomer().getTenantId()+"/subscriptions/"+ordersDetail.getSubscriptionId();
+			String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+orders.getCustomer().getTenantId()+"/subscriptions/"+ordersDetail.getSubscriptionId();
 			String method = "GET";
 			Map<String, String> paramHeader = new HashMap<String, String>();
 			paramHeader.put("Accept", "application/json");
@@ -449,7 +449,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public HashMap<String,Object> getSubscribeMap(HashMap<String,Offer> offerMap,String tenantId){
 		HashMap<String,Object> subscriptionMap = new HashMap<String,Object>();
 		String access_token = RestfulUtil.getAccessToken();
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers/"+tenantId+"/subscriptions";
+		String targetURL = RestfulUtil.getBaseUrl()+"/customers/"+tenantId+"/subscriptions";
 		String method = "GET";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");

@@ -77,6 +77,7 @@
 					</div>
 					<div>
 						<input type="hidden" name="id" id="id" value="${partner.id }" />
+						<input type="hidden" name="version" id="version" value="${partner.version }" />
 					</div>
 					<div class="info" style="margin-left: 40px">
 						<input type="button" name="editBtn" id="editBtn" value="编辑"	class="btn" onclick="edit()" />

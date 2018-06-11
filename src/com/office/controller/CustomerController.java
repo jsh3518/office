@@ -132,7 +132,7 @@ public class CustomerController {
 	public void domain(String domain,String  customerId,HttpServletResponse response,HttpSession session){
 
 		String access_token = RestfulUtil.getAccessToken();
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/domains/"+domain+".partner.onmschina.cn"; 
+		String targetURL = RestfulUtil.getBaseUrl()+"/domains/"+domain+".partner.onmschina.cn"; 
 		String method = "HEAD";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");

@@ -118,7 +118,7 @@ public class CustomerServiceImpl implements CustomerService {
 		customerJson.put("companyProfile", companyJson);
 		customerJson.put("billingProfile", billingJson);
 		String access_token = RestfulUtil.getAccessToken();
-		String targetURL = "https://partner.partnercenterapi.microsoftonline.cn/v1/customers"; 
+		String targetURL = RestfulUtil.getBaseUrl()+"/customers"; 
 		String method = "POST";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");
