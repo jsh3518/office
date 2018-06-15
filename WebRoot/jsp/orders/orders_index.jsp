@@ -337,10 +337,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			var value = $("#quantity_"+id).val();
 			var rootId = $("#quantity_"+id).attr("alt");
 			var maxinum = $("#maxinum_"+id).val();
-			
+			var num = /^\d*$/; //全数字
 			$("#div_"+id).siblings(".error").remove();
-		  if(isNaN(value)||value==""){
-				$("#div_"+id).after('<div class="error" style="float:right">请输入数字！</div>');
+		  if(!num.test(value)||value==""){
+				$("#div_"+id).after('<div class="error" style="float:right">请输入正确的订阅数量！</div>');
 				numFlag = 0;
 	    }else if(value<=0){
 				$("#div_"+id).after('<div class="error" style="float:right">订阅数量必须大于0！</div>');

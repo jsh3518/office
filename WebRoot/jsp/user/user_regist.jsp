@@ -324,7 +324,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		  }
 		}
 		
-		
 		//判断邮政编码
 		function valPost(){
 			$("#posterr").html("");

@@ -310,6 +310,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		
 		function failed(){
 			alert("客户信息修改失败！");
+			$("#saveBtn").attr("disabled",false);
+			$("#closeBtn").attr("disabled",false);
 		}
 		
 		function cancel(){

@@ -104,8 +104,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				con = 0;
 			}
 			$("#quantity").siblings(".error").remove();
-		  if(isNaN(value)||value==""){
-				$("#quantity").after('<div class="error" style="width:400px">请输入数字！</div>');
+			var num = /^\d*$/; //全数字
+		  if(!num.test(value)||value==""){
+				$("#quantity").after('<div class="error" style="width:400px">请输入正确的订阅数量！</div>');
 				con = 0;
 	    }else if(value<=0){
 				$("#quantity").after('<div class="error" style="width:400px">订阅数量必须大于0！</div>');

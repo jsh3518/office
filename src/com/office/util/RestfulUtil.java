@@ -210,7 +210,7 @@ public class RestfulUtil {
 		return resultJson;
 	}
 	
-	//获取access_token，并放入静态变量中
+	//获取access_token
 	public static String getAccessToken(){
 	    long current = System.currentTimeMillis();
 	    Date date = new Date(current-30 * 60 * 1000);
@@ -222,6 +222,12 @@ public class RestfulUtil {
 			access_token = jsonObject.get("access_token")==null?null:jsonObject.get("access_token").toString();
 			return access_token;
 		}
+	}
+	
+	//设置access_token
+	public static void setAccessToken(String accessToken){
+		start = new Date();
+		access_token = accessToken;
 	}
 	
 	/**
@@ -265,7 +271,7 @@ public class RestfulUtil {
 	 */
 	public static JSONObject getMpnId(String mpnId) {
 		String access_token = RestfulUtil.getAccessToken();
-		String targetURL = "https://"+getBaseUrl()+"/profiles/mpn?mpnId=" + mpnId;
+		String targetURL = getBaseUrl()+"/profiles/mpn?mpnId=" + mpnId;
 		String method = "GET";
 		Map<String, String> paramHeader = new HashMap<String, String>();
 		paramHeader.put("Accept", "application/json");

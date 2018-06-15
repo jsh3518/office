@@ -12,7 +12,6 @@ public class Offer {
 	private String maxinum;//最大数量
 	private String sort;//排序
 	private String isTrial;//是否试用产品
-	private String status;//状态
 	private String valid;//是否有效
 	
 	private List<Offer> subOffer;//下级产品集合
@@ -65,12 +64,6 @@ public class Offer {
 	}
 	public void setIsTrial(String isTrial) {
 		this.isTrial = isTrial;
-	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
 	}
 	public String getValid() {
 		return valid;

@@ -97,7 +97,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<div class="info">
 					<label class="left">折扣：</label>
 					<div class="right">
-						<input type="text" id="discount" name="discount" class="input" style="width: 100px" value="${credit.discount }">&nbsp;折
+						<input type="text" id="discount" name="discount" class="input" style="width: 100px" value="${credit.discount }">&nbsp;%
 					</div>
 				</div>
 			</fieldset>
@@ -140,10 +140,14 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		}
 		
+		var num = /^\d*$/; //全数字 
 		function valCreditLine(){
 			$("#creditLine").siblings('.error').remove();
 			if($("#creditLine").val() ==""){
 				$("#creditLine").after('<div class="error">请输入信用额度！</div>');
+				con = 0;
+			}else if(!num.test($("#creditLine").val())){
+				$("#creditLine").after('<div class="error">信用额度必须为正数！</div>');
 				con = 0;
 			}
 		}
@@ -153,7 +157,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			if($("#account").val() ==""){
 				$("#unitDiv").after('<div class="error">请输入账期！</div>');
 				con = 0;
-			}else if(isNaN($("#account").val())){
+			}else if(!num.test($("#account").val())){
 				$("#unitDiv").after('<div class="error">账期仅可输入数字，请重新输入！</div>');
 				con = 0;
 			}else	if($("#unit").val() ==""){

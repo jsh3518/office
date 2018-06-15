@@ -32,9 +32,6 @@ public class PartnerController {
 	public ModelAndView getPartner() {
 		Partner partner = new Partner();
 		partner = partnerService.getPartner(partner);
-		if(partner.getVersion()==null||"".equals(partner.getVersion())){
-			partner.setVersion("1");
-		}
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("partner", partner);
 		mv.setViewName("basic/partner");
@@ -50,6 +47,9 @@ public class PartnerController {
 	public ModelAndView editPartner(Partner partner) {
 		
 		String message = "failed";
+		if(partner.getVersion()==null||"".equals(partner.getVersion())){
+			partner.setVersion("1");
+		}
 		//  验证密码
 		String domain = partner.getUsername().substring(partner.getUsername().lastIndexOf("@")+1);
 		String url = "https://login.chinacloudapi.cn/"+domain+"/oauth2/token?api-version="+partner.getVersion();
@@ -73,6 +73,9 @@ public class PartnerController {
 			}else{
 				partnerService.updatePartner(partner);
 			}
+			JSONObject jsonObject = (JSONObject) resultJson.get("result");
+			String access_token = jsonObject.get("access_token")==null?null:jsonObject.get("access_token").toString();
+			RestfulUtil.setAccessToken(access_token);//更新token值
 			message = "success";
 		}else if(resultJson.get("responseCode").toString().startsWith("4")){
 			message = "保存失败！请确认账号信息是否正确！";

@@ -30,7 +30,7 @@
 		<if test="level!=null and level!=''">
 			and level = #{level}
 		</if>
-		<if test="istrial!=null and istrial!=''">
+		<if test="isTrial!=null and isTrial!=''">
 			and istrial = #{isTrial}
 		</if>
 		<if test="valid!=null and valid!=''">
@@ -57,10 +57,37 @@
 		from offer o 
 		where o.parent = #{parent} and valid = 1
 	</select>
-
+	
 	<select id="getOffer" resultMap="offerResultMap">
 		select <include refid="offerColumns"/>
 		from offer 
 		where offerid = #{offerId}
 	</select>
+	
+	<select id="getCountById" resultType="int">
+		select count(1) from offer where offerid = #{offerId}
+	</select>
+	
+	<delete id="deleteOffer" parameterType="int">
+		delete from offer where offerid=#{offerId}
+	</delete>
+	
+	<insert id="insertOffer" parameterType="Offer">
+		insert offer(<include refid="offerColumns"/>) values(#{offerId},#{offerName},#{parent},#{level},#{mininum},#{maxinum},#{sort},#{isTrial},#{valid}) 
+	</insert>
+	
+	<update id="updateOffer" parameterType="Offer">
+		update offer set 
+		offerid=#{offerId},
+		offername=#{offerName},
+		parent=#{parent}, 
+		level=#{level},
+		mininum=#{mininum}, 
+		maxinum=#{maxinum}, 
+		sort=#{sort}, 
+		istrial =#{isTrial},
+		valid =#{valid}
+		where offerid = #{offerId}
+	</update>
+	
 </mapper>

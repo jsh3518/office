@@ -12,7 +12,15 @@ public interface OfferMapper  {
 	
 	List<Offer> listOfferByParent(String parent);
 	
+	Offer getOffer(String  offerId);
+	
+	void deleteOffer(String offerId);
+	
+	void updateOffer(Offer offer);
+	
+	void insertOffer(Offer offer);
+	
 	List<Offer> listPageOffer(Offer offer);
 	
-	Offer getOffer(String OfferId);
+	int getCountById(String offerId);
 }

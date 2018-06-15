@@ -43,6 +43,9 @@
 		<if test="agentName!=null and agentName!=''">
 			, agentname = #{agentName}
 		</if>
+		<if test="creditLine!=null and creditLine!=''">
+			, creditline = #{creditLine}
+		</if>
 		<if test="creditRating!=null and creditRating!=''">
 			, creditrating = #{creditRating}
 		</if>

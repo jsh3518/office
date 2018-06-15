@@ -90,23 +90,23 @@
 	</div>
 	<script type="text/javascript">
 		var message = "${message}";
-		changeCode();
 		$.ajaxSetup({ 
 		    async : false 
 		});  
 		$(document).ready(function(){
-				$("#codeImg").bind("click",changeCode);
-				 if(message=="success"){
-						alert("保存成功！");
-				 }else if(message!=""){
-						$(".hide").show();
-						$(".font").show();
-						$(".input").attr("disabled",false);
-						$("#editBtn").hide();
-						$("#saveBtn").show();
-						$("#cancelBtn").show();
-						alert(message);
-				}
+			changeCode();
+			$("#codeImg").bind("click",changeCode);
+			 if(message=="success"){
+					alert("保存成功！");
+			 }else if(message!=""){
+					$(".hide").show();
+					$(".font").show();
+					$(".input").attr("disabled",false);
+					$("#editBtn").hide();
+					$("#saveBtn").show();
+					$("#cancelBtn").show();
+					alert(message);
+			}
 		});
 	
 		function genTimestamp(){

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.mapper.InvoiceMapper">
+	<sql id="invoiceColumns">userid,company,tax,address,bank,account,phone,valid</sql>
+
+	<resultMap type="Invoice" id="invoiceResultMap">
+		<id column="id" property="id"/>
+		<id column="userid" property="userId"/>
+		<result column="company" property="company"/>
+		<result column="tax" property="tax"/>
+		<result column="address" property="address"/>
+		<result column="bank" property="bank"/>
+		<result column="account" property="account"/>
+		<result column="phone" property="phone"/>
+		<result column="valid" property="valid"/>
+	</resultMap>
+	
+	<select id="listAllInvoice" resultMap="invoiceResultMap">
+		select ice.id,ice.userid,ice.company,ice.tax,ice.address,ice.bank,ice.account,
+		ice.phone,ice.valid from invoice ice
+		where 1 = 1
+		<if test="company!=null and company!=''">
+			and company = #{company}
+		</if>
+	</select>
+		
+	<select id="listPageInvoice" resultMap="invoiceResultMap">
+		select ice.id,ice.userid,ice.company,ice.tax,ice.address,ice.bank,ice.account,
+		ice.phone,ice.valid from invoice ice
+		where 1 = 1
+		<if test="company!=null and company!=''">
+			and company like "%"#{company}"%"
+		</if>
+	</select>
+	
+	<select id="getInvoice" parameterType="invoice" resultMap="invoiceResultMap">
+		select * from invoice where 1=1
+		<if test="id!=null">
+			and id = #{id}
+		</if>
+		<if test="userId!=null and userId!=''">
+			and userid = #{userId}
+		</if>
+		<if test="tax!=null and tax!=''">
+			and tax = #{tax}
+		</if>
+		<if test="address!=null and address!=''">
+			and address = #{address}
+		</if>
+		
+		<if test="bank!=null and bank!=''">
+			and bank like "%"#{bank}"%"
+		</if>
+		
+		<if test="account!=null and account!=''">
+			and account = #{account}
+		</if>
+		
+		<if test="phone!=null and phone!=''">
+			and phone = #{phone}
+		</if>
+		
+		<if test="valid!=null and valid!=''">
+			and valid = #{valid}
+		</if>
+	</select>
+	
+	<select id="getInvoiceById" parameterType="int" resultMap="invoiceResultMap">
+		select * from invoice ice where ice.id = #{id}
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		delete from invoice where id=#{id}
+	</delete>
+	
+	<update id="updateInfo" parameterType="Invoice">
+		update invoice set 
+		company=#{company},
+		tax=#{tax},
+		address=#{address}, 
+		bank=#{bank},
+		account=#{account}, 
+		phone=#{phone}, 
+		valid=#{valid} 
+		where id=#{id}
+	</update>
+	
+	<insert id="insertInvoice" parameterType="Invoice" useGeneratedKeys="true" keyProperty="id">
+		insert invoice (<include refid="invoiceColumns"/>) values 
+		(#{userId},#{company},#{tax},#{address},#{bank},#{account},#{phone},#{valid})
+	</insert>
+	
+</mapper>
