@@ -34,4 +34,6 @@ public interface OfferService {
 	 //更新产品信息
 	 int getCountById(String offerId);
 	 
+	 //查询订单明细个数
+	 int getOrdersCount(String offerId);
 }

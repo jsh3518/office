@@ -69,6 +69,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<script type="text/javascript" src="<%=basePath%>js/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=basePath%>js/lhgdialog/lhgdialog.min.js?t=self&s=areo_blue"></script>
 	<script type="text/javascript">
+		$.ajaxSetup({ 
+		    async : false 
+		});
 		$(document).ready(function(){
 			$(".main_info:even").addClass("main_table_even");
 		});
@@ -107,16 +110,15 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     		dg.ShowDialog();
 		}
 		
-		
 		function deleteOffer(offerId){
 			if(confirm("请确认是否删除？")){
-				var url = "<%=basePath%>offer/deleteOffer.html";
-				var postData = {"offerId":offerId};
+				url = "<%=basePath%>offer/deleteOffer.html";
+				postData = {"offerId":offerId};
 				$.post(url,postData,function(data){
 					if(data=="success"){
 						alert("删除成功！");
 					}else{
-						alert("删除失败！");
+						alert(data);
 					}
 					window.location="<%=basePath%>offer/getOffer.html?parent=${offer.parent }";
 				})

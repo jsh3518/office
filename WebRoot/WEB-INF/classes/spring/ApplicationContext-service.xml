@@ -19,6 +19,7 @@
 		<property name="customerMapper" ref="customerMapper"/>
 	</bean>
 	<bean id="OfferService" class="com.office.service.impl.OfferServiceImpl">
-		<property name="OfferMapper" ref="offerMapper"/>
+		<property name="offerMapper" ref="offerMapper"/>
+		<property name="offerPriceMapper" ref="offerPriceMapper"/>
 	</bean>
 </beans>

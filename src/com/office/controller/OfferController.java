@@ -91,8 +91,14 @@ public class OfferController {
 	 */
 	@RequestMapping(value="/deleteOffer")
 	public void deleteOffer(@RequestParam String offerId,PrintWriter out){
-		offerService.deleteOffer(offerId);
-		out.write("success");
+		String message = "success";
+		int count = offerService.getOrdersCount(offerId);
+		if(count>0){
+			message = "该产品已有订单，无法删除！";
+		}else{
+			offerService.deleteOffer(offerId);
+		}
+		out.write(message);
 		out.close();
 	}
 	

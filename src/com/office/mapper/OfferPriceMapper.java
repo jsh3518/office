@@ -14,4 +14,6 @@ public interface OfferPriceMapper  {
 	public void insertOfferPrice(OfferPrice offerPrice);
 	
 	public void updateOfferPrice(OfferPrice offerPrice);
+	
+	public void deleteOfferPrice(String offerId);
 }

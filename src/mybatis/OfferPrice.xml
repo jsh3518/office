@@ -61,4 +61,8 @@
 		</if>
 		  where id = #{id}
 	</update>
+	
+	<delete id="deleteOfferPrice" parameterType="String">
+		delete from offer_price where offerid=#{offerId}
+	</delete>
 </mapper>

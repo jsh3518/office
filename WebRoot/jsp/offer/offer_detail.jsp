@@ -229,7 +229,7 @@
 		}
 		
 		function success(){
-			alert("产品信息已修改！");
+			alert("产品信息已保存！");
 			dg.curWin.location.reload();
 			dg.cancel();
 		}

@@ -23,4 +23,6 @@ public interface OfferMapper  {
 	List<Offer> listPageOffer(Offer offer);
 	
 	int getCountById(String offerId);
+	
+	int getOrdersCount(String offerId);
 }

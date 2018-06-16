@@ -68,7 +68,11 @@
 		select count(1) from offer where offerid = #{offerId}
 	</select>
 	
-	<delete id="deleteOffer" parameterType="int">
+	<select id="getOrdersCount" resultType="int">
+		select count(1) from orders_detail where offerid = #{offerId}
+	</select>
+	
+	<delete id="deleteOffer" parameterType="String">
 		delete from offer where offerid=#{offerId}
 	</delete>
 	

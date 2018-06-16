@@ -4,12 +4,14 @@ import java.util.List;
 
 import com.office.entity.Offer;
 import com.office.mapper.OfferMapper;
+import com.office.mapper.OfferPriceMapper;
 import com.office.service.OfferService;
 
 public class OfferServiceImpl implements OfferService {
 
 
 	private OfferMapper offerMapper;
+	private OfferPriceMapper offerPriceMapper;
 	
 	public OfferMapper getOfferMapper() {
 		return offerMapper;
@@ -18,7 +20,14 @@ public class OfferServiceImpl implements OfferService {
 	public void setOfferMapper(OfferMapper offerMapper) {
 		this.offerMapper = offerMapper;
 	}
+	
+	public OfferPriceMapper getOfferPriceMapper() {
+		return offerPriceMapper;
+	}
 
+	public void setOfferPriceMapper(OfferPriceMapper offerPriceMapper) {
+		this.offerPriceMapper = offerPriceMapper;
+	}
 	/**
 	 * 根据级别查询产品列表
 	 * @param parent
@@ -64,7 +73,7 @@ public class OfferServiceImpl implements OfferService {
 	public void deleteOffer(String offerId) {
 		
 		offerMapper.deleteOffer(offerId);
-		
+		offerPriceMapper.deleteOfferPrice(offerId);
 	}
 
 	/*
@@ -88,4 +97,11 @@ public class OfferServiceImpl implements OfferService {
 		 return  offerMapper.getCountById(offerId);
 	}
 	
+	/*
+	 * 查询订单明细个数
+	 * @see com.office.service.OfferService#getOrdersCount(java.lang.String)
+	 */
+	public int getOrdersCount(String offerId) {
+		 return  offerMapper.getOrdersCount(offerId);
+	}
 }
